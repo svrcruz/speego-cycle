@@ -1,0 +1,193 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #fff;
+    color: #000;
+    overflow-x: hidden; 
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 20px;
+    font-size: 14px;
+}
+
+.icon {
+    margin-right: 8px;
+}
+
+.filter img {
+    width: 18px;     
+    height: 18px;   
+    object-fit: contain;
+    display: block;  
+}
+
+
+.iconprofile a {
+    color: #000 !important;
+    text-decoration: none !important;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.menu {
+    font-size: 20px;
+    cursor: pointer;
+}
+
+/* Search */
+.search-container {
+    display: flex;
+    align-items: center;
+    margin: 10px 20px;
+    background: #f0f0f0;
+    border-radius: 20px;
+    padding: 8px 15px;
+}
+
+.search-container input {
+    border: none;
+    background: none;
+    outline: none;
+    flex: 1;
+    font-size: 14px;
+}
+
+.filter {
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+/* New Products */
+.new-products {
+    display: flex;
+    align-items: center;
+    margin: 30px 20px;
+}
+
+.new-products .text {
+    flex: 1;
+}
+
+.new-products h2 {
+    font-size: 22px;
+    color: #b00000;
+    margin-bottom: 10px;
+}
+
+.new-products button {
+    padding: 5px 15px;
+    border: none;
+    border-radius: 10px;
+    background: #ddd;
+    cursor: pointer;
+}
+
+.product-banner {
+    flex: 2;
+    background: #eee;
+    height: 150px;
+    border-radius: 12px;
+    margin-left: 20px;
+    position: relative;
+}
+
+.highlight {
+    width: 60px;
+    height: 25px;
+    background: #b00000;
+    border-radius: 12px;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+
+/* Sections */
+.section {
+    background: #e0e0e0;
+    padding: 20px;
+    margin-bottom: 10px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.section-header h3 {
+    font-size: 14px;
+}
+
+.section-header a {
+    font-size: 12px;
+    text-decoration: none;
+    color: black;
+}
+
+.card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.card {
+    background: #fff;
+    height: 120px;
+    border-radius: 10px;
+}
+
+
+.floating-menu {
+    position: fixed; 
+    top: 60px;
+    right: 0;
+    background: rgba(176, 0, 0, 0.9);
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+    width: 180px;
+    overflow: hidden;
+    transform: translateX(100%); 
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    z-index: 1000;
+}
+
+.floating-menu.open {
+    transform: translateX(0); /* Slide in */
+    opacity: 1;
+}
+
+.floating-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.floating-menu li {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.floating-menu li:last-child {
+    border-bottom: none;
+}
+
+.floating-menu a {
+    display: block;
+    padding: 12px 15px;
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.floating-menu a:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
