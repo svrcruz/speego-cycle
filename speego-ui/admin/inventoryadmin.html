@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Inventory Admin</title>
+  <link rel="stylesheet" href="inventoryadmin.css">
+</head>
+<body>
+  <div class="sidebar">
+    <h2>Hello there,<br><span>ADMIN</span></h2>
+    <ul>
+      <li><a href="#" class="house-icon"><img src="house-icon.png" alt="House"> Dashboard</a></li>
+      <li><a href="#" class="chart-icon"><img src="chart-icon.png" alt="Chart"> Reports</a></li>
+      <li><a href="#"> Service Requests</a></li>
+      <li class="active"><a href="#">Inventory</a></li>
+      <li><a href="#"> Orders</a></li>
+    </ul>
+  </div>
+
+  <div class="main-content">
+    <div class="top-bar">
+      <h1>Products</h1>
+      <div class="actions">
+        <input type="text" placeholder="Search...">
+        <button class="edit">Edit</button>
+        <button class="delete">Delete</button>
+        <button class="add">Add Product</button>
+        <button class="filter">Filters</button>
+        <button class="download">Download all</button>
+      </div>
+    </div>
+
+    <table id="product-table">
+      <thead>
+        <tr>
+          <th>Products</th>
+          <th>Listed Price</th>
+          <th>Quantity</th>
+          <th>Reorder Level</th>
+          <th>Availability</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- rows will be added here from MySQL -->
+      </tbody>
+    </table>
+
+    <div class="pagination">
+      <button disabled>Previous</button>
+      <span>Page 1 of 1</span>
+      <button disabled>Next</button>
+    </div>
+  </div>
+
+  <script>
+    // Fetch product data from backend 
+    fetch('get_products.php')
+      .then(response => response.json())
+      .then(data => {
+        const tbody = document.querySelector('#product-table tbody');
+        tbody.innerHTML = '';
+
+        data.forEach(product => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${product.name}</td>
+            <td>₱${parseFloat(product.price).toLocaleString()}</td>
+            <td>${product.quantity}</td>
+            <td>${product.reorder_level}</td>
+            <td>${product.availability}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      })
+      .catch(err => console.error('Error loading products:', err));
+  </script>
+</body>
+</html>
