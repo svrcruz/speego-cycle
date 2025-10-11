@@ -9,21 +9,31 @@ CORS(app)
 def chat():
     user_message = request.json['message']
 
-    # Send message to Ollama
+    prompt = (
+        "You are SpeegoPal, a friendly, knowledgeable e-bike assistant. "
+        "Provide concise, complete, and helpful answers. "
+        "Be professional but approachable. Avoid unnecessary details unless asked. "
+        "Keep answers under 100 words unless absolutely necessary.\n\n"
+        f"User: {user_message}\nSpeegoPal:"
+    )
+
+    # Ollama request with dynamic constraints
     response = requests.post(
         'http://localhost:11434/api/generate',
         json={
-        "model": "tinyllama",
-        "prompt": user_message,
-        "stream": False,
-        "options": {
-            "num_predict": 100  # limits response length
+            "model": "llama3",
+            "prompt": prompt,
+            "stream": False,
+            "options": {
+                "temperature": 0.6,     # Slight creativity, not too stiff
+                "num_predict": 150,     # Enough to complete a clear reply
+                "top_p": 0.9,           # Balanced randomness
+                "stop": ["User:"],      # Prevents extra turns
             }
         }
-
     )
 
-    reply = response.json()['response']
+    reply = response.json().get('response', '').strip()
     return jsonify({'reply': reply})
 
 if __name__ == '__main__':
