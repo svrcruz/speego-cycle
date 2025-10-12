@@ -51,6 +51,7 @@ body {
     font-size: 24px;
     cursor: pointer;
     color: #333;
+    text-decoration: none;
 }
 
 .search-container {
@@ -377,7 +378,7 @@ tbody tr:hover {
     right: 0px;
     top: 60px;
     width: 180px;
-    height: 31.8vh;
+    height: 31.8h;
     background-color: rgba(141, 1, 1, 0.8);
     transform: translateX(220px);
     transition: transform 0.3s ease;
@@ -391,8 +392,10 @@ tbody tr:hover {
 }
 
 .sidebar-item {
+    display: block;
     padding: 18px 25px;
     color: white;
+    text-decoration: none;
     cursor: pointer;
     border-bottom: 1px solid rgba(255, 255, 255, 0.15);
     font-size: 15px;

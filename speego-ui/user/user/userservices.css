@@ -210,10 +210,11 @@ body {
   cursor: pointer;
   transition: background-color 0.2s;
   font-family: 'Poppins', sans-serif;
+  text-decoration: none;
 }
 
 .book-service-btn:hover {
-  background-color: #b91c1c;
+  background-color: #9c1818;
 }
 
 /* Sidebar (same style as home) */
