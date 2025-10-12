@@ -1,102 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>User Services</title>
-  <link rel="stylesheet" href="userservices.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Arial:wght@400;700&display=swap" rel="stylesheet">
-</head>
-<body>
 
-  <!-- Header -->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Services - SpeegoCycle</title>
+  <link rel="stylesheet" href="userservices.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+
+<body>
   <header class="header">
-    <div class="left">
-      <div class="iconprofile">
-        <a href="#">
-          <span class="profile-icon"><a href="userprofile.html">👤</a></span>
-        </a>
-      </div>
-      <div class="greeting">
-        <p>Hello there,</p>
-        <strong>USER</strong>
+    <div class="header-left">
+      <div class="user-profile" onclick="window.location.href='userprofile.html'" style="cursor: pointer;">
+        <div class="user-icon">
+          <i class="ph ph-user-circle"></i>
+        </div>
+        <div class="user-info">
+          <p>Hello there,</p>
+          <h3>Juan Dela Cruz</h3>
+        </div>
       </div>
     </div>
-
-    <div class="right">
-      <a href="userservicehistory.html" class="link">Service History</a>
-      <a href="#" class="link">Track Service Requests</a>
-      <a href="index.html" class="home-icon"><img src="house-icon.png" alt="Home"></a>
-      <span class="menu-icon">☰</span>
+    <div class="header-right">
+      <a href="userservicehistory.html" class="nav-link">Service History</a>
+      <a href="#" class="nav-link">Track Service Requests</a>
+      <a href="index.html" class="home-icon">
+        <i class="ph ph-house"></i>
+      </a>
+      <span class="menu-icon" id="menuToggle">
+        <i class="ph ph-list"></i>
+      </span>
     </div>
   </header>
 
-   <!-- Floating Menu -->
-    <nav class="floating-menu" id="floatingMenu">
-    <ul>
-      <li><a href="#">Shopping Cart</a></li>
-       <li><a href="#">Order History</a></li>
-       <li><a href="#">About Us</a></li>
-       <li><a href="userservices.html">Services</a></li>
-       <li><a href="#">Log Out</a></li>
-      </ul>
-    </nav>
-
-  <!-- Search -->
   <div class="search-container">
-    <span class="search-icon"><img src="search-icon.png" alt="Search"></span>
-    <input type="text" placeholder="Search">
-    <span class="filter-icon"><img src="filter-icon.png" alt="Filter"></span>
-  </div>
-
-  <!-- Page Title -->
-  <div class="page-title">
-    <h1>Services</h1>
-    <p><a href="index.html">Home</a> › Services</p>
-  </div>
-
-  <!-- Services Grid -->
-  <div class="service-grid">
-    <div class="service-card">
-      <div class="card-image"></div>
-      <p>Repair</p>
-    </div>
-    <div class="service-card">
-      <div class="card-image"></div>
-      <p>Battery Replacement</p>
-    </div>
-    <div class="service-card">
-      <div class="card-image"></div>
-      <p>Parts Installation</p>
-    </div>
-    <div class="service-card">
-      <div class="card-image"></div>
-      <p>SpeegoPal ChatBot</p>
+    <div class="search-box">
+      <span class="search-icon">
+        <i class="ph ph-magnifying-glass"></i>
+      </span>
+      <input type="text" class="search-input" placeholder="Search">
     </div>
   </div>
 
-  <!-- CTA Button -->
-  <div class="cta">
-    <button>Book a Service</button>
+  <main class="main-content">
+    <h1 class="page-title">Services</h1>
+    <div class="breadcrumb">
+      Home <span>›</span> Services
+    </div>
+
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="service-image"></div>
+        <h3 class="service-name">Repair</h3>
+      </div>
+      <div class="service-card">
+        <div class="service-image"></div>
+        <h3 class="service-name">Battery Replacement</h3>
+      </div>
+      <div class="service-card">
+        <div class="service-image"></div>
+        <h3 class="service-name">Parts Installation</h3>
+      </div>
+      <div class="service-card">
+        <div class="service-image"></div>
+        <h3 class="service-name">SpeegoPal ChatBot</h3>
+      </div>
+    </div>
+
+    <div class="book-service-container">
+      <button class="book-service-btn">Book a Service</button>
+    </div>
+  </main>
+
+  <div class="sidebar" id="sidebar">
+    <a href="shoppingcart.html" class="sidebar-item">Shopping Cart</a>
+    <a href="orderhistory.html" class="sidebar-item">Order History</a>
+    <a href="aboutus.html" class="sidebar-item">About Us</a>
+    <a href="userservices.html" class="sidebar-item">Services</a>
+    <a href="logout.html" class="sidebar-item">Log Out</a>
   </div>
 
-<script>
-  const menuIcon = document.querySelector('.menu-icon');
-  const floatingMenu = document.querySelector('.floating-menu');
+  <script>
+    // Sidebar toggle functionality
+    const menuToggle = document.getElementById('menuToggle');
+    menuToggle.addEventListener('click', function (e) {
+      e.stopPropagation();
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('active');
+    });
 
-  menuIcon.addEventListener('click', () => {
-    floatingMenu.classList.toggle('open');
-  });
+    // Close sidebar when clicking outside
+    document.addEventListener('click', function (e) {
+      const sidebar = document.getElementById('sidebar');
+      const menuToggle = document.getElementById('menuToggle');
 
-  
-  document.addEventListener('click', (e) => {
-    if (!floatingMenu.contains(e.target) && !menuIcon.contains(e.target)) {
-      floatingMenu.classList.remove('open');
-    }
-  });
-</script>
+      if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+        sidebar.classList.remove('active');
+      }
+    });
 
+    // Prevent sidebar from closing when clicking inside it
+    document.getElementById('sidebar').addEventListener('click', function (e) {
+      e.stopPropagation();
+    });
+  </script>
 </body>
+
 </html>

@@ -4,120 +4,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Bike Shop UI</title>
+    <title>SpeegoCycle - Home</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="user">
-            <span class="iconprofile"><a href="userprofile.html">👤</a></span>
-            <span>Hello there, <b>Juan Dela Cruz</b></span>
+    <div class="header">
+        <div class="user-greeting" onclick="window.location.href='userprofile.html'" style="cursor: pointer;">
+            <div class="user-icon">
+                <i class="ph ph-user-circle"></i>
+            </div>
+            <div class="greeting-text">
+                <h3>Hello there,</h3>
+                <p>Juan Dela Cruz</p>
+            </div>
         </div>
-        <div class="menu">
-            <span class="icon">☰</span>
+        <div class="header-right">
+            <button class="icon-btn">
+                <i class="ph ph-open-ai-logo"></i>
+            </button>
+            <button class=" icon-btn" onclick="toggleSidebar()">
+                <i class="ph ph-list"></i>
+            </button>
         </div>
-
-        
-    </header>
-    
-    <!-- Floating Menu -->
-    <nav class="floating-menu" id="floatingMenu">
-    <ul>
-      <li><a href="#">Shopping Cart</a></li>
-       <li><a href="#">Order History</a></li>
-       <li><a href="#">About Us</a></li>
-       <li><a href="userservices.html">Services</a></li>
-       <li><a href="#">Log Out</a></li>
-      </ul>
-    </nav>
-
-
-    <!-- Search Bar -->
-    <div class="search-container">
-        <input type="text" placeholder="Looking for something?">
-        <span class="filter"><img src="filter-icon.png" alt="Filter"></span>
     </div>
 
-    <!-- Newly Released Products -->
-    <section class="new-products">
-        <div class="text">
-            <h2>Explore Our Newly Released Products</h2>
-            <button>View All →</button>
-        </div>
-        <div class="product-banner">
-            <div class="highlight"></div>
-        </div>
-    </section>
+    <div class=" search-bar">
+        <span class="search-icon">
+            <i class="ph ph-magnifying-glass"></i>
+        </span>
+        <input type="text" placeholder="Looking for something?">
+        <span class="filter-icon">
+            <i class="ph ph-funnel-simple"></i>
+        </span>
+    </div>
 
-    <!-- Recommended -->
-    <section class="section">
-        <div class="section-header">
-            <h3>RECOMMENDED FOR YOU</h3>
-            <a href="#">See All</a>
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1>Explore Our Newly<br>Released Products</h1>
+            <button class="view-all-btn">View All</button>
         </div>
-        <div class="card-container">
-            <div class="card"></div>
-            <div class="card"></div>
-            <div class="card"></div>
-            <div class="card"></div>
+        <div class="hero-image">
+            <span class="sale-badge">Sale</span>
         </div>
-    </section>
+    </div>
 
-    <!-- E-Bikes -->
-    <section class="section">
+    <div class="section">
         <div class="section-header">
-            <h3>E-BIKES</h3>
-            <a href="#">See All</a>
+            <h2>RECOMMENDED FOR YOU</h2>
+            <a href="#" class="see-all">See All</a>
         </div>
-        <div class="card-container">
-            <div class="card"></div>
-            <div class="card"></div>
+        <div class="carousel-container">
+            <div class="carousel-track" id="recommended">
+                <div class="card"></div>
+                <div class="card"></div>
+                <div class="card"></div>
+                <div class="card"></div>
+                <div class="card"></div>
+                <div class="card"></div>
+            </div>
         </div>
-    </section>
+    </div>
 
-    <!-- Parts -->
-    <section class="section">
+    <div class="section">
         <div class="section-header">
-            <h3>PARTS</h3>
-            <a href="#">See All</a>
+            <h2>E-BIKES</h2>
+            <a href="#" class="see-all">See All</a>
         </div>
-        <div class="card-container">
-            <div class="card"></div>
-            <div class="card"></div>
+        <div class="carousel-container">
+            <div class="carousel-track" id="ebikes">
+                <div class="card"></div>
+                <div class="card"></div>
+                <div class="card"></div>
+                <div class="card"></div>
+                <div class="card"></div>
+                <div class="card"></div>
+            </div>
         </div>
-    </section>
+    </div>
 
-    <!-- Accessories -->
-    <section class="section">
+    <div class="section">
         <div class="section-header">
-            <h3>ACCESSORIES</h3>
-            <a href="#">See All</a>
+            <h2>PARTS</h2>
+            <a href="#" class="see-all">See All</a>
         </div>
-        <div class="card-container">
-            <div class="card"></div>
-            <div class="card"></div>
-            <div class="card"></div>
+        <div class="carousel-container">
+            <div class="carousel-track" id="parts">
+                <div class="card"></div>
+                <div class="card"></div>
+                <div class="card"></div>
+                <div class="card"></div>
+                <div class="card"></div>
+                <div class="card"></div>
+            </div>
         </div>
-    </section>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>ACCESSORIES</h2>
+            <a href="#" class="see-all">See All</a>
+        </div>
+        <div class="carousel-container">
+            <div class="carousel-track" id="accessories">
+                <div class="card"></div>
+                <div class="card"></div>
+                <div class="card"></div>
+                <div class="card"></div>
+                <div class="card"></div>
+                <div class="card"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <a href="shoppingcart.html" class="sidebar-item">Shopping Cart</a>
+        <a href="orderhistory.html" class="sidebar-item">Order History</a>
+        <a href="aboutus.html" class="sidebar-item">About Us</a>
+        <a href="userservices.html" class="sidebar-item">Services</a>
+        <a href="logout.html" class="sidebar-item">Log Out</a>
+    </div>
+
 
     <script>
-     const menuIcon = document.querySelector('.menu .icon');
-     const floatingMenu = document.getElementById('floatingMenu');
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('active');
+        }
 
-     menuIcon.addEventListener('click', () => {
-      floatingMenu.classList.toggle('open');
-     });
+        document.addEventListener('click', function (e) {
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.querySelector('.header-right .icon-btn:last-child');
 
- 
-     document.addEventListener('click', (e) => {
-       if (!floatingMenu.contains(e.target) && !menuIcon.contains(e.target)) {
-         floatingMenu.classList.remove('open');
-       }
-     });
-</script>
+            if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+                sidebar.classList.remove('active');
+            }
+        });
 
+        const carouselTracks = document.querySelectorAll('.carousel-track');
+
+        carouselTracks.forEach(track => {
+            let isDown = false;
+            let startX;
+            let scrollLeft;
+
+            track.addEventListener('mousedown', (e) => {
+                isDown = true;
+                startX = e.pageX - track.offsetLeft;
+                scrollLeft = track.scrollLeft;
+                track.style.cursor = 'grabbing';
+            });
+
+            track.addEventListener('mouseleave', () => {
+                isDown = false;
+                track.style.cursor = 'grab';
+            });
+
+            track.addEventListener('mouseup', () => {
+                isDown = false;
+                track.style.cursor = 'grab';
+            });
+
+            track.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - track.offsetLeft;
+                const walk = (x - startX) * 2;
+                track.scrollLeft = scrollLeft - walk;
+            });
+
+            track.style.cursor = 'grab';
+        });
+    </script>
 </body>
 
 </html>

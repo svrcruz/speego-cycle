@@ -1,95 +1,271 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>User Service History</title>
-  <link rel="stylesheet" href="userservicehistory.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpeegoCycle - Service History</title>
+  <link rel="stylesheet" href="userservicehistory.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
+
 <body>
-
-  <!-- Header -->
   <header class="header">
-    <div class="left">
-      <div class="iconprofile">
-        <a href="userprofile.html">👤</a>
-      </div>
-      <div class="greeting">
-        <p>Hello there,</p>
-        <strong>USER</strong>
-      </div>
+    <div class="header-left">
+      <a href="#" class="back-arrow">
+        <i class="ph ph-caret-left"></i>
+      </a>
     </div>
-
-    <div class="right">
-      <a href="userservicehistory.html" class="link active">Service History</a>
-      <a href="#" class="link">Track Service Requests</a>
-      <a href="index.html" class="home-icon"><img src="house-icon.png" alt="Home"></a>
-      <span class="menu-icon">☰</span>
+    <div class="header-right">
+      <a href="#" class="nav-link active">Service History</a>
+      <a href="#" class="nav-link">Track Service Requests</a>
+      <span class="home-icon">
+        <i class="ph ph-house"></i>
+      </span>
+      <span class="menu-icon" id="menuToggle">
+        <i class="ph ph-list"></i>
+      </span>
     </div>
   </header>
 
-  <!-- Floating Menu -->
-  <nav class="floating-menu" id="floatingMenu">
-    <ul>
-      <li><a href="#">Shopping Cart</a></li>
-      <li><a href="#">Order History</a></li>
-      <li><a href="#">About Us</a></li>
-      <li><a href="userservices.html">Services</a></li>
-      <li><a href="#">Log Out</a></li>
-    </ul>
-  </nav>
-
-  <!-- Search -->
   <div class="search-container">
-    <span class="search-icon"><img src="search-icon.png" alt="Search"></span>
-    <input type="text" placeholder="Search">
-    <span class="filter-icon"><img src="filter-icon.png" alt="Filter"></span>
+    <div class="search-box">
+      <span class="search-icon">
+        <i class="ph ph-magnifying-glass"></i>
+      </span>
+      <input type="text" class="search-input" id="searchInput" placeholder="Search">
+      <span class="filter-icon" id="filterToggle">
+        <i class="ph ph-funnel-simple"></i>
+      </span>
+    </div>
+
+    <div class="filter-panel" id="filterPanel">
+      <h3>Filter Options</h3>
+      <div class="filter-group">
+        <label>Service Type:</label>
+        <select id="filterServiceType">
+          <option value="">All</option>
+          <option value="Repair">Repair</option>
+          <option value="Maintenance">Maintenance</option>
+          <option value="Installation">Installation</option>
+          <option value="Inspection">Inspection</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Status:</label>
+        <select id="filterStatus">
+          <option value="">All</option>
+          <option value="Completed">Completed</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Pending">Pending</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
+      <div class="filter-actions">
+        <button id="applyFilter" class="btn-apply">Apply Filters</button>
+        <button id="clearFilter" class="btn-clear">Clear</button>
+      </div>
+    </div>
   </div>
 
-  <!-- Page Title -->
-  <div class="page-title">
-    <h1>Service History</h1>
-    <p><a href="index.html">Home</a> › <a href="userservices.html">Services</a> > Service History</p>
+  <main class="main-content">
+    <h1 class="page-title">Service History</h1>
+    <div class="breadcrumb">
+      Home <span>›</span> Services <span>›</span> Service History
+    </div>
+
+    <div class="table-container">
+      <table id="serviceTable">
+        <thead>
+          <tr>
+            <th data-sort="serviceNo">Service No. <span class="sort-arrow">⇅</span></th>
+            <th>Service Type</th>
+            <th data-sort="datePlaced">Date Placed <span class="sort-arrow">⇅</span></th>
+            <th data-sort="status">Status <span class="sort-arrow">⇅</span></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <!-- Data will be populated by JavaScript -->
+        </tbody>
+      </table>
+      <div id="noResults" class="no-results" style="display: none;">
+        No services found matching your criteria.
+      </div>
+    </div>
+  </main>
+
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-item">Shopping Cart</div>
+    <div class="sidebar-item">Order History</div>
+    <div class="sidebar-item">About Us</div>
+    <div class="sidebar-item">Services</div>
+    <div class="sidebar-item">Log Out</div>
   </div>
 
-  <!-- Table -->
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th>Service No.</th>
-          <th>Service Type</th>
-          <th>Date Placed</th>
-          <th>Status</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>0000000001</td>
-          <td>Repair</td>
-          <td>August 29, 2025</td>
-          <td class="status-completed">Completed</td>
-          <td><button class="invoice-btn">View invoice</button></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <script>
+    // Sample data - in a real application, this would come from an API
+    const serviceData = [
+      { serviceNo: '0000000001', serviceType: 'Repair', datePlaced: 'August 29, 2025', status: 'Completed', date: new Date('2025-08-29') },
+      { serviceNo: '0000000002', serviceType: 'Maintenance', datePlaced: 'September 15, 2025', status: 'In Progress', date: new Date('2025-09-15') },
+      { serviceNo: '0000000003', serviceType: 'Installation', datePlaced: 'September 22, 2025', status: 'Completed', date: new Date('2025-09-22') },
+      { serviceNo: '0000000004', serviceType: 'Repair', datePlaced: 'October 01, 2025', status: 'Pending', date: new Date('2025-10-01') },
+      { serviceNo: '0000000005', serviceType: 'Inspection', datePlaced: 'October 05, 2025', status: 'Completed', date: new Date('2025-10-05') },
+      { serviceNo: '0000000006', serviceType: 'Maintenance', datePlaced: 'October 08, 2025', status: 'Cancelled', date: new Date('2025-10-08') },
+      { serviceNo: '0000000007', serviceType: 'Repair', datePlaced: 'October 10, 2025', status: 'In Progress', date: new Date('2025-10-10') }
+    ];
 
-<script>
-  const menuIcon = document.querySelector('.menu-icon');
-  const floatingMenu = document.getElementById('floatingMenu');
+    let currentData = [...serviceData];
+    let sortDirection = {};
 
-  menuIcon.addEventListener('click', () => {
-    floatingMenu.classList.toggle('open');
-  });
+    // Render table
+    function renderTable(data) {
+      const tbody = document.getElementById('tableBody');
+      const noResults = document.getElementById('noResults');
 
-  document.addEventListener('click', (e) => {
-    if (!floatingMenu.contains(e.target) && !menuIcon.contains(e.target)) {
-      floatingMenu.classList.remove('open');
+      if (data.length === 0) {
+        tbody.innerHTML = '';
+        noResults.style.display = 'block';
+        return;
+      }
+
+      noResults.style.display = 'none';
+      tbody.innerHTML = data.map(service => `
+                    <tr>
+                        <td>${service.serviceNo}</td>
+                        <td>${service.serviceType}</td>
+                        <td>${service.datePlaced}</td>
+                        <td><span class="status-${service.status.toLowerCase().replace(' ', '-')}">${service.status}</span></td>
+                        <td><button class="view-invoice-btn" onclick="viewInvoice('${service.serviceNo}')">View Invoice</button></td>
+                    </tr>
+                `).join('');
     }
-  });
-</script>
 
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', function (e) {
+      const searchTerm = e.target.value.toLowerCase();
+      const filtered = currentData.filter(service =>
+        service.serviceNo.toLowerCase().includes(searchTerm) ||
+        service.serviceType.toLowerCase().includes(searchTerm) ||
+        service.datePlaced.toLowerCase().includes(searchTerm) ||
+        service.status.toLowerCase().includes(searchTerm)
+      );
+      renderTable(filtered);
+    });
+
+    // Filter panel toggle
+    document.getElementById('filterToggle').addEventListener('click', function () {
+      const panel = document.getElementById('filterPanel');
+      panel.classList.toggle('active');
+    });
+
+    // Apply filters
+    document.getElementById('applyFilter').addEventListener('click', function () {
+      const serviceType = document.getElementById('filterServiceType').value;
+      const status = document.getElementById('filterStatus').value;
+
+      currentData = serviceData.filter(service => {
+        const matchServiceType = !serviceType || service.serviceType === serviceType;
+        const matchStatus = !status || service.status === status;
+        return matchServiceType && matchStatus;
+      });
+
+      renderTable(currentData);
+      document.getElementById('filterPanel').classList.remove('active');
+    });
+
+    // Clear filters
+    document.getElementById('clearFilter').addEventListener('click', function () {
+      document.getElementById('filterServiceType').value = '';
+      document.getElementById('filterStatus').value = '';
+      currentData = [...serviceData];
+      renderTable(currentData);
+      document.getElementById('searchInput').value = '';
+      document.getElementById('filterPanel').classList.remove('active');
+    });
+
+    // Sorting functionality
+    document.querySelectorAll('th[data-sort]').forEach(header => {
+      header.addEventListener('click', function () {
+        const sortKey = this.getAttribute('data-sort');
+
+        // Initialize sort direction for this column if not exists
+        if (!sortDirection[sortKey]) {
+          sortDirection[sortKey] = 'asc';
+        } else {
+          sortDirection[sortKey] = sortDirection[sortKey] === 'asc' ? 'desc' : 'asc';
+        }
+
+        // Remove active class from all headers
+        document.querySelectorAll('th[data-sort]').forEach(h => h.classList.remove('sorted-asc', 'sorted-desc'));
+
+        // Add active class to current header
+        this.classList.add(sortDirection[sortKey] === 'asc' ? 'sorted-asc' : 'sorted-desc');
+
+        // Sort the data
+        const sorted = [...currentData].sort((a, b) => {
+          let aVal, bVal;
+
+          if (sortKey === 'datePlaced') {
+            aVal = a.date;
+            bVal = b.date;
+          } else {
+            aVal = a[sortKey].toString().toLowerCase();
+            bVal = b[sortKey].toString().toLowerCase();
+          }
+
+          if (aVal < bVal) return sortDirection[sortKey] === 'asc' ? -1 : 1;
+          if (aVal > bVal) return sortDirection[sortKey] === 'asc' ? 1 : -1;
+          return 0;
+        });
+
+        renderTable(sorted);
+      });
+    });
+
+    // View invoice function
+    function viewInvoice(serviceNo) {
+      alert(`Viewing invoice for Service No: ${serviceNo}`);
+      // In a real application, this would navigate to the invoice page
+    }
+
+    // Close filter panel when clicking outside
+    document.addEventListener('click', function (e) {
+      const filterPanel = document.getElementById('filterPanel');
+      const filterToggle = document.getElementById('filterToggle');
+
+      if (!filterPanel.contains(e.target) && e.target !== filterToggle) {
+        filterPanel.classList.remove('active');
+      }
+    });
+
+    // Sidebar toggle functionality
+    document.getElementById('menuToggle').addEventListener('click', function (e) {
+      e.stopPropagation();
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('active');
+    });
+
+    // Close sidebar when clicking outside
+    document.addEventListener('click', function (e) {
+      const sidebar = document.getElementById('sidebar');
+      const menuToggle = document.getElementById('menuToggle');
+
+      if (!sidebar.contains(e.target) && e.target !== menuToggle) {
+        sidebar.classList.remove('active');
+      }
+    });
+
+    // Initial render
+    renderTable(currentData);
+
+    //previous page
+    document.querySelector('.back-arrow').addEventListener('click', function (e) {
+      e.preventDefault();
+      window.history.back();
+    });
+  </script>
 </body>
+
 </html>
