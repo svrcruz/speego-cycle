@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpeegoCycle - Parts</title>
+  <link rel="stylesheet" href="partsproduct.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+
+<body>
+  <header class="header">
+    <div class="user-info">
+      <i class="ph ph-user-circle"></i>
+      <div>
+        <span class="greeting">Hello there,</span>
+        <span class="username">Juan Dela Cruz</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="home-icon">
+        <i class="ph ph-house"></i>
+      </span>
+      <span class="menu-icon" id="menuToggle">
+        <i class="ph ph-list"></i>
+      </span>
+    </div>
+  </header>
+
+  <div class="search-container">
+    <div class="search-box">
+      <span class="search-icon">
+        <i class="ph ph-magnifying-glass"></i>
+      </span>
+      <input type="text" class="search-input" id="searchInput" placeholder="What are you looking for?">
+      <span class="filter-icon" id="filterToggle">
+        <i class="ph ph-funnel-simple" id="filterIcon"></i>
+      </span>
+    </div>
+
+    <div class="filter-panel" id="filterPanel">
+      <h3>Filter Options</h3>
+      <div class="filter-group">
+        <label>Category:</label>
+        <select id="filterCategory">
+          <option value="">All</option>
+          <option value="New Arrivals!">New Arrivals</option>
+          <option value="Battery">Battery</option>
+          <option value="Wheels">Wheels</option>
+          <option value="Handlebars">Handlebars</option>
+          <option value="Chains">Chains</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Price Range:</label>
+        <select id="filterPrice">
+          <option value="">All</option>
+          <option value="0-30000">₱0 - ₱30,000</option>
+          <option value="30000-50000">₱30,000 - ₱50,000</option>
+          <option value="50000-70000">₱50,000 - ₱70,000</option>
+          <option value="70000-100000">₱70,000+</option>
+        </select>
+      </div>
+      <div class="filter-actions">
+        <button id="applyFilter" class="btn-apply">Apply Filters</button>
+        <button id="clearFilter" class="btn-clear">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="main-content">
+    <h1 class="page-title">PARTS</h1>
+
+    <!-- New Arrivals Section -->
+    <section class="product-section">
+      <h2 class="section-title">New Arrivals!</h2>
+      <div class="product-grid">
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">NEW 1</p>
+            <p class="product-price">₱45,000</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">NEW 2</p>
+            <p class="product-price">₱33,000</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">NEW 3</p>
+            <p class="product-price">₱56,000</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">NEW 4</p>
+            <p class="product-price">₱8,000</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Battery Section -->
+    <section class="product-section">
+      <h2 class="section-title">Battery</h2>
+      <div class="product-grid">
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">BATTERY 1</p>
+            <p class="product-price">₱17,000</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">BATTERY 2</p>
+            <p class="product-price">₱18,000</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">BATTERY 3</p>
+            <p class="product-price">₱25,000</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">BATTERY 4</p>
+            <p class="product-price">₱21,000</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">BATTERY 5</p>
+            <p class="product-price">₱18,000</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Wheels Section -->
+    <section class="product-section">
+      <h2 class="section-title">Wheels</h2>
+      <div class="product-grid">
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">WHEELS 1</p>
+            <p class="product-price">₱32,000</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">WHEELS 2</p>
+            <p class="product-price">₱41,000</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">WHEELS 3</p>
+            <p class="product-price">₱53,000</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">WHEELS 4</p>
+            <p class="product-price">₱15,000</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">WHEELS 5</p>
+            <p class="product-price">₱28,000</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">WHEELS 6</p>
+            <p class="product-price">₱45,000</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">WHEELS 7</p>
+            <p class="product-price">₱58,000</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Handlebars Section -->
+    <section class="product-section">
+      <h2 class="section-title">Handlebars</h2>
+      <div class="product-grid">
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">HANDLE 1</p>
+            <p class="product-price">₱63,000</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">HANDLE 2</p>
+            <p class="product-price">₱45,000</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">HANDLE 3</p>
+            <p class="product-price">₱54,000</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">HANDLE 4</p>
+            <p class="product-price">₱56,000</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">HANDLE 5</p>
+            <p class="product-price">₱63,000</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">HANDLE 6</p>
+            <p class="product-price">₱78,000</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">HANDLE 7</p>
+            <p class="product-price">₱98,300</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">HANDLE 8</p>
+            <p class="product-price">₱72,300</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Chains Section -->
+    <section class="product-section">
+      <h2 class="section-title">Chains</h2>
+      <div class="product-grid">
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">CHAIN 1</p>
+            <p class="product-price">₱33,000</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">CHAIN 2</p>
+            <p class="product-price">₱58,000</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">CHAIN 3</p>
+            <p class="product-price">₱64,000</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">CHAIN 4</p>
+            <p class="product-price">₱56,000</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">CHAIN 5</p>
+            <p class="product-price">₱68,000</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image"></div>
+          <div class="product-info">
+            <p class="product-name">CHAIN 6</p>
+            <p class="product-price">₱76,000</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-item">Shopping Cart</div>
+    <div class="sidebar-item">Order History</div>
+    <div class="sidebar-item">About Us</div>
+    <div class="sidebar-item">Services</div>
+    <div class="sidebar-item">Log Out</div>
+  </div>
+
+  <script>
+    // Store all products with their categories and prices
+    const allProducts = [];
+    
+    // Build product data from DOM
+    document.querySelectorAll('.product-section').forEach(section => {
+      const category = section.querySelector('.section-title').textContent;
+      section.querySelectorAll('.product-card').forEach(card => {
+        const name = card.querySelector('.product-name').textContent;
+        const priceText = card.querySelector('.product-price').textContent;
+        const price = parseInt(priceText.replace(/[₱,]/g, ''));
+        allProducts.push({
+          element: card,
+          name: name,
+          price: price,
+          priceText: priceText,
+          category: category
+        });
+      });
+    });
+
+    let filteredProducts = [...allProducts];
+
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', function (e) {
+      const searchTerm = e.target.value.toLowerCase();
+      
+      filteredProducts.forEach(product => {
+        const matchesSearch = product.name.toLowerCase().includes(searchTerm) || 
+                             product.priceText.toLowerCase().includes(searchTerm);
+        product.element.style.display = matchesSearch ? 'block' : 'none';
+      });
+    });
+
+    // Filter panel toggle
+    document.getElementById('filterToggle').addEventListener('click', function () {
+      const panel = document.getElementById('filterPanel');
+      panel.classList.toggle('active');
+    });
+
+    // Apply filters
+    document.getElementById('applyFilter').addEventListener('click', function () {
+      const category = document.getElementById('filterCategory').value;
+      const priceRange = document.getElementById('filterPrice').value;
+
+      filteredProducts = allProducts.filter(product => {
+        const matchCategory = !category || product.category === category;
+        
+        let matchPrice = true;
+        if (priceRange) {
+          const [min, max] = priceRange.split('-').map(v => parseInt(v));
+          if (max) {
+            matchPrice = product.price >= min && product.price <= max;
+          } else {
+            matchPrice = product.price >= min;
+          }
+        }
+        
+        return matchCategory && matchPrice;
+      });
+
+      // Hide all products first
+      allProducts.forEach(product => product.element.style.display = 'none');
+      
+      // Show filtered products
+      filteredProducts.forEach(product => product.element.style.display = 'block');
+      
+      document.getElementById('filterPanel').classList.remove('active');
+    });
+
+    // Clear filters
+    document.getElementById('clearFilter').addEventListener('click', function () {
+      document.getElementById('filterCategory').value = '';
+      document.getElementById('filterPrice').value = '';
+      document.getElementById('searchInput').value = '';
+      
+      filteredProducts = [...allProducts];
+      allProducts.forEach(product => product.element.style.display = 'block');
+      
+      document.getElementById('filterPanel').classList.remove('active');
+    });
+
+    // Close filter panel when clicking outside
+    document.addEventListener('click', function (e) {
+      const filterPanel = document.getElementById('filterPanel');
+      const filterToggle = document.getElementById('filterToggle');
+
+      if (!filterPanel.contains(e.target) && !filterToggle.contains(e.target)) {
+        filterPanel.classList.remove('active');
+      }
+    });
+
+    // Product card click
+    document.querySelectorAll('.product-card').forEach(card => {
+      card.addEventListener('click', function () {
+        const productName = this.querySelector('.product-name').textContent;
+        alert(`Viewing details for ${productName}`);
+        // In a real application, this would navigate to the product details page
+      });
+    });
+
+    // Sidebar toggle functionality
+    document.getElementById('menuToggle').addEventListener('click', function (e) {
+      e.stopPropagation();
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('active');
+    });
+
+    // Close sidebar when clicking outside
+    document.addEventListener('click', function (e) {
+      const sidebar = document.getElementById('sidebar');
+      const menuToggle = document.getElementById('menuToggle');
+
+      if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+        sidebar.classList.remove('active');
+      }
+    });
+  </script>
+</body>
+
+</html>
