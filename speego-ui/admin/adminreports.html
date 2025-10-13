@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - Admin</title>
+    <link rel="stylesheet" href="adminreports.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <button class="toggle-btn" id="toggleBtn">
+                    <i class="ph ph-caret-left"></i>
+                </button>
+                <div class="admin-info">
+                    <h2>Hello there,</h2>
+                    <h1>ADMIN</h1>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="admindashboard.html" class="nav-item">
+                    <i class="ph ph-house"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="adminreports.html" class="nav-item active">
+                    <i class="ph ph-chart-line"></i>
+                    <span>Reports</span>
+                </a>
+                <a href="adminservicerequest.html" class="nav-item">
+                    <i class="ph ph-wrench"></i>
+                    <span>Service Requests</span>
+                </a>
+                <a href="admininventory.html" class="nav-item">
+                    <i class="ph ph-stack"></i>
+                    <span>Inventory</span>
+                </a>
+                <a href="adminorders.html" class="nav-item">
+                    <i class="ph ph-truck"></i>
+                    <span>Orders</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="top-bar">
+                <button class="refresh-btn" onclick="location.reload()">
+                    <i class="ph ph-arrow-clockwise"></i>
+                    Refresh Page
+                </button>
+            </div>
+
+            <!-- Sales Reports -->
+            <section class="report-section">
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title">Sales Reports</h2>
+                        <div class="dropdown-container">
+                            <button class="dropdown-btn">
+                                This week <i class="ph ph-caret-down"></i>
+                            </button>
+                            <p class="section-subtitle">Sales Summary</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card red">
+                        <i class="ph ph-coin"></i>
+                        <h3 class="stat-value">₱175,000</h3>
+                        <p class="stat-label">Total Sales</p>
+                        <p class="stat-change positive">+10% from last week</p>
+                    </div>
+                    <div class="stat-card red">
+                        <i class="ph ph-clipboard-text"></i>
+                        <h3 class="stat-value">10</h3>
+                        <p class="stat-label">Total Order</p>
+                        <p class="stat-change positive">+8% from last week</p>
+                    </div>
+                    <div class="stat-card red">
+                        <i class="ph ph-shopping-bag"></i>
+                        <h3 class="stat-value">50</h3>
+                        <p class="stat-label">Product Sold</p>
+                        <p class="stat-change negative">-2% from last week</p>
+                    </div>
+                    <div class="stat-card red">
+                        <i class="ph ph-user-plus"></i>
+                        <h3 class="stat-value">12</h3>
+                        <p class="stat-label">New Customer</p>
+                        <p class="stat-change positive">+3% from last week</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Service Reports -->
+            <section class="report-section">
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title">Service Reports</h2>
+                        <div class="dropdown-container">
+                            <button class="dropdown-btn">
+                                This week <i class="ph ph-caret-down"></i>
+                            </button>
+                            <p class="section-subtitle">Summary</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="service-grid">
+                    <div class="stats-group">
+                        <div class="stat-card red">
+                            <i class="ph ph-wrench"></i>
+                            <h3 class="stat-value">25</h3>
+                            <p class="stat-label">Service Requests</p>
+                            <p class="stat-change positive">+10% from last week</p>
+                        </div>
+                        <div class="stat-card red">
+                            <i class="ph ph-clock"></i>
+                            <h3 class="stat-value">1.5 hrs</h3>
+                            <p class="stat-label">Avg Repair Time</p>
+                        </div>
+                        <div class="stat-card red">
+                            <i class="ph ph-check-circle"></i>
+                            <h3 class="stat-value">90%</h3>
+                            <p class="stat-label">Completion Rate</p>
+                            <p class="stat-change">3 pending requests</p>
+                        </div>
+                        <div class="stat-card red">
+                            <i class="ph ph-shield-check"></i>
+                            <h3 class="stat-value">10</h3>
+                            <p class="stat-label">Warranty</p>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <h3 class="chart-title">Most Requested Service</h3>
+                        <div class="chart-content">
+                            <canvas id="serviceChart"></canvas>
+                            <div class="legend">
+                                <div class="legend-item">
+                                    <span class="legend-dot blue"></span>
+                                    <span>Repair</span>
+                                    <span class="legend-value">45%</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-dot orange"></span>
+                                    <span>Parts Installation</span>
+                                    <span class="legend-value">35%</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-dot purple"></span>
+                                    <span>Battery Replacement</span>
+                                    <span class="legend-value">20%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Feedback/Complaints Reports -->
+            <section class="report-section">
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title">Feedback/Complaints Reports:</h2>
+                        <div class="dropdown-container">
+                            <button class="dropdown-btn">
+                                This week <i class="ph ph-caret-down"></i>
+                            </button>
+                            <p class="section-subtitle">Summary</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="service-grid">
+                    <div class="stats-group">
+                        <div class="stat-card red">
+                            <i class="ph ph-chat-dots"></i>
+                            <h3 class="stat-value">30</h3>
+                            <p class="stat-label">Total Feedback</p>
+                        </div>
+                        <div class="stat-card red">
+                            <i class="ph ph-warning"></i>
+                            <h3 class="stat-value">10</h3>
+                            <p class="stat-label">Complaints</p>
+                        </div>
+                        <div class="stat-card red">
+                            <i class="ph ph-star"></i>
+                            <h3 class="stat-value">4.3 / 5</h3>
+                            <p class="stat-label">Average Rating</p>
+                        </div>
+                        <div class="stat-card red">
+                            <i class="ph ph-timer"></i>
+                            <h3 class="stat-value">5 minutes</h3>
+                            <p class="stat-label">Avg Response Time</p>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <h3 class="chart-title">Top Complaint</h3>
+                        <div class="chart-content">
+                            <canvas id="complaintChart"></canvas>
+                            <div class="legend">
+                                <div class="legend-item">
+                                    <span class="legend-dot blue"></span>
+                                    <span>Defective Parts</span>
+                                    <span class="legend-value">50%</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-dot purple"></span>
+                                    <span>Battery Issues</span>
+                                    <span class="legend-value">15%</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-dot orange"></span>
+                                    <span>Delivery Delays</span>
+                                    <span class="legend-value">20%</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-dot teal"></span>
+                                    <span>Others</span>
+                                    <span class="legend-value">15%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Sidebar toggle
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('toggleBtn');
+
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+        });
+
+        // Draw donut chart for Most Requested Service
+        const serviceCanvas = document.getElementById('serviceChart');
+        const serviceCtx = serviceCanvas.getContext('2d');
+        serviceCanvas.width = 150;
+        serviceCanvas.height = 150;
+
+        const serviceData = [
+            { percent: 45, color: '#3b82f6' },
+            { percent: 35, color: '#f97316' },
+            { percent: 20, color: '#a855f7' }
+        ];
+
+        let currentAngle = -Math.PI / 2;
+        const centerX = 75;
+        const centerY = 75;
+        const radius = 60;
+        const innerRadius = 35;
+
+        serviceData.forEach(item => {
+            const sliceAngle = (item.percent / 100) * 2 * Math.PI;
+            
+            serviceCtx.beginPath();
+            serviceCtx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+            serviceCtx.arc(centerX, centerY, innerRadius, currentAngle + sliceAngle, currentAngle, true);
+            serviceCtx.closePath();
+            serviceCtx.fillStyle = item.color;
+            serviceCtx.fill();
+            
+            currentAngle += sliceAngle;
+        });
+
+        // Draw donut chart for Top Complaint
+        const complaintCanvas = document.getElementById('complaintChart');
+        const complaintCtx = complaintCanvas.getContext('2d');
+        complaintCanvas.width = 150;
+        complaintCanvas.height = 150;
+
+        const complaintData = [
+            { percent: 50, color: '#3b82f6' },
+            { percent: 15, color: '#a855f7' },
+            { percent: 20, color: '#f97316' },
+            { percent: 15, color: '#14b8a6' }
+        ];
+
+        currentAngle = -Math.PI / 2;
+
+        complaintData.forEach(item => {
+            const sliceAngle = (item.percent / 100) * 2 * Math.PI;
+            
+            complaintCtx.beginPath();
+            complaintCtx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+            complaintCtx.arc(centerX, centerY, innerRadius, currentAngle + sliceAngle, currentAngle, true);
+            complaintCtx.closePath();
+            complaintCtx.fillStyle = item.color;
+            complaintCtx.fill();
+            
+            currentAngle += sliceAngle;
+        });
+    </script>
+</body>
+</html>
