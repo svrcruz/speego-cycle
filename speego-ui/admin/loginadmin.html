@@ -27,7 +27,7 @@
   </div>
 
   <script>
-    // show an alert when redirected with ?error=1
+    
     if (new URLSearchParams(window.location.search).get('error') === '1') {
       alert('Invalid username or password');
       history.replaceState(null, '', location.pathname);
