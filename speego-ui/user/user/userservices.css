@@ -2,6 +2,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  text-decoration: none;
 }
 
 body {
@@ -191,6 +192,7 @@ body {
   font-weight: 500;
   color: #333;
   text-align: center;
+  text-decoration: none;
 }
 
 .book-service-container {

@@ -23,16 +23,16 @@
             </div>
         </div>
         <div class="header-right">
-            <button class="icon-btn">
+            <button class="icon-btn" id="openChatBtn">
                 <i class="ph ph-open-ai-logo"></i>
             </button>
-            <button class=" icon-btn" onclick="toggleSidebar()">
+            <button class="icon-btn" onclick="toggleSidebar()">
                 <i class="ph ph-list"></i>
             </button>
         </div>
     </div>
 
-    <div class=" search-bar">
+    <div class="search-bar">
         <span class="search-icon">
             <i class="ph ph-magnifying-glass"></i>
         </span>
@@ -55,7 +55,7 @@
     <div class="section">
         <div class="section-header">
             <h2>RECOMMENDED FOR YOU</h2>
-            <a href="#" class="see-all">See All</a>
+            <a href="recommendedproducts.html" class="see-all">See All</a>
         </div>
         <div class="carousel-container">
             <div class="carousel-track" id="recommended">
@@ -106,7 +106,7 @@
     <div class="section">
         <div class="section-header">
             <h2>ACCESSORIES</h2>
-            <a href="#" class="see-all">See All</a>
+            <a href="accessoriesproducts.html" class="see-all">See All</a>
         </div>
         <div class="carousel-container">
             <div class="carousel-track" id="accessories">
@@ -128,6 +128,22 @@
         <a href="logout.html" class="sidebar-item">Log Out</a>
     </div>
 
+    <!-- Chat Overlay -->
+    <div id="chatOverlay" class="chat-overlay">
+        <div class="chat-box">
+            <div class="chat-header">
+                <h3>SpeegoPal</h3>
+                <button class="close-chat" id="closeChatBtn">&times;</button>
+            </div>
+            <div class="chat-body">
+                <p>Hello! How can I help you today? 🚴‍♀️</p>
+            </div>
+            <div class="chat-footer">
+                <input type="text" placeholder="Type a message..." />
+                <button class="send-btn"><i class="ph ph-arrow-up"></i></button>
+            </div>
+        </div>
+    </div>
 
     <script>
         function toggleSidebar() {
@@ -145,7 +161,6 @@
         });
 
         const carouselTracks = document.querySelectorAll('.carousel-track');
-
         carouselTracks.forEach(track => {
             let isDown = false;
             let startX;
@@ -178,7 +193,26 @@
 
             track.style.cursor = 'grab';
         });
+
+        // Chat Overlay Logic
+        const chatOverlay = document.getElementById('chatOverlay');
+        const openChatBtn = document.getElementById('openChatBtn');
+        const closeChatBtn = document.getElementById('closeChatBtn');
+
+        openChatBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            chatOverlay.classList.add('active');
+        });
+
+        closeChatBtn.addEventListener('click', () => {
+            chatOverlay.classList.remove('active');
+        });
+
+        window.addEventListener('click', (e) => {
+            if (chatOverlay.classList.contains('active') && !chatOverlay.querySelector('.chat-box').contains(e.target) && e.target !== openChatBtn) {
+                chatOverlay.classList.remove('active');
+            }
+        });
     </script>
 </body>
-
 </html>

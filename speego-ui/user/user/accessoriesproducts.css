@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
 * {
   margin: 0;
   padding: 0;
@@ -103,93 +105,6 @@ body {
   color: #dc2626;
 }
 
-/* Filter Panel */
-.filter-panel {
-  position: absolute;
-  top: calc(100% + 10px);
-  right: 0;
-  left: auto;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  padding: 20px;
-  width: 280px;
-  z-index: 100;
-  display: none;
-}
-
-.filter-panel.active {
-  display: block;
-}
-
-.filter-panel h3 {
-  font-size: 16px;
-  margin-bottom: 15px;
-  color: #333;
-}
-
-.filter-group {
-  margin-bottom: 15px;
-}
-
-.filter-group label {
-  display: block;
-  font-size: 14px;
-  margin-bottom: 5px;
-  color: #666;
-  font-weight: 500;
-}
-
-.filter-group select {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  outline: none;
-  cursor: pointer;
-}
-
-.filter-group select:focus {
-  border-color: #dc2626;
-}
-
-.filter-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.btn-apply,
-.btn-clear {
-  flex: 1;
-  padding: 10px;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
-.btn-apply {
-  background-color: #dc2626;
-  color: white;
-}
-
-.btn-apply:hover {
-  background-color: #b91c1c;
-}
-
-.btn-clear {
-  background-color: #e5e5e5;
-  color: #333;
-}
-
-.btn-clear:hover {
-  background-color: #d5d5d5;
-}
-
 .main-content {
   max-width: 1200px;
   margin: 0 auto;
@@ -260,12 +175,13 @@ body {
   color: #1a1a1a;
 }
 
+/* Sidebar */
 .sidebar {
   position: fixed;
   right: 0px;
   top: 60px;
   width: 180px;
-  height: 31.8h;
+  height: 31.8vh;
   background-color: rgba(141, 1, 1, 0.8);
   transform: translateX(220px);
   transition: transform 0.3s ease;
@@ -279,10 +195,8 @@ body {
 }
 
 .sidebar-item {
-  display: block;
   padding: 18px 25px;
   color: white;
-  text-decoration: none;
   cursor: pointer;
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
   font-size: 15px;
@@ -294,33 +208,15 @@ body {
   background-color: rgba(0, 0, 0, 0.15);
 }
 
-.sidebar-item:first-child {
-  margin-top: 0;
-}
-
-/* Responsive */
 @media (max-width: 1024px) {
   .product-grid {
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
   }
 }
 
 @media (max-width: 768px) {
   .header {
     padding: 15px 20px;
-  }
-
-  .user-info i {
-    font-size: 28px;
-  }
-
-  .greeting {
-    font-size: 11px;
-  }
-
-  .username {
-    font-size: 13px;
   }
 
   .main-content {
@@ -335,18 +231,10 @@ body {
     grid-template-columns: repeat(2, 1fr);
     gap: 15px;
   }
-
-  .section-title {
-    font-size: 16px;
-  }
 }
 
 @media (max-width: 480px) {
   .product-grid {
     grid-template-columns: 1fr;
-  }
-
-  .search-container {
-    padding: 0 15px;
   }
 }
