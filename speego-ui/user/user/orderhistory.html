@@ -66,7 +66,7 @@
         </div>
         <div class="order-header-right">
           <span class="order-id">Order ID: #EBIKE123</span>
-          <button class="track-btn">Track Order</button>
+          <button class="track-btn" onclick="window.location.href='ordertracking.html'">Track Order</button>
         </div>
       </div>
 
@@ -109,7 +109,7 @@
         </div>
         <div class="order-header-right">
           <span class="order-id">Order ID: #BAT123</span>
-          <button class="track-btn">Track Order</button>
+          <button class="track-btn" onclick="window.location.href='ordertracking.html'">Track Order</button>
         </div>
       </div>
 
@@ -142,12 +142,12 @@
   </main>
 
   <div class="sidebar" id="sidebar">
-    <div class="sidebar-item" onclick="window.location.href='shoppingcart.html'">Shopping Cart</div>
-    <div class="sidebar-item" onclick="window.location.href='orderhistory.html'">Order History</div>
-    <div class="sidebar-item">About Us</div>
-    <div class="sidebar-item">Services</div>
-    <div class="sidebar-item">Log Out</div>
-  </div>
+    <a href="shoppingcart.html" class="sidebar-item">Shopping Cart</a>
+    <a href="orderhistory.html" class="sidebar-item">Order History</a>
+    <a href="aboutus.html" class="sidebar-item">About Us</a>
+    <a href="userservices.html" class="sidebar-item">Services</a>
+    <a href="logout.html" class="sidebar-item">Log Out</a>
+</div>
 
   <script>
     // Sidebar toggle
@@ -164,13 +164,6 @@
       }
     });
 
-    // Track Order buttons
-    document.querySelectorAll('.track-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-        const orderId = this.closest('.order-card').querySelector('.order-id').textContent;
-        alert(`Tracking ${orderId}`);
-      });
-    });
 
     // Action buttons
     document.querySelectorAll('.action-btn').forEach(btn => {
