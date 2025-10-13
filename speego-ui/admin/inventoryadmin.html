@@ -1,38 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Inventory Admin</title>
-  <link rel="stylesheet" href="inventoryadmin.css">
+  <link rel="stylesheet" href="newproduct.css">
 </head>
 <body>
+
   <div class="sidebar">
-    <h2>Hello there,<br><span>ADMIN</span></h2>
+    <h3>Hello there, ADMIN</h3>
     <ul>
-      <li><a href="#" class="house-icon"><img src="house-icon.png" alt="House"> Dashboard</a></li>
-      <li><a href="#" class="chart-icon"><img src="chart-icon.png" alt="Chart"> Reports</a></li>
-      <li><a href="#"> Service Requests</a></li>
-      <li class="active"><a href="#">Inventory</a></li>
-      <li><a href="#"> Orders</a></li>
+      <li>Dashboard</li>
+      <li>Reports</li>
+      <li class="active">Inventory</li>
+      <li>Orders</li>
     </ul>
   </div>
 
-  <div class="main-content">
-    <div class="top-bar">
-      <h1>Products</h1>
-      <div class="actions">
-        <input type="text" placeholder="Search...">
-        <button class="edit">Edit</button>
-        <button class="delete">Delete</button>
-        <button class="add">Add Product</button>
-        <button class="filter">Filters</button>
-        <button class="download">Download all</button>
-      </div>
+  <div class="main">
+    <h2>Products</h2>
+    <div class="toolbar">
+      <input type="text" placeholder="Search..." />
+      <button class="edit">Edit</button>
+      <button class="delete">Delete</button>
+      <button id="addProductBtn" class="add">Add Product</button>
+      <button class="filter">Filters</button>
+      <button class="download">Download all</button>
     </div>
 
-    <table id="product-table">
+    <table>
       <thead>
         <tr>
+          <th>Product ID</th>
           <th>Products</th>
           <th>Listed Price</th>
           <th>Quantity</th>
@@ -40,39 +40,120 @@
           <th>Availability</th>
         </tr>
       </thead>
-      <tbody>
-        <!-- rows will be added here from MySQL -->
+      <tbody id="productTableBody">
+        <tr><td colspan="6">Loading products...</td></tr>
       </tbody>
     </table>
+  </div>
 
-    <div class="pagination">
-      <button disabled>Previous</button>
-      <span>Page 1 of 1</span>
-      <button disabled>Next</button>
-    </div>
+  <!-- SLIDING PANEL -->
+  <div id="overlay"></div>
+  <div id="newProductPanel">
+    <h3>New Product</h3>
+    <p>Drag image here or <a href="#">browse image</a></p>
+
+    <form id="addProductForm" action="add_product.php" method="POST">
+      <div class="form">
+        <label>Product Name</label>
+        <input type="text" name="product_name" placeholder="Enter product name" required>
+
+        <label>Category</label>
+        <select name="category" required>
+          <option value="">Select category</option>
+          <option value="E-bikes">E-bikes</option>
+          <option value="Parts">Parts</option>
+          <option value="Accessories">Accessories</option>
+        </select>
+
+        <label>Listing Price</label>
+        <input type="number" name="price" placeholder="Enter price" step="0.01" required>
+
+        <label>Quantity</label>
+        <input type="number" name="stock" placeholder="Enter quantity" required>
+
+        <label>Reorder Value</label>
+        <input type="number" name="reorder_level" placeholder="Enter reorder level" required>
+
+        <div class="buttons">
+          <button type="button" id="discardBtn" class="discard">Discard</button>
+          <button type="submit" class="submit">Add Product</button>
+        </div>
+      </div>
+    </form>
   </div>
 
   <script>
-    // Fetch product data from backend 
-    fetch('get_products.php')
-      .then(response => response.json())
-      .then(data => {
-        const tbody = document.querySelector('#product-table tbody');
-        tbody.innerHTML = '';
+const addBtn = document.getElementById('addProductBtn');
+const discardBtn = document.getElementById('discardBtn');
+const panel = document.getElementById('newProductPanel');
+const overlay = document.getElementById('overlay');
+const tableBody = document.querySelector('table tbody');
 
-        data.forEach(product => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${product.name}</td>
-            <td>₱${parseFloat(product.price).toLocaleString()}</td>
-            <td>${product.quantity}</td>
-            <td>${product.reorder_level}</td>
-            <td>${product.availability}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-      })
-      .catch(err => console.error('Error loading products:', err));
-  </script>
+// Panel controls
+addBtn.addEventListener('click', () => {
+  panel.classList.add('show');
+  overlay.classList.add('active');
+});
+
+discardBtn.addEventListener('click', () => {
+  panel.classList.remove('show');
+  overlay.classList.remove('active');
+});
+
+overlay.addEventListener('click', () => {
+  panel.classList.remove('show');
+  overlay.classList.remove('active');
+});
+
+// Function to load products
+function loadProducts() {
+  fetch('get_product.php')
+    .then(response => response.json())
+    .then(data => {
+      tableBody.innerHTML = ''; // clear table first
+
+      if (data.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="6">No products yet.</td></tr>';
+        return;
+      }
+
+      data.forEach(product => {
+        let availability = '';
+        const stock = parseInt(product.Stock);
+        const reorder = parseInt(product.Reorder_Level);
+
+        if (stock === 0) {
+          availability = 'Out of Stock';
+        } else if (stock <= reorder) {
+          availability = 'Low Stock';
+        } else {
+          availability = 'In Stock';
+        }
+
+        const row = `
+          <tr>
+            <td>${product.ProductID}</td>
+            <td>${product.Product_Name}</td>
+            <td>${product.Price}</td>
+            <td>${product.Stock}</td>
+            <td>${product.Reorder_Level}</td>
+            <td>${availability}</td>
+          </tr>
+        `;
+        tableBody.insertAdjacentHTML('beforeend', row);
+      });
+    })
+    .catch(err => {
+      console.error('Error loading products:', err);
+      tableBody.innerHTML = '<tr><td colspan="6">Error loading products.</td></tr>';
+    });
+}
+
+// Load products immediately, and every 3 seconds
+loadProducts();
+setInterval(loadProducts, 3000);
+</script>
+
+
 </body>
 </html>
