@@ -88,11 +88,12 @@
             <section class="diagnosis-cost-section">
                 <div class="left-section">
                     <button class="smart-diagnosis-btn" id="smartDiagnosisBtn">
-                        <span class="diagnosis-title">Smart Diagnosis</span>
-                        <i class="ph ph-first-aid-kit diagnosis-icon"></i>
+                    <i class="ph ph-first-aid-kit diagnosis-icon"></i>
+                    <span class="diagnosis-title">Smart Diagnosis</span>
+                    <div id="diagnosisResult" class="diagnosis-result"></div>
                     </button>
                 </div>
-
+           
                 <div class="right-section">
                     <div class="cost-time-box">
                         <label>ESTIMATED REPAIR COST</label>
@@ -153,11 +154,48 @@
             });
         });
 
-        // Smart Diagnosis button
-        document.getElementById('smartDiagnosisBtn').addEventListener('click', function () {
-            alert('Smart Diagnosis feature coming soon!');
-            // In a real application, this would trigger the diagnosis process
-        });
+        // 🔧 Smart Diagnosis (with cost and time)
+        document.getElementById('smartDiagnosisBtn').addEventListener('click', async function () {
+        const problem = document.getElementById('problemDescription').value.trim();
+        const resultBox = document.getElementById('diagnosisResult');
+        const costBox = document.querySelectorAll('.display-box')[0];
+        const timeBox = document.querySelectorAll('.display-box')[1];
+
+        if (!problem) {
+            alert('Please enter a problem description first.');
+            return;
+        }
+
+        // Show loading placeholders
+        resultBox.style.display = 'block';
+        resultBox.innerHTML = `<em>Analyzing issue...</em>`;
+        costBox.innerHTML = `<i class="ph ph-currency-circle-dollar"></i> ...`;
+        timeBox.innerHTML = `<i class="ph ph-timer"></i> ...`;
+
+        try {
+            const response = await fetch('http://127.0.0.1:5000/diagnose', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ description: problem })
+            });
+
+            if (!response.ok) throw new Error(`Server error: ${response.status}`);
+
+            const data = await response.json();
+
+            resultBox.innerHTML = `<strong>Diagnosis:</strong> ${data.diagnosis}`;
+            costBox.innerHTML = `<i class="ph ph-currency-circle-dollar"></i> <span><strong>${data.cost}</strong></span>`;
+            timeBox.innerHTML = `<i class="ph ph-timer"></i> <span><strong>${data.time}</strong></span>`;
+
+        } catch (error) {
+            console.error("Smart Diagnosis Error:", error);
+            resultBox.innerHTML = `<span style="color:red;">Error: Unable to connect to the AI service.</span>`;
+            costBox.innerHTML = `<i class="ph ph-currency-circle-dollar"></i> N/A`;
+            timeBox.innerHTML = `<i class="ph ph-timer"></i> N/A`;
+        }
+    });
+
+
 
         // Date picker simulation
         document.getElementById('purchaseDate').addEventListener('click', function () {
