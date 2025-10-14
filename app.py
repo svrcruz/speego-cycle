@@ -6,7 +6,6 @@ import json
 app = Flask(__name__)
 CORS(app)
 
-#chatbot
 @app.route('/chat', methods=['POST'])
 def chat():
     user_message = request.json['message']
@@ -43,7 +42,6 @@ def chat():
         return jsonify({'reply': 'Sorry, there was an error connecting to the AI model.'}), 500
 
 
-#diagnosis
 @app.route('/diagnose', methods=['POST'])
 def diagnose():
     problem_description = request.json['description']
@@ -57,43 +55,46 @@ def diagnose():
         f"Problem description: {problem_description}\nSpeegoPal:"
     )
 
-    response = requests.post(
-        'http://localhost:11434/api/generate',
-        json={
-            "model": "llama3",
-            "prompt": prompt,
-            "stream": False,
-            "options": {"temperature": 0.6, "num_predict": 150}
-        }
-    )
+    try:
+        response = requests.post(
+            'http://localhost:11434/api/generate',
+            json={
+                "model": "llama3",
+                "prompt": prompt,
+                "stream": False,
+                "options": {"temperature": 0.6, "num_predict": 150}
+            }
+        )
 
-    ai_response = response.json().get('response', '').strip()
+        ai_response = response.json().get('response', '').strip()
 
-    diagnosis = ""
-    cost = "N/A"
-    time = "N/A"
+        # Split response into fields (basic parsing)
+        diagnosis = ""
+        cost = "N/A"
+        time = "N/A"
 
-    for line in ai_response.splitlines():
-        if line.lower().startswith("diagnosis:"):
-            diagnosis = line.split(":", 1)[1].strip()
-        elif "cost" in line.lower():
-            cost = line.split(":", 1)[1].strip()
-        elif "time" in line.lower():
-            time = line.split(":", 1)[1].strip()
+        for line in ai_response.splitlines():
+            if line.lower().startswith("diagnosis:"):
+                diagnosis = line.split(":", 1)[1].strip()
+            elif "cost" in line.lower():
+                cost = line.split(":", 1)[1].strip()
+            elif "time" in line.lower():
+                time = line.split(":", 1)[1].strip()
 
-    return jsonify({
-        'diagnosis': diagnosis or ai_response,
-        'cost': cost,
-        'time': time
-    })
+        return jsonify({
+            'diagnosis': diagnosis or ai_response,
+            'cost': cost,
+            'time': time
+        })
 
-except Exception as e:
+    except Exception as e:
         print("Error in /diagnose:", e)
         return jsonify({
             "diagnosis": "Error: Unable to generate diagnosis.",
             "estimated_cost": "N/A",
             "estimated_time": "N/A"
         }), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
