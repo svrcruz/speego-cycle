@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory - Admin</title>
+    <link rel="stylesheet" href="admininventory.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <button class="toggle-btn" id="toggleBtn">
+                    <i class="ph ph-caret-left"></i>
+                </button>
+                <div class="admin-info">
+                    <h2>Hello there,</h2>
+                    <h1>ADMIN</h1>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="admindashboard.html" class="nav-item">
+                    <i class="ph ph-house"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="adminreports.html" class="nav-item">
+                    <i class="ph ph-chart-line"></i>
+                    <span>Reports</span>
+                </a>
+                <a href="adminservicerequest.html" class="nav-item">
+                    <i class="ph ph-wrench"></i>
+                    <span>Service Requests</span>
+                </a>
+                <a href="admininventory.html" class="nav-item active">
+                    <i class="ph ph-stack"></i>
+                    <span>Inventory</span>
+                </a>
+                <a href="adminorders.html" class="nav-item">
+                    <i class="ph ph-truck"></i>
+                    <span>Orders</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="inventory-card">
+                <div class="card-header">
+                    <h1 class="page-title">Products</h1>
+                    <div class="header-actions">
+                        <div class="search-box">
+                            <i class="ph ph-magnifying-glass"></i>
+                            <input type="text" placeholder="Search" id="searchInput">
+                        </div>
+                        <button class="btn btn-edit">Edit</button>
+                        <button class="btn btn-delete">Delete</button>
+                        <button class="btn btn-add">Add Product</button>
+                        <button class="btn btn-filters">
+                            <i class="ph ph-faders"></i>
+                            Filters
+                        </button>
+                        <button class="btn btn-download">Download all</button>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="table-container">
+                    <table class="inventory-table">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input type="checkbox" id="selectAll">
+                                </th>
+                                <th>Products</th>
+                                <th>Listed Price</th>
+                                <th>Quantity</th>
+                                <th>Reorder Level</th>
+                                <th>Availability</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr>
+                                <td><input type="checkbox" class="row-checkbox"></td>
+                                <td>Speego C7</td>
+                                <td>₱42,000</td>
+                                <td>5</td>
+                                <td>3</td>
+                                <td><span class="status-badge in-stock">In-stock</span></td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" class="row-checkbox"></td>
+                                <td>Speego V3</td>
+                                <td>₱72,000</td>
+                                <td>0</td>
+                                <td>3</td>
+                                <td><span class="status-badge out-of-stock">Out of stock</span></td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" class="row-checkbox"></td>
+                                <td>Speego Q6</td>
+                                <td>₱51,999</td>
+                                <td>5</td>
+                                <td>3</td>
+                                <td><span class="status-badge in-stock">In-stock</span></td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" class="row-checkbox"></td>
+                                <td>Battery</td>
+                                <td>₱10,000</td>
+                                <td>7</td>
+                                <td>8</td>
+                                <td><span class="status-badge low-stock">Low stock</span></td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" class="row-checkbox"></td>
+                                <td>Handlebar</td>
+                                <td>₱51,999</td>
+                                <td>5</td>
+                                <td>8</td>
+                                <td><span class="status-badge low-stock">Low stock</span></td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" class="row-checkbox"></td>
+                                <td>Tire</td>
+                                <td>₱1,500</td>
+                                <td>10</td>
+                                <td>8</td>
+                                <td><span class="status-badge in-stock">In-stock</span></td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" class="row-checkbox"></td>
+                                <td>Helmet</td>
+                                <td>₱1,000</td>
+                                <td>23</td>
+                                <td>8</td>
+                                <td><span class="status-badge in-stock">In-stock</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination-container">
+                    <button class="pagination-btn" id="prevBtn">Previous</button>
+                    <span class="page-info">Page 1 of 5</span>
+                    <button class="pagination-btn" id="nextBtn">Next</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Product Modal -->
+    <div class="modal" id="addProductModal">
+        <div class="modal-content">
+            <h2 class="modal-title">New Product</h2>
+            
+            <div class="form-grid">
+                <div class="image-upload">
+                    <div class="upload-box" id="uploadBox">
+                        <input type="file" id="imageInput" accept="image/*" hidden>
+                        <i class="ph ph-image"></i>
+                    </div>
+                    <p class="upload-text">Drag image here<br>or<br><a href="#" class="browse-link" id="browseBtn">Browse image</a></p>
+                </div>
+
+                <div class="form-fields">
+                    <div class="form-group">
+                        <label>Product Name</label>
+                        <input type="text" placeholder="Enter product name" class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Product ID</label>
+                        <input type="text" placeholder="Enter product ID" class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select class="form-input">
+                            <option>Select product category</option>
+                            <option>E-Bikes</option>
+                            <option>Parts</option>
+                            <option>Accessories</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Listing Price</label>
+                        <input type="text" placeholder="Enter listing price" class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" placeholder="Enter product quantity" class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Unit</label>
+                        <input type="text" placeholder="Enter product unit" class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Reorder Value</label>
+                        <input type="number" placeholder="Enter reorder value" class="form-input">
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-modal btn-discard" id="discardBtn">Discard</button>
+                <button class="btn-modal btn-submit">Add Product</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sidebar toggle
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('toggleBtn');
+
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+        });
+
+        // Select all checkbox
+        const selectAllCheckbox = document.getElementById('selectAll');
+        const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+
+        selectAllCheckbox.addEventListener('change', function() {
+            rowCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+        });
+
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const tableBody = document.getElementById('tableBody');
+        const rows = tableBody.getElementsByTagName('tr');
+
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            
+            Array.from(rows).forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        // Button actions
+        document.querySelector('.btn-edit').addEventListener('click', function() {
+            const selected = Array.from(rowCheckboxes).filter(cb => cb.checked);
+            if (selected.length === 0) {
+                alert('Please select at least one product to edit');
+            } else {
+                alert(`Edit ${selected.length} product(s)`);
+            }
+        });
+
+        document.querySelector('.btn-delete').addEventListener('click', function() {
+            const selected = Array.from(rowCheckboxes).filter(cb => cb.checked);
+            if (selected.length === 0) {
+                alert('Please select at least one product to delete');
+            } else {
+                if (confirm(`Are you sure you want to delete ${selected.length} product(s)?`)) {
+                    selected.forEach(checkbox => {
+                        checkbox.closest('tr').remove();
+                    });
+                }
+            }
+        });
+
+        document.querySelector('.btn-add').addEventListener('click', function() {
+            document.getElementById('addProductModal').classList.add('active');
+        });
+
+        // Close modal
+        document.getElementById('discardBtn').addEventListener('click', function() {
+            document.getElementById('addProductModal').classList.remove('active');
+        });
+
+        // Image upload
+        const uploadBox = document.getElementById('uploadBox');
+        const imageInput = document.getElementById('imageInput');
+        const browseBtn = document.getElementById('browseBtn');
+
+        browseBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            imageInput.click();
+        });
+
+        uploadBox.addEventListener('click', function() {
+            imageInput.click();
+        });
+
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadBox.style.backgroundImage = `url(${e.target.result})`;
+                    uploadBox.style.backgroundSize = 'cover';
+                    uploadBox.style.backgroundPosition = 'center';
+                    uploadBox.innerHTML = '';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Drag and drop
+        uploadBox.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#3b82f6';
+        });
+
+        uploadBox.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#ddd';
+        });
+
+        uploadBox.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#ddd';
+            
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadBox.style.backgroundImage = `url(${e.target.result})`;
+                    uploadBox.style.backgroundSize = 'cover';
+                    uploadBox.style.backgroundPosition = 'center';
+                    uploadBox.innerHTML = '';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.querySelector('.btn-submit').addEventListener('click', function() {
+            alert('Product added successfully!');
+            document.getElementById('addProductModal').classList.remove('active');
+        });
+
+        document.querySelector('.btn-filters').addEventListener('click', function() {
+            alert('Open filters');
+        });
+
+        document.querySelector('.btn-download').addEventListener('click', function() {
+            alert('Download inventory data');
+        });
+
+        // Pagination
+        let currentPage = 1;
+        const totalPages = 5;
+
+        document.getElementById('prevBtn').addEventListener('click', function() {
+            if (currentPage > 1) {
+                currentPage--;
+                updatePageInfo();
+            }
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', function() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updatePageInfo();
+            }
+        });
+
+        function updatePageInfo() {
+            document.querySelector('.page-info').textContent = `Page ${currentPage} of ${totalPages}`;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpeegoCycle - Order History</title>
+  <link rel="stylesheet" href="orderhistory.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+
+<body>
+  <div class="header">
+    <div class="user-greeting" onclick="window.location.href='userprofile.html'" style="cursor: pointer;">
+      <div class="user-icon">
+        <i class="ph ph-user-circle"></i>
+      </div>
+      <div class="greeting-text">
+        <h3>Hello there,</h3>
+        <p>Juan Dela Cruz</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="icon-btn" onclick="window.location.href='index.html'">
+        <i class="ph ph-house"></i>
+      </button>
+      <button class="icon-btn" id="menuToggle">
+        <i class="ph ph-list"></i>
+      </button>
+    </div>
+  </div>
+
+  <section class="search-section">
+    <div class="search-bar">
+      <i class="ph ph-magnifying-glass"></i>
+      <input type="text" placeholder="Search Products">
+      <i class="ph ph-funnel filter-icon"></i>
+    </div>
+  </section>
+
+  <section class="page-title-section">
+    <h1 class="page-title">Order History</h1>
+    <div class="breadcrumb">
+      <a href="index.html">Home</a> > Order History
+    </div>
+  </section>
+
+  <main class="main-content">
+    <!-- Order 1 -->
+    <div class="order-card">
+      <div class="order-header">
+        <div class="order-info">
+          <div class="info-item">
+            <span class="info-label">Order Date:</span>
+            <span class="info-value">Sept 20, 2025</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Total Amount:</span>
+            <span class="info-value">₱8500.00</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Ship To:</span>
+            <span class="info-value">Lipa, Batangas City</span>
+          </div>
+        </div>
+        <div class="order-header-right">
+          <span class="order-id">Order ID: #EBIKE123</span>
+          <button class="track-btn" onclick="window.location.href='ordertracking.html'">Track Order</button>
+        </div>
+      </div>
+
+      <div class="order-body">
+        <div class="order-status">
+          <span class="status-badge expected">Expected Delivery Sept 20</span>
+        </div>
+        <div class="product-section">
+          <div class="product-image"></div>
+          <div class="product-details">
+            <h3 class="product-name">E-Bike 1</h3>
+            <div class="specifications">
+              <span class="spec-label">Specifications:</span>
+              <span class="spec-item">Color: White</span>
+              <span class="spec-item">Capacity: 4 Seater</span>
+              <span class="spec-item">Battery: 1500w</span>
+              <span class="spec-item">With Fan, Crownlight, Reverse Camera</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order 2 -->
+    <div class="order-card">
+      <div class="order-header">
+        <div class="order-info">
+          <div class="info-item">
+            <span class="info-label">Order Date:</span>
+            <span class="info-value">May 20, 2025</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Total Amount:</span>
+            <span class="info-value">₱3000.00</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Ship To:</span>
+            <span class="info-value">Lipa, Batangas City</span>
+          </div>
+        </div>
+        <div class="order-header-right">
+          <span class="order-id">Order ID: #BAT123</span>
+          <button class="track-btn" onclick="window.location.href='ordertracking.html'">Track Order</button>
+        </div>
+      </div>
+
+      <div class="order-body">
+        <div class="order-status">
+          <span class="status-badge delivered">Delivered May 21</span>
+        </div>
+        <div class="product-section">
+          <div class="product-image"></div>
+          <div class="product-details">
+            <h3 class="product-name">15000w Battery</h3>
+            <div class="specifications">
+              <span class="spec-label">Specifications:</span>
+              <span class="spec-item">Manufacturer: SDFJ Company</span>
+            </div>
+            <div class="product-actions">
+              <button class="action-btn">
+                <i class="ph ph-arrow-counter-clockwise"></i>
+                Buy It Again
+              </button>
+              <button class="action-btn">
+                <i class="ph ph-eye"></i>
+                View Product
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="sidebar" id="sidebar">
+    <a href="shoppingcart.html" class="sidebar-item">Shopping Cart</a>
+    <a href="orderhistory.html" class="sidebar-item">Order History</a>
+    <a href="aboutus.html" class="sidebar-item">About Us</a>
+    <a href="userservices.html" class="sidebar-item">Services</a>
+    <a href="logout.html" class="sidebar-item">Log Out</a>
+</div>
+
+  <script>
+    // Sidebar toggle
+    document.getElementById('menuToggle').addEventListener('click', function(e) {
+      e.stopPropagation();
+      document.getElementById('sidebar').classList.toggle('active');
+    });
+
+    document.addEventListener('click', function(e) {
+      const sidebar = document.getElementById('sidebar');
+      const menuToggle = document.getElementById('menuToggle');
+      if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+        sidebar.classList.remove('active');
+      }
+    });
+
+
+    // Action buttons
+    document.querySelectorAll('.action-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const action = this.textContent.trim();
+        const productName = this.closest('.product-details').querySelector('.product-name').textContent;
+        alert(`${action}: ${productName}`);
+      });
+    });
+  </script>
+</body>
+
+</html>
