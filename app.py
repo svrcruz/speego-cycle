@@ -1,10 +1,12 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
+import json
 
 app = Flask(__name__)
 CORS(app)
 
+#chatbot
 @app.route('/chat', methods=['POST'])
 def chat():
     user_message = request.json['message']
@@ -17,34 +19,42 @@ def chat():
         f"User: {user_message}\nSpeegoPal:"
     )
 
-    # Ollama request with dynamic constraints
-    response = requests.post(
-        'http://localhost:11434/api/generate',
-        json={
-            "model": "llama3",
-            "prompt": prompt,
-            "stream": False,
-            "options": {
-                "temperature": 0.6,     # Slight creativity, not too stiff
-                "num_predict": 150,     # Enough to complete a clear reply
-                "top_p": 0.9,           # Balanced randomness
-                "stop": ["User:"],      # Prevents extra turns
+    try:
+        response = requests.post(
+            'http://localhost:11434/api/generate',
+            json={
+                "model": "llama3",
+                "prompt": prompt,
+                "stream": False,
+                "options": {
+                    "temperature": 0.6,
+                    "num_predict": 150,
+                    "top_p": 0.9,
+                    "stop": ["User:"],
+                }
             }
-        }
-    )
+        )
 
-    reply = response.json().get('response', '').strip()
-    return jsonify({'reply': reply})
+        reply = response.json().get('response', '').strip()
+        return jsonify({'reply': reply})
 
+    except Exception as e:
+        print("Error in /chat:", e)
+        return jsonify({'reply': 'Sorry, there was an error connecting to the AI model.'}), 500
+
+
+#diagnosis
 @app.route('/diagnose', methods=['POST'])
 def diagnose():
     problem_description = request.json['description']
 
     prompt = (
         "You are SpeegoPal, an AI e-bike service assistant. "
-        "Given the user's description, identify possible causes and suggest what part may need checking or replacement. "
-        "Keep the response short (2–3 sentences), factual, and easy to understand.\n\n"
-        f"Problem description: {problem_description}\nDiagnosis:"
+        "Given the user's description, provide three outputs in this exact format:\n"
+        "Diagnosis: <short 1-2 sentence diagnosis>\n"
+        "Estimated Cost: <approximate price in PHP>\n"
+        "Estimated Time: <approximate repair time in hours or days>\n\n"
+        f"Problem description: {problem_description}\nSpeegoPal:"
     )
 
     response = requests.post(
@@ -53,15 +63,37 @@ def diagnose():
             "model": "llama3",
             "prompt": prompt,
             "stream": False,
-            "options": {
-                "temperature": 0.5,
-                "num_predict": 120
-            }
+            "options": {"temperature": 0.6, "num_predict": 150}
         }
     )
 
-    diagnosis = response.json().get('response', '').strip()
-    return jsonify({'diagnosis': diagnosis})
+    ai_response = response.json().get('response', '').strip()
+
+    diagnosis = ""
+    cost = "N/A"
+    time = "N/A"
+
+    for line in ai_response.splitlines():
+        if line.lower().startswith("diagnosis:"):
+            diagnosis = line.split(":", 1)[1].strip()
+        elif "cost" in line.lower():
+            cost = line.split(":", 1)[1].strip()
+        elif "time" in line.lower():
+            time = line.split(":", 1)[1].strip()
+
+    return jsonify({
+        'diagnosis': diagnosis or ai_response,
+        'cost': cost,
+        'time': time
+    })
+
+except Exception as e:
+        print("Error in /diagnose:", e)
+        return jsonify({
+            "diagnosis": "Error: Unable to generate diagnosis.",
+            "estimated_cost": "N/A",
+            "estimated_time": "N/A"
+        }), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

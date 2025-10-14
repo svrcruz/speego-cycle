@@ -154,34 +154,44 @@
             });
         });
 
-        // Smart Diagnosis button (AI integrated)
-        document.getElementById('smartDiagnosisBtn').addEventListener('click', async function () {
-            const problem = document.getElementById('problemDescription').value.trim();
-            const resultBox = document.getElementById('diagnosisResult');
+        //diagnosis (w date & time)
+document.getElementById('smartDiagnosisBtn').addEventListener('click', async function () {
+    const problem = document.getElementById('problemDescription').value.trim();
+    const resultBox = document.getElementById('diagnosisResult');
+    const costBox = document.querySelectorAll('.display-box')[0];
+    const timeBox = document.querySelectorAll('.display-box')[1];
 
-            if (!problem) {
-                alert('Please enter a problem description first.');
-                return;
-            }
+    if (!problem) {
+        alert('Please enter a problem description first.');
+        return;
+    }
 
-            // Show the box and a loading message
-            resultBox.style.display = 'block';
-            resultBox.innerHTML = `<i class="ph ph-hourglass"></i> Analyzing your e-bike issue...`;
+    resultBox.style.display = 'block';
+    resultBox.innerHTML = `<i class="ph ph-hourglass"></i> Analyzing your e-bike issue...`;
+    costBox.innerHTML = `<i class="ph ph-currency-circle-dollar"></i> ...`;
+    timeBox.innerHTML = `<i class="ph ph-timer"></i> ...`;
 
-            try {
-                const response = await fetch('http://127.0.0.1:5000/diagnose', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ description: problem })
-                });
-
-                const data = await response.json();
-                resultBox.innerHTML = `<strong>Diagnosis:</strong> ${data.diagnosis}`;
-            } catch (error) {
-                console.error(error);
-                resultBox.innerHTML = `<span style="color:red;">Error: Unable to connect to the AI service.</span>`;
-            }
+    try {
+        const response = await fetch('http://127.0.0.1:5000/diagnose', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ description: problem })
         });
+
+        const data = await response.json();
+
+        resultBox.innerHTML = `<strong>Diagnosis:</strong> ${data.diagnosis}`;
+        costBox.innerHTML = `<i class="ph ph-currency-circle-dollar"></i> <span><strong>${data.estimated_cost}</strong></span>`;
+        timeBox.innerHTML = `<i class="ph ph-timer"></i> <span><strong>${data.estimated_time}</strong></span>`;
+
+    } catch (error) {
+        console.error(error);
+        resultBox.innerHTML = `<span style="color:red;">Error: Unable to connect to the AI service.</span>`;
+        costBox.innerHTML = `<i class="ph ph-currency-circle-dollar"></i> N/A`;
+        timeBox.innerHTML = `<i class="ph ph-timer"></i> N/A`;
+    }
+});
+
 
 
         // Date picker simulation
