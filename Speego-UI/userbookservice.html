@@ -1,16 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>SpeegoCycle - Book a Service</title>
-    <link rel="stylesheet" href="userbookservice.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link rel="stylesheet" href="userbookservice.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
-
 <body>
     <header class="header">
         <div class="header-left">
@@ -23,7 +20,7 @@
             <a href="usertrack.html" class="nav-link">Track Service Requests</a>
             <a href="index.html" class="home-icon">
                 <i class="ph ph-house"></i>
-            </span></a>
+            </a>
             <span class="menu-icon" id="menuToggle">
                 <i class="ph ph-list"></i>
             </span>
@@ -32,21 +29,15 @@
 
     <div class="search-container">
         <div class="search-box">
-            <span class="search-icon">
-                <i class="ph ph-magnifying-glass"></i>
-            </span>
+            <span class="search-icon"><i class="ph ph-magnifying-glass"></i></span>
             <input type="text" class="search-input" placeholder="Search">
-            <span class="filter-icon">
-                <i class="ph ph-funnel-simple"></i>
-            </span>
+            <span class="filter-icon"><i class="ph ph-funnel-simple"></i></span>
         </div>
     </div>
 
     <main class="main-content">
         <h1 class="page-title">Book a Service</h1>
-        <div class="breadcrumb">
-            Home <span>›</span> Services <span>›</span> Book a Service
-        </div>
+        <div class="breadcrumb">Home <span>›</span> Services <span>›</span> Book a Service</div>
 
         <div class="booking-container">
             <section class="service-selection">
@@ -62,7 +53,7 @@
                 <h2 class="section-title">E-Bike Details</h2>
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="model">MODEL</label>
+                        <label for="model">PRODUCT NAME</label>
                         <input type="text" id="model" class="form-input" placeholder="">
                     </div>
                     <div class="form-group">
@@ -72,8 +63,8 @@
                     <div class="form-group">
                         <label for="purchaseDate">PURCHASE DATE</label>
                         <div class="date-input-wrapper">
-                            <input type="text" id="purchaseDate" class="form-input" value="09-25-2025"
-                                placeholder="MM-DD-YYYY">
+                            <!-- real date picker -->
+                            <input type="date" id="purchaseDate" class="form-input">
                             <i class="ph ph-caret-down date-icon"></i>
                         </div>
                     </div>
@@ -87,36 +78,41 @@
 
             <section class="diagnosis-cost-section">
                 <div class="left-section">
+                    <!-- big diagnosis card — preserved style -->
                     <button class="smart-diagnosis-btn" id="smartDiagnosisBtn">
-                    <i class="ph ph-first-aid-kit diagnosis-icon"></i>
-                    <span class="diagnosis-title">Smart Diagnosis</span>
-                    <div id="diagnosisResult" class="diagnosis-result"></div>
+                        <i class="ph ph-first-aid-kit diagnosis-icon"></i>
+                        <span class="diagnosis-title">Smart Diagnosis</span>
+                        <div id="diagnosisResult" class="diagnosis-result" aria-live="polite"></div>
                     </button>
                 </div>
-           
+
                 <div class="right-section">
                     <div class="cost-time-box">
                         <label>ESTIMATED REPAIR COST</label>
-                        <div class="display-box">
-                            <i class="ph ph-currency-circle-dollar"></i>
+                        <div class="display-box" id="costBox">
+                            <span class="peso-symbol">₱</span>
+                            <span id="estimatedCost">--</span>
                         </div>
                     </div>
                     <div class="cost-time-box">
                         <label>ESTIMATED REPAIR TIME</label>
-                        <div class="display-box">
+                        <div class="display-box" id="timeBox">
                             <i class="ph ph-timer"></i>
+                            <span id="estimatedTime" style="margin-left:10px">--</span>
                         </div>
                     </div>
                 </div>
             </section>
 
             <section class="appointment-section">
-                <button class="smart-sched-btn">
+                <button class="smart-sched-btn" id="smartSchedBtn">
                     <i class="ph ph-calendar-check"></i>
-                    SPEEGOPAL SMART SCHED
+                    Schedule an appointment
                 </button>
-                <button class="confirm-btn">Confirm Appointment</button>
+                <button class="confirm-btn" id="confirmBtn">Confirm Appointment</button>
             </section>
+
+            <div id="chosenSlotDisplay" style="text-align:center; margin-top:12px; font-weight:600; color:#333;"></div>
         </div>
     </main>
 
@@ -128,120 +124,202 @@
         <a href="logout.html" class="sidebar-item">Log Out</a>
     </div>
 
+    <!-- Modal: Smart Schedule -->
+    <div id="scheduleModal" class="modal" aria-hidden="true">
+      <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="scheduleTitle">
+        <h3 id="scheduleTitle">Select Your Preferred Slot</h3>
+        <div id="slotList" class="slot-list"></div>
+        <div class="modal-actions">
+          <button id="confirmSlotBtn" class="confirm-btn" style="padding:10px 20px; border-radius:10px;">Confirm Slot</button>
+          <button id="closeModalBtn" class="cancel-btn">Cancel</button>
+        </div>
+      </div>
+    </div>
 
     <script>
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('active');
-        }
+    // Sidebar toggle
+    document.getElementById('menuToggle').addEventListener('click', function(e){
+        e.stopPropagation();
+        document.getElementById('sidebar').classList.toggle('active');
+    });
 
-        document.addEventListener('click', function (e) {
-            const sidebar = document.getElementById('sidebar');
-            const menuBtn = document.querySelector('.header-right .icon-btn:last-child');
+    // close sidebar clicking outside
+    document.addEventListener('click', function(e){
+        const sidebar = document.getElementById('sidebar');
+        const menuToggle = document.getElementById('menuToggle');
+        if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) sidebar.classList.remove('active');
+    });
 
-            if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
-                sidebar.classList.remove('active');
-            }
+    // Service selection
+    const serviceButtons = document.querySelectorAll('.service-btn');
+    serviceButtons.forEach(btn => {
+        btn.addEventListener('click', function () {
+            serviceButtons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
         });
+    });
 
+    // Keep track of the created service_request id (set by /diagnose response)
+    let currentServiceRequestID = null;
+    let selectedSlot = null;
 
-        // Service button selection
-        const serviceButtons = document.querySelectorAll('.service-btn');
-        serviceButtons.forEach(btn => {
-            btn.addEventListener('click', function () {
-                serviceButtons.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
-
-        // 🔧 Smart Diagnosis (with cost and time)
-        document.getElementById('smartDiagnosisBtn').addEventListener('click', async function () {
+    // Smart Diagnosis: call your Ollama-backed Flask endpoint and save diagnosis to DB (backend does saving)
+    document.getElementById('smartDiagnosisBtn').addEventListener('click', async function () {
         const problem = document.getElementById('problemDescription').value.trim();
+        const model = document.getElementById('model').value;
+        const serial = document.getElementById('serialNumber').value;
+        const purchaseDate = document.getElementById('purchaseDate').value;
+
         const resultBox = document.getElementById('diagnosisResult');
-        const costBox = document.querySelectorAll('.display-box')[0];
-        const timeBox = document.querySelectorAll('.display-box')[1];
+        const costBox = document.getElementById('estimatedCost');
+        const timeBox = document.getElementById('estimatedTime');
 
         if (!problem) {
             alert('Please enter a problem description first.');
             return;
         }
 
-        // Show loading placeholders
+        // show loader
         resultBox.style.display = 'block';
         resultBox.innerHTML = `<em>Analyzing issue...</em>`;
-        costBox.innerHTML = `<i class="ph ph-currency-circle-dollar"></i> ...`;
-        timeBox.innerHTML = `<i class="ph ph-timer"></i> ...`;
+        costBox.textContent = '--';
+        timeBox.textContent = '--';
 
         try {
-            const response = await fetch('http://127.0.0.1:5000/diagnose', {
+            const resp = await fetch('http://127.0.0.1:5000/diagnose', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ description: problem })
+                body: JSON.stringify({
+                    description: problem,
+                    product_id: null,
+                    purchase_date: purchaseDate
+                })
             });
 
-            if (!response.ok) throw new Error(`Server error: ${response.status}`);
+            if (!resp.ok) throw new Error('Server error');
 
-            const data = await response.json();
+            const data = await resp.json();
 
-            resultBox.innerHTML = `<strong>Diagnosis:</strong> ${data.diagnosis}`;
-            costBox.innerHTML = `<i class="ph ph-currency-circle-dollar"></i> <span><strong>${data.cost}</strong></span>`;
-            timeBox.innerHTML = `<i class="ph ph-timer"></i> <span><strong>${data.time}</strong></span>`;
+            // show results and keep service_request_id for scheduling
+            resultBox.innerHTML = `<strong>Diagnosis:</strong> ${data.diagnosis || '—'}`;
+            // ensure cost displayed as numeric after ₱ sign
+            const costStr = (data.cost || '--').toString().replace('FREE', 'FREE').replace('₱', '').replace('PHP', '').trim();
+            costBox.textContent = (data.cost && data.cost.toString().toUpperCase().includes('FREE')) ? 'FREE' : (costStr || '--');
+            timeBox.textContent = data.time || '--';
 
-        } catch (error) {
-            console.error("Smart Diagnosis Error:", error);
-            resultBox.innerHTML = `<span style="color:red;">Error: Unable to connect to the AI service.</span>`;
-            costBox.innerHTML = `<i class="ph ph-currency-circle-dollar"></i> N/A`;
-            timeBox.innerHTML = `<i class="ph ph-timer"></i> N/A`;
+            currentServiceRequestID = data.service_request_id || null;
+
+        } catch (err) {
+            console.error('Diagnosis error:', err);
+            resultBox.innerHTML = `<span style="color:red">Error: Unable to connect to AI service.</span>`;
+            costBox.textContent = 'N/A';
+            timeBox.textContent = 'N/A';
         }
     });
 
+    // Smart Schedule Modal logic
+    const scheduleModal = document.getElementById('scheduleModal');
+    const slotList = document.getElementById('slotList');
+    const chosenSlotDisplay = document.getElementById('chosenSlotDisplay');
 
+    document.getElementById('smartSchedBtn').addEventListener('click', async function () {
+        try {
+            const resp = await fetch('http://127.0.0.1:5000/smart-schedule');
+            const data = await resp.json();
 
-        // Date picker simulation
-        document.getElementById('purchaseDate').addEventListener('click', function () {
-            // In a real application, this would open a date picker
-            this.showPicker ? this.showPicker() : null;
-        });
-
-        // Sidebar toggle functionality
-        document.getElementById('menuToggle').addEventListener('click', function (e) {
-            e.stopPropagation();
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('active');
-        });
-
-        // Close sidebar when clicking outside
-        document.addEventListener('click', function (e) {
-            const sidebar = document.getElementById('sidebar');
-            const menuToggle = document.getElementById('menuToggle');
-
-            if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-                sidebar.classList.remove('active');
+            if (data.available_slots && data.available_slots.length) {
+                // populate buttons
+                slotList.innerHTML = '';
+                selectedSlot = null;
+                data.available_slots.forEach(slot => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'slot-btn';
+                    btn.textContent = slot;
+                    btn.addEventListener('click', ()=> {
+                        document.querySelectorAll('.slot-btn').forEach(b=>b.classList.remove('selected'));
+                        btn.classList.add('selected');
+                        selectedSlot = slot;
+                    });
+                    slotList.appendChild(btn);
+                });
+                scheduleModal.style.display = 'flex';
+                scheduleModal.setAttribute('aria-hidden', 'false');
+            } else {
+                alert('No available slots right now.');
             }
-        });
+        } catch (err) {
+            console.error('Smart schedule error', err);
+            alert('Error fetching schedule. Try again later.');
+        }
+    });
 
-        // Back button
-        document.querySelector('.back-arrow').addEventListener('click', function (e) {
-            e.preventDefault();
-            window.history.back();
-        });
+    document.getElementById('closeModalBtn').addEventListener('click', function(){
+        scheduleModal.style.display = 'none';
+        scheduleModal.setAttribute('aria-hidden', 'true');
+    });
 
-        // Confirm Appointment
-        document.querySelector('.confirm-btn').addEventListener('click', function () {
-            const model = document.getElementById('model').value;
-            const serialNumber = document.getElementById('serialNumber').value;
-            const purchaseDate = document.getElementById('purchaseDate').value;
-            const problem = document.getElementById('problemDescription').value;
+    document.getElementById('confirmSlotBtn').addEventListener('click', async function(){
+        if (!selectedSlot) { alert('Please select a slot first.'); return; }
 
-            if (!model || !serialNumber || !problem) {
-                alert('Please fill in all required fields');
-                return;
+        // If we have a created service request (from diagnosis), call /schedule to save the chosen slot there.
+        if (currentServiceRequestID) {
+            try {
+                const resp = await fetch('http://127.0.0.1:5000/schedule', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        service_request_id: currentServiceRequestID,
+                        appointment_date: selectedSlot // backend expects a datetime string — you may transform it server-side
+                    })
+                });
+                const data = await resp.json();
+                if (data.error) throw new Error(data.error || 'Failed to schedule');
+
+                chosenSlotDisplay.innerHTML = `✅ Chosen Schedule: <strong>${selectedSlot}</strong>`;
+                scheduleModal.style.display = 'none';
+                scheduleModal.setAttribute('aria-hidden', 'true');
+            } catch (err) {
+                console.error(err);
+                alert('Failed to save schedule. You can still choose a slot locally.');
             }
+        } else {
+            // no service request created — just show chosen slot locally
+            chosenSlotDisplay.innerHTML = `✅ Chosen Schedule: <strong>${selectedSlot}</strong>`;
+            scheduleModal.style.display = 'none';
+            scheduleModal.setAttribute('aria-hidden', 'true');
+        }
+    });
 
-            alert('Appointment confirmed! You will receive a confirmation email shortly.');
-            // In a real application, this would submit the form to the server
-        });
+    // Close modal on backdrop click
+    window.addEventListener('click', function(e){
+        if (e.target === scheduleModal) {
+            scheduleModal.style.display = 'none';
+            scheduleModal.setAttribute('aria-hidden', 'true');
+        }
+    });
+
+    // Confirm appointment button (client-side demo)
+    document.getElementById('confirmBtn').addEventListener('click', function(){
+        const model = document.getElementById('model').value.trim();
+        const serial = document.getElementById('serialNumber').value.trim();
+        const purchase = document.getElementById('purchaseDate').value;
+        const problem = document.getElementById('problemDescription').value.trim();
+
+        if (!model || !serial || !problem) {
+            alert('Please fill in Model, Serial Number, and Problem Description.');
+            return;
+        }
+
+        // If currentServiceRequestID exists, assume record already saved by /diagnose earlier.
+        if (currentServiceRequestID) {
+            alert('Appointment confirmed — we will email you the details.');
+        } else {
+            // fallback: you might want to POST a new service_request here if diagnose not used
+            alert('Please run Smart Diagnosis first to create the request (recommended).');
+        }
+    });
+
     </script>
 </body>
-
 </html>
