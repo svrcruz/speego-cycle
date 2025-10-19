@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpeegoCycle - Track Service Requests</title>
+    <link rel="stylesheet" href="usertrack.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-left">
+            <a href="#" class="back-arrow">
+                <i class="ph ph-caret-left"></i>
+            </a>
+        </div>
+        <div class="header-right">
+            <a href="userservicehistory.html" class="nav-link">Service History</a>
+            <a href="#" class="nav-link active">Track Service Requests</a>
+            <a href="index.html" class="home-icon">
+                <i class="ph ph-house"></i>
+                </span></a>
+            <span class="menu-icon" id="menuToggle">
+                <i class="ph ph-list"></i>
+            </span>
+        </div>
+    </header>
+
+    <div class="search-container">
+        <div class="search-box">
+            <span class="search-icon">
+                <i class="ph ph-magnifying-glass"></i>
+            </span>
+            <input type="text" class="search-input" id="searchInput" placeholder="Search">
+            <span class="filter-icon" id="filterToggle">
+                <i class="ph ph-funnel-simple"></i>
+            </span>
+        </div>
+
+        <div class="filter-panel" id="filterPanel">
+            <h3>Filter Options</h3>
+            <div class="filter-group">
+                <label>Service Type:</label>
+                <select id="filterServiceType">
+                    <option value="">All</option>
+                    <option value="Parts Installation">Parts Installation</option>
+                    <option value="Repair">Repair</option>
+                    <option value="Maintenance">Maintenance</option>
+                    <option value="Inspection">Inspection</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Status:</label>
+                <select id="filterStatus">
+                    <option value="">All</option>
+                    <option value="Pending">Pending</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Confirmed">Confirmed</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+            </div>
+            <div class="filter-actions">
+                <button id="applyFilter" class="btn-apply">Apply Filters</button>
+                <button id="clearFilter" class="btn-clear">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <main class="main-content">
+        <h1 class="page-title">Track Service Requests</h1>
+        <div class="breadcrumb">
+            Home <span>›</span> Services <span>›</span> Track Service Requests
+        </div>
+
+        <div class="table-container">
+            <table id="serviceTable">
+                <thead>
+                    <tr>
+                        <th data-sort="serviceNo">Service No. <span class="sort-arrow">⇅</span></th>
+                        <th>Service Type</th>
+                        <th data-sort="datePlaced">Date Placed <span class="sort-arrow">⇅</span></th>
+                        <th data-sort="status">Status <span class="sort-arrow">⇅</span></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Data will be populated by JavaScript -->
+                </tbody>
+            </table>
+            <div id="noResults" class="no-results" style="display: none;">
+                No service requests found matching your criteria.
+            </div>
+        </div>
+    </main>
+
+    <div class="sidebar" id="sidebar">
+        <a href="shoppingcart.html" class="sidebar-item">Shopping Cart</a>
+        <a href="orderhistory.html" class="sidebar-item">Order History</a>
+        <a href="aboutus.html" class="sidebar-item">About Us</a>
+        <a href="userservices.html" class="sidebar-item">Services</a>
+        <a href="loginuser.html" class="sidebar-item">Log Out</a>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('active');
+        }
+
+        document.addEventListener('click', function (e) {
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.querySelector('.header-right .icon-btn:last-child');
+
+            if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+                sidebar.classList.remove('active');
+            }
+        });
+
+        // Sample data - in a real application, this would come from an API
+            const serviceData = [
+            {serviceNo: '0000000002', serviceType: 'Parts Installation', datePlaced: 'September 23, 2025', status: 'Pending', date: new Date('2025-09-23') },
+            {serviceNo: '0000000003', serviceType: 'Repair', datePlaced: 'September 28, 2025', status: 'In Progress', date: new Date('2025-09-28') },
+            {serviceNo: '0000000005', serviceType: 'Maintenance', datePlaced: 'October 05, 2025', status: 'Confirmed', date: new Date('2025-10-05') },
+            {serviceNo: '0000000007', serviceType: 'Inspection', datePlaced: 'October 10, 2025', status: 'Pending', date: new Date('2025-10-10') },
+            {serviceNo: '0000000008', serviceType: 'Parts Installation', datePlaced: 'October 11, 2025', status: 'In Progress', date: new Date('2025-10-11') }
+            ];
+
+            let currentData = [...serviceData];
+            let sortDirection = { };
+
+            // Render table
+            function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            const noResults = document.getElementById('noResults');
+
+            if (data.length === 0) {
+                tbody.innerHTML = '';
+            noResults.style.display = 'block';
+            return;
+            }
+
+            noResults.style.display = 'none';
+            tbody.innerHTML = data.map(service => `
+            <tr>
+                <td>${service.serviceNo}</td>
+                <td>${service.serviceType}</td>
+                <td>${service.datePlaced}</td>
+                <td><span class="status-${service.status.toLowerCase().replace(' ', '-')}">${service.status}</span></td>
+                <td><button class="view-details-btn" onclick="viewDetails('${service.serviceNo}')">View details</button></td>
+            </tr>
+            `).join('');
+        }
+
+            // Search functionality
+            document.getElementById('searchInput').addEventListener('input', function (e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const filtered = currentData.filter(service =>
+            service.serviceNo.toLowerCase().includes(searchTerm) ||
+            service.serviceType.toLowerCase().includes(searchTerm) ||
+            service.datePlaced.toLowerCase().includes(searchTerm) ||
+            service.status.toLowerCase().includes(searchTerm)
+            );
+            renderTable(filtered);
+        });
+
+            // Filter panel toggle
+            document.getElementById('filterToggle').addEventListener('click', function () {
+            const panel = document.getElementById('filterPanel');
+            panel.classList.toggle('active');
+        });
+
+            // Apply filters
+            document.getElementById('applyFilter').addEventListener('click', function () {
+            const serviceType = document.getElementById('filterServiceType').value;
+            const status = document.getElementById('filterStatus').value;
+
+            currentData = serviceData.filter(service => {
+                const matchServiceType = !serviceType || service.serviceType === serviceType;
+            const matchStatus = !status || service.status === status;
+            return matchServiceType && matchStatus;
+            });
+
+            renderTable(currentData);
+            document.getElementById('filterPanel').classList.remove('active');
+        });
+
+            // Clear filters
+            document.getElementById('clearFilter').addEventListener('click', function () {
+                document.getElementById('filterServiceType').value = '';
+            document.getElementById('filterStatus').value = '';
+            currentData = [...serviceData];
+            renderTable(currentData);
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterPanel').classList.remove('active');
+        });
+
+        // Sorting functionality
+        document.querySelectorAll('th[data-sort]').forEach(header => {
+                header.addEventListener('click', function () {
+                    const sortKey = this.getAttribute('data-sort');
+
+                    // Initialize sort direction for this column if not exists
+                    if (!sortDirection[sortKey]) {
+                        sortDirection[sortKey] = 'asc';
+                    } else {
+                        sortDirection[sortKey] = sortDirection[sortKey] === 'asc' ? 'desc' : 'asc';
+                    }
+
+                    // Remove active class from all headers
+                    document.querySelectorAll('th[data-sort]').forEach(h => h.classList.remove('sorted-asc', 'sorted-desc'));
+
+                    // Add active class to current header
+                    this.classList.add(sortDirection[sortKey] === 'asc' ? 'sorted-asc' : 'sorted-desc');
+
+                    // Sort the data
+                    const sorted = [...currentData].sort((a, b) => {
+                        let aVal, bVal;
+
+                        if (sortKey === 'datePlaced') {
+                            aVal = a.date;
+                            bVal = b.date;
+                        } else {
+                            aVal = a[sortKey].toString().toLowerCase();
+                            bVal = b[sortKey].toString().toLowerCase();
+                        }
+
+                        if (aVal < bVal) return sortDirection[sortKey] === 'asc' ? -1 : 1;
+                        if (aVal > bVal) return sortDirection[sortKey] === 'asc' ? 1 : -1;
+                        return 0;
+                    });
+
+                    renderTable(sorted);
+                });
+        });
+
+            // View details function
+            function viewDetails(serviceNo) {
+                alert(`Viewing details for Service No: ${serviceNo}`);
+            // In a real application, this would navigate to the service details page
+        }
+
+            // Close filter panel when clicking outside
+            document.addEventListener('click', function (e) {
+            const filterPanel = document.getElementById('filterPanel');
+            const filterToggle = document.getElementById('filterToggle');
+
+            if (!filterPanel.contains(e.target) && !filterToggle.contains(e.target)) {
+                filterPanel.classList.remove('active');
+            }
+        });
+
+            // Sidebar toggle functionality
+            document.getElementById('menuToggle').addEventListener('click', function (e) {
+                e.stopPropagation();
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('active');
+        });
+
+            // Close sidebar when clicking outside
+            document.addEventListener('click', function (e) {
+            const sidebar = document.getElementById('sidebar');
+            const menuToggle = document.getElementById('menuToggle');
+
+            if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                sidebar.classList.remove('active');
+            }
+        });
+
+            // Initial render
+            renderTable(currentData);
+
+            //previous page
+            document.querySelector('.back-arrow').addEventListener('click', function (e) {
+                e.preventDefault();
+            window.history.back();
+        });
+    </script>
+</body>
+
+</html>
