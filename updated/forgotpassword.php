@@ -12,7 +12,7 @@ if ($conn->connect_error) {
 if (isset($_POST['get_otp'])) {
     $email = $_POST['email'];
 
-    // ✅ Check if email exists in database
+    // Check if email exists in database
     $sql = "SELECT * FROM customer WHERE Customer_Email = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $email);
@@ -33,3 +33,4 @@ if (isset($_POST['get_otp'])) {
     }
 }
 ?>
+
