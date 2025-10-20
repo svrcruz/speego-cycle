@@ -143,13 +143,26 @@ body {
 }
 
 .hero-image {
+    position: relative;
     width: 400px;
     height: 280px;
     background-color: #f0f0f0;
     border-radius: 15px;
-    position: relative;
+    overflow: hidden; /* ensures image stays inside the rounded edges */
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .hero-image .hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* or 'cover' if you want it to fill fully */
+    border-radius: 15px;
+  }  
+
+
 
 .sale-badge {
     position: absolute;
@@ -215,7 +228,24 @@ body {
     border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     flex-shrink: 0;
-}
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* ensures images stay inside rounded corners */
+  }
+  
+  .card img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* keeps image proportions inside the card */
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+  }
+  
+  .card:hover img {
+    transform: scale(1.05); /* optional zoom effect */
+  }
+  
 
 .sidebar {
     position: fixed;
