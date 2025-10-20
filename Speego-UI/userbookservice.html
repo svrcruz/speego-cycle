@@ -49,27 +49,29 @@
                 </div>
             </section>
 
-            <section class="ebike-details">
-                <h2 class="section-title">E-Bike Details</h2>
+            <div class="ebike-details">
+                <h3 class="section-title">E-Bike Details</h3>
+
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="model">PRODUCT NAME</label>
-                        <input type="text" id="model" class="form-input" placeholder="">
+                        <label for="product_name">Product Name</label>
+                        <input type="text" id="product_name" name="product_name" class="form-input" placeholder="Enter e-bike name" required>
                     </div>
+
                     <div class="form-group">
-                        <label for="serialNumber">SERIAL NUMBER</label>
-                        <input type="text" id="serialNumber" class="form-input" placeholder="">
+                        <label for="serial_code">Serial Code</label>
+                        <input type="text" id="serial_code" name="serial_code" class="form-input" placeholder="Enter your Serial Code" required>
                     </div>
-                    <div class="form-group">
-                        <label for="purchaseDate">PURCHASE DATE</label>
-                        <div class="date-input-wrapper">
-                            <!-- real date picker -->
-                            <input type="date" id="purchaseDate" class="form-input">
-                            <i class="ph ph-caret-down date-icon"></i>
-                        </div>
+
+                    <div class="form-group date-input-wrapper">
+                        <label for="purchase_date">Purchase Date</label>
+                        <input type="date" id="purchase_date" name="purchase_date" class="form-input" required>
+                        <i class="fa-solid fa-calendar-days date-icon"></i>
                     </div>
                 </div>
+            </div>
 
+            <section class="problem-section">
                 <div class="form-group full-width">
                     <label for="problemDescription">PROBLEM DESCRIPTION</label>
                     <textarea id="problemDescription" class="form-textarea" placeholder="Enter an issue"></textarea>
@@ -163,12 +165,12 @@
     let currentServiceRequestID = null;
     let selectedSlot = null;
 
-    // Smart Diagnosis: call your Ollama-backed Flask endpoint and save diagnosis to DB (backend does saving)
+    // Smart Diagnosis: call your Ollama-backed Flask endpoint
     document.getElementById('smartDiagnosisBtn').addEventListener('click', async function () {
         const problem = document.getElementById('problemDescription').value.trim();
-        const model = document.getElementById('model').value;
-        const serial = document.getElementById('serialNumber').value;
-        const purchaseDate = document.getElementById('purchaseDate').value;
+        const productName = document.getElementById('product_name').value;
+        const serial = document.getElementById('serial_code').value;
+        const purchaseDate = document.getElementById('purchase_date').value;
 
         const resultBox = document.getElementById('diagnosisResult');
         const costBox = document.getElementById('estimatedCost');
@@ -191,8 +193,8 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     description: problem,
-                    product_id: null,
-                    purchase_date: purchaseDate
+                    product_id: serial || null,  // using serial as product_id
+                    purchase_date: purchaseDate || null
                 })
             });
 
@@ -202,7 +204,8 @@
 
             // show results and keep service_request_id for scheduling
             resultBox.innerHTML = `<strong>Diagnosis:</strong> ${data.diagnosis || '—'}`;
-            // ensure cost displayed as numeric after ₱ sign
+            
+            // Handle cost display
             const costStr = (data.cost || '--').toString().replace('FREE', 'FREE').replace('₱', '').replace('PHP', '').trim();
             costBox.textContent = (data.cost && data.cost.toString().toUpperCase().includes('FREE')) ? 'FREE' : (costStr || '--');
             timeBox.textContent = data.time || '--';
@@ -270,7 +273,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         service_request_id: currentServiceRequestID,
-                        appointment_date: selectedSlot // backend expects a datetime string — you may transform it server-side
+                        appointment_date: selectedSlot // backend expects a datetime string
                     })
                 });
                 const data = await resp.json();
@@ -299,15 +302,15 @@
         }
     });
 
-    // Confirm appointment button (client-side demo)
+    // Confirm appointment button
     document.getElementById('confirmBtn').addEventListener('click', function(){
-        const model = document.getElementById('model').value.trim();
-        const serial = document.getElementById('serialNumber').value.trim();
-        const purchase = document.getElementById('purchaseDate').value;
+        const productName = document.getElementById('product_name').value.trim();
+        const serial = document.getElementById('serial_code').value.trim();
+        const purchase = document.getElementById('purchase_date').value;
         const problem = document.getElementById('problemDescription').value.trim();
 
-        if (!model || !serial || !problem) {
-            alert('Please fill in Model, Serial Number, and Problem Description.');
+        if (!productName || !serial || !problem) {
+            alert('Please fill in Product Name, Serial Code, and Problem Description.');
             return;
         }
 
