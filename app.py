@@ -49,7 +49,7 @@ def check_warranty_status(product_id, purchase_date):
         
         if not warranty:
             # No warranty found, calculate default warranty (e.g., 1 year)
-            purchase_dt = datetime.strptime(purchase_date, '%m-%d-%Y')
+            purchase_dt = datetime.strptime(purchase_date, '%Y-%m-%d')
             warranty_end = purchase_dt + timedelta(days=365)
             today = datetime.now()
             
@@ -59,7 +59,7 @@ def check_warranty_status(product_id, purchase_date):
             return {
                 'has_warranty': False,
                 'is_active': is_active,
-                'warranty_end_date': warranty_end.strftime('%m-%d-%Y'),
+                'warranty_end_date': warranty_end.strftime('%Y-%m-%d'),
                 'days_remaining': max(0, days_remaining),
                 'coverage_type': 'Standard 1-Year Warranty'
             }
@@ -75,8 +75,8 @@ def check_warranty_status(product_id, purchase_date):
             'has_warranty': True,
             'is_active': is_active,
             'warranty_id': warranty['WarrantyID'],
-            'warranty_end_date': warranty_end.strftime('%m-%d-%Y'),
-            'warranty_start_date': warranty['Warranty_StartDate'].strftime('%m-%d-%Y'),
+            'warranty_end_date': warranty_end.strftime('%Y-%m-%d'),
+            'warranty_start_date': warranty['Warranty_StartDate'].strftime('%Y-%m-%d'),
             'days_remaining': max(0, days_remaining),
             'status': warranty['Warranty_Status'],
             'product_name': warranty['Product_Name']
@@ -166,6 +166,91 @@ def get_product_recommendations(keywords):
     except Error as e:
         print(f"Error getting recommendations: {e}")
         return []
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
+def save_diagnosis_to_db(diagnosis_data):
+    """Save diagnosis to database and update corresponding service request status"""
+    conn = get_db_connection()
+    if not conn:
+        return None
+
+    try:
+        cursor = conn.cursor()
+
+        # Insert into service_diagnosis table
+        insert_query = """
+            INSERT INTO service_diagnosis
+            (ServiceRequestID, DiagnosisDetails, TechnicianName, FindingsDate)
+            VALUES (%s, %s, %s, %s)
+        """
+
+        cursor.execute(insert_query, (
+            diagnosis_data.get('service_request_id'),
+            diagnosis_data.get('diagnosis_details'),
+            diagnosis_data.get('technician_name', 'SpeegoPal AI'),
+            datetime.now()
+        ))
+
+        # Get diagnosis ID
+        diagnosis_id = cursor.lastrowid
+
+        # Update related service request status
+        update_query = """
+            UPDATE service_request
+            SET Status = 'Diagnosed'
+            WHERE ServiceRequestID = %s
+        """
+        cursor.execute(update_query, (diagnosis_data.get('service_request_id'),))
+
+        conn.commit()
+        return diagnosis_id
+
+    except Error as e:
+        print(f"Error saving diagnosis: {e}")
+        conn.rollback()
+        return None
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
+
+def save_service_request_to_db(request_data):
+
+    """Save service request to database"""
+    conn = get_db_connection()
+    if not conn:
+        return None
+
+    try:
+        cursor = conn.cursor()
+
+        insert_query = """
+            INSERT INTO service_request 
+            (CustomerID, AdminID, ServiceType, ProblemDescription, AppointmentDate, Status)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """
+
+        cursor.execute(insert_query, (
+            request_data.get('customer_id', 1),  # Replace with actual logged-in customer later
+            request_data.get('admin_id', None),
+            request_data.get('service_type', 'Repair'),
+            request_data.get('problem_description'),
+            None,  # AppointmentDate can be set later via /schedule
+            'Pending Diagnosis'
+        ))
+
+        conn.commit()
+        service_request_id = cursor.lastrowid
+        return service_request_id
+
+    except Error as e:
+        print(f"Error saving service request: {e}")
+        conn.rollback()
+        return None
     finally:
         if conn.is_connected():
             cursor.close()
@@ -347,6 +432,7 @@ def diagnose():
                 time = line.split(":", 1)[1].strip()
 
         # Override cost if warranty is active
+        estimated_cost_numeric = 0
         if is_warranty_covered:
             cost = "FREE (Warranty Covered)"
             warranty_message = f"✓ Under warranty until {warranty_info['warranty_end_date']}"
@@ -357,6 +443,29 @@ def diagnose():
                 db_cost = service_costs[detected_service_type].get('EstimatedCost')
                 if db_cost:
                     cost = f"₱{db_cost}"
+                    estimated_cost_numeric = db_cost
+
+        # Save service request to database
+        service_request_data = {
+            'product_id': product_id,
+            'service_type': detected_service_type or service_type,
+            'problem_description': problem_description,
+            'estimated_cost': estimated_cost_numeric,
+            'estimated_time': time
+        }
+        
+        service_request_id = save_service_request_to_db(service_request_data)
+        
+        # Save diagnosis to database
+        if service_request_id:
+            diagnosis_data = {
+                'service_request_id': service_request_id,
+                'diagnosis_details': diagnosis or ai_response,
+                'technician_name': 'SpeegoPal AI'
+            }
+            diagnosis_id = save_diagnosis_to_db(diagnosis_data)
+        else:
+            diagnosis_id = None
 
         related_products = get_product_recommendations(problem_description)
 
@@ -368,7 +477,9 @@ def diagnose():
             'warranty': warranty_info,
             'warranty_covered': is_warranty_covered,
             'warranty_message': warranty_message,
-            'related_products': related_products[:3]
+            'related_products': related_products[:3],
+            'service_request_id': service_request_id,
+            'diagnosis_id': diagnosis_id
         })
 
     except Exception as e:
@@ -379,7 +490,9 @@ def diagnose():
             "cost": "N/A",
             "time": "N/A",
             "warranty_covered": False,
-            "related_products": []
+            "related_products": [],
+            "service_request_id": None,
+            "diagnosis_id": None
         }), 500
 
 @app.route('/products/search', methods=['POST'])
@@ -417,27 +530,72 @@ def get_categories():
 
 @app.route('/smart-schedule', methods=['GET'])
 def smart_schedule():
-        """Automatically suggest available service slots"""
-        try:
-            today = datetime.now()
-            schedule = []
-            
-            # Generate next 7 available time slots
-            for i in range(1, 8):
-                day = today + timedelta(days=i)
-                for hour in [9, 11, 13, 15]:  # 9AM, 11AM, 1PM, 3PM
-                    slot_time = day.replace(hour=hour, minute=0)
-                    schedule.append(slot_time.strftime('%Y-%m-%d %I:%M %p'))
+    """Automatically suggest available service slots"""
+    try:
+        today = datetime.now()
+        schedule = []
+        
+        # Generate next 7 available time slots
+        for i in range(1, 8):
+            day = today + timedelta(days=i)
+            for hour in [9, 11, 13, 15]:  # 9AM, 11AM, 1PM, 3PM
+                slot_time = day.replace(hour=hour, minute=0)
+                schedule.append(slot_time.strftime('%Y-%m-%d %I:%M %p'))
 
-            return jsonify({
-                "message": "Available Smart Schedule generated successfully",
-                "available_slots": schedule[:8]  # limit to 8 slots
-            })
-        except Exception as e:
-            print(f"Smart Schedule Error: {e}")
-            return jsonify({
-                "error": "Unable to generate smart schedule"
-            }), 500
+        return jsonify({
+            "message": "Available Smart Schedule generated successfully",
+            "available_slots": schedule[:8]  # limit to 8 slots
+        })
+    except Exception as e:
+        print(f"Smart Schedule Error: {e}")
+        return jsonify({
+            "error": "Unable to generate smart schedule"
+        }), 500
+
+@app.route('/schedule', methods=['POST'])
+def schedule_appointment():
+    """Save appointment schedule to database"""
+    data = request.json
+    service_request_id = data.get('service_request_id')
+    appointment_date = data.get('appointment_date')
+    
+    if not service_request_id or not appointment_date:
+        return jsonify({'error': 'Service request ID and appointment date required'}), 400
+    
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'error': 'Database connection failed'}), 500
+    
+    try:
+        cursor = conn.cursor()
+        
+        # Update SERVICE_REQUEST with appointment date
+        update_query = """
+            UPDATE SERVICE_REQUEST 
+            SET AppointmentDate = %s
+            WHERE ServiceRequestID = %s
+        """
+        
+        # Parse the appointment date string
+        appointment_dt = datetime.strptime(appointment_date, '%Y-%m-%d %I:%M %p')
+        
+        cursor.execute(update_query, (appointment_dt, service_request_id))
+        conn.commit()
+        
+        return jsonify({
+            'message': 'Appointment scheduled successfully',
+            'service_request_id': service_request_id,
+            'appointment_date': appointment_date
+        })
+        
+    except Exception as e:
+        print(f"Error scheduling appointment: {e}")
+        conn.rollback()
+        return jsonify({'error': 'Failed to schedule appointment'}), 500
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
 
 if __name__ == '__main__':
     app.run(debug=True)
