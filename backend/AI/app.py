@@ -352,6 +352,12 @@ def diagnose():
             elif low.startswith("estimated time:"): time = line.split(":", 1)[1].strip()
 
         related_products = get_product_recommendations(problem_description)
+        # Normalize cost symbol to PHP
+        if cost:
+            cost = cost.replace("$", "₱").replace("USD", "₱").replace("US$", "₱")
+            # remove duplicates (₱₱)
+            cost = cost.replace("₱₱", "₱").strip()
+
         return jsonify({
             'diagnosis': diagnosis or ai_response,
             'service_type': detected_service_type,
