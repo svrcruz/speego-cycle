@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpeegoCycle - My Cart</title>
+  <link rel="stylesheet" href="shoppingcart.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+
+<body>
+  <header class="header">
+    <div class="header-left">
+      <a href="#" class="back-arrow">
+        <i class="ph ph-caret-left"></i>
+      </a>
+      <h1 class="header-title">Shopping Cart</h1>
+    </div>
+    <div class="header-right">
+      <a href="index.html" class="home-icon">
+        <i class="ph ph-house"></i>
+      </a>
+      <span class="menu-icon" id="menuToggle">
+        <i class="ph ph-list"></i>
+      </span>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="cart-header">
+      <div class="select-all">
+        <input type="checkbox" id="selectAll" class="checkbox">
+        <label for="selectAll">Select All</label>
+      </div>
+      <button class="delete-btn" id="deleteSelected">
+        <i class="ph ph-trash"></i> Delete
+      </button>
+    </div>
+
+    <div class="cart-items" id="cartItems">
+      <!-- Cart Item 1 -->
+      <div class="cart-item" data-id="1">
+        <input type="checkbox" class="item-checkbox checkbox" data-id="1">
+        <div class="item-image"></div>
+        <div class="item-details">
+          <h3 class="item-name">E-BIKE 10</h3>
+          <p class="item-variant">Color: Red, Size: Medium</p>
+          <div class="item-footer">
+            <p class="item-price">₱32,000</p>
+            <div class="quantity-controls">
+              <button class="qty-btn minus" data-id="1">-</button>
+              <input type="text" class="qty-input" value="1" data-id="1" readonly>
+              <button class="qty-btn plus" data-id="1">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cart Item 2 -->
+      <div class="cart-item" data-id="2">
+        <input type="checkbox" class="item-checkbox checkbox" data-id="2">
+        <div class="item-image"></div>
+        <div class="item-details">
+          <h3 class="item-name">BATTERY 3</h3>
+          <p class="item-variant">Type: Lithium-ion, 48V</p>
+          <div class="item-footer">
+            <p class="item-price">₱25,000</p>
+            <div class="quantity-controls">
+              <button class="qty-btn minus" data-id="2">-</button>
+              <input type="text" class="qty-input" value="2" data-id="2" readonly>
+              <button class="qty-btn plus" data-id="2">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cart Item 3 -->
+      <div class="cart-item" data-id="3">
+        <input type="checkbox" class="item-checkbox checkbox" data-id="3">
+        <div class="item-image"></div>
+        <div class="item-details">
+          <h3 class="item-name">WHEELS 5</h3>
+          <p class="item-variant">Size: 26 inch, Color: Black</p>
+          <div class="item-footer">
+            <p class="item-price">₱28,000</p>
+            <div class="quantity-controls">
+              <button class="qty-btn minus" data-id="3">-</button>
+              <input type="text" class="qty-input" value="1" data-id="3" readonly>
+              <button class="qty-btn plus" data-id="3">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="voucher-section">
+      <i class="ph ph-ticket voucher-icon"></i>
+      <span>SpeegoCycle Voucher</span>
+      <i class="ph ph-caret-right"></i>
+    </div>
+  </main>
+
+  <footer class="checkout-footer">
+    <div class="footer-content">
+      <div class="total-section">
+        <input type="checkbox" id="selectAllBottom" class="checkbox">
+        <label for="selectAllBottom" class="select-all-label">All</label>
+        <div class="total-price">
+          <span class="total-label">Total:</span>
+          <span class="total-amount" id="totalAmount">₱0</span>
+        </div>
+      </div>
+      <button class="checkout-btn" id="checkoutBtn" onclick="window.location.href='checkout.html'" style="cursor: pointer;">
+        Check Out (<span id="itemCount">0</span>)
+      </button>
+    </div>
+  </footer>
+
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-item">Shopping Cart</div>
+    <div class="sidebar-item">Order History</div>
+    <div class="sidebar-item">About Us</div>
+    <div class="sidebar-item">Services</div>
+    <div class="sidebar-item">Log Out</div>
+  </div>
+
+  <script>
+    // Cart items data
+    const cartData = {
+      1: { name: 'E-BIKE 10', price: 32000, quantity: 1 },
+      2: { name: 'BATTERY 3', price: 25000, quantity: 2 },
+      3: { name: 'WHEELS 5', price: 28000, quantity: 1 }
+    };
+
+    // Update total
+    function updateTotal() {
+      let total = 0;
+      let count = 0;
+      
+      document.querySelectorAll('.item-checkbox:checked').forEach(checkbox => {
+        const id = checkbox.dataset.id;
+        const item = cartData[id];
+        total += item.price * item.quantity;
+        count++;
+      });
+
+      document.getElementById('totalAmount').textContent = `₱${total.toLocaleString()}`;
+      document.getElementById('itemCount').textContent = count;
+    }
+
+    // Select all functionality
+    document.getElementById('selectAll').addEventListener('change', function() {
+      const checkboxes = document.querySelectorAll('.item-checkbox');
+      checkboxes.forEach(cb => cb.checked = this.checked);
+      document.getElementById('selectAllBottom').checked = this.checked;
+      updateTotal();
+    });
+
+    document.getElementById('selectAllBottom').addEventListener('change', function() {
+      const checkboxes = document.querySelectorAll('.item-checkbox');
+      checkboxes.forEach(cb => cb.checked = this.checked);
+      document.getElementById('selectAll').checked = this.checked;
+      updateTotal();
+    });
+
+    // Individual checkbox
+    document.querySelectorAll('.item-checkbox').forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        const allChecked = document.querySelectorAll('.item-checkbox:checked').length === 
+                          document.querySelectorAll('.item-checkbox').length;
+        document.getElementById('selectAll').checked = allChecked;
+        document.getElementById('selectAllBottom').checked = allChecked;
+        updateTotal();
+      });
+    });
+
+    // Quantity controls
+    document.querySelectorAll('.qty-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const id = this.dataset.id;
+        const input = document.querySelector(`.qty-input[data-id="${id}"]`);
+        let quantity = parseInt(input.value);
+
+        if (this.classList.contains('plus')) {
+          quantity++;
+        } else if (this.classList.contains('minus') && quantity > 1) {
+          quantity--;
+        }
+
+        input.value = quantity;
+        cartData[id].quantity = quantity;
+        updateTotal();
+      });
+    });
+
+    // Delete selected
+    document.getElementById('deleteSelected').addEventListener('click', function() {
+      const selectedItems = document.querySelectorAll('.item-checkbox:checked');
+      
+      if (selectedItems.length === 0) {
+        alert('Please select items to delete');
+        return;
+      }
+
+      if (confirm(`Delete ${selectedItems.length} item(s)?`)) {
+        selectedItems.forEach(checkbox => {
+          const id = checkbox.dataset.id;
+          delete cartData[id];
+          checkbox.closest('.cart-item').remove();
+        });
+        updateTotal();
+      }
+    });
+
+    // Checkout
+    document.getElementById('checkoutBtn').addEventListener('click', function() {
+      const count = document.querySelectorAll('.item-checkbox:checked').length;
+      if (count === 0) {
+        alert('Please select items to checkout');
+      } else {
+        alert(`Proceeding to checkout with ${count} item(s)`);
+      }
+    });
+
+    // Sidebar toggle
+    document.getElementById('menuToggle').addEventListener('click', function(e) {
+      e.stopPropagation();
+      document.getElementById('sidebar').classList.toggle('active');
+    });
+
+    document.addEventListener('click', function(e) {
+      const sidebar = document.getElementById('sidebar');
+      const menuToggle = document.getElementById('menuToggle');
+      if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+        sidebar.classList.remove('active');
+      }
+    });
+
+    // Back button
+    document.querySelector('.back-arrow').addEventListener('click', function(e) {
+      e.preventDefault();
+      window.history.back();
+    });
+
+    // Initial total calculation
+    updateTotal();
+  </script>
+</body>
+
+</html>

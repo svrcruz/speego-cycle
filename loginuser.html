@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpeegoCycle | Login</title>
+
+  <!-- Link to your CSS file -->
+  <link rel="stylesheet" href="loginuser.css" />
+
+  <!-- Icon library -->
+  <link href="https://unpkg.com/phosphor-icons@1.4.2/src/css/phosphor.css" rel="stylesheet">
+</head>
+
+<body>
+  <div class="login-wrapper">
+    <div class="login-card">
+      <h1 class="brand">Speego<span>Cycle</span></h1>
+      <p class="subtitle">Welcome back! Please log in to continue.</p>
+
+      <!-- Form connects to loginuser.php -->
+      <form action="loginuser.php" method="POST">
+        <div class="input-group">
+          <i class="ph ph-envelope"></i>
+          <input type="email" name="Customer_Email" required />
+          <label>Email</label>
+        </div>
+
+        <div class="input-group">
+          <i class="ph ph-lock"></i>
+          <input type="password" name="Customer_Password" required />
+          <label>Password</label>
+        </div>
+
+        <button type="submit" class="login-btn">Login</button>
+
+        <div class="links">
+          <a href="authenticationuser.html">Forgot password?</a>
+          <a href="createnewuser.html">Create account</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
