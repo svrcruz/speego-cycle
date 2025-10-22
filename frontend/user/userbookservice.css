@@ -233,6 +233,10 @@ body {
     pointer-events: none;
 }
 
+.form-group textarea.form-textarea {
+    width: 100%;
+    box-sizing: border-box;
+}
 
 .form-textarea {
     padding: 12px 15px;

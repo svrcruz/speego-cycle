@@ -28,7 +28,7 @@ def get_db_connection():
 
 
 # ======================================================
-# EXISTING CORE FUNCTIONS (unchanged)
+# EXISTING CORE FUNCTIONS 
 # ======================================================
 
 def check_warranty_status(product_id, purchase_date):
@@ -232,7 +232,7 @@ def save_service_request_to_db(request_data):
 
 
 # ======================================================
-# AI & ROUTES (unchanged)
+# AI & ROUTES 
 # ======================================================
 
 @app.route('/chat', methods=['POST'])
@@ -294,7 +294,7 @@ def chat():
 
 
 # ======================================================
-# DIAGNOSIS (unchanged) - AI does all reasoning here
+# DIAGNOSIS - AI does all reasoning here
 # ======================================================
 
 @app.route('/diagnose', methods=['POST'])
@@ -365,7 +365,7 @@ def diagnose():
 
 
 # ======================================================
-# NEW ROUTE: Save confirmed service request + AI diagnosis
+# Save confirmed service request + AI diagnosis
 # ======================================================
 
 @app.route('/api/service-request', methods=['POST'])
@@ -387,7 +387,7 @@ def create_service_request():
     try:
         cursor = conn.cursor()
 
-        # 1️⃣ Insert service request
+        # Insert service request
         insert_sr = """
             INSERT INTO service_request (CustomerID, AdminID, ServiceType, ProblemDescription, AppointmentDate, Status)
             VALUES (%s, %s, %s, %s, %s, %s)
@@ -398,7 +398,7 @@ def create_service_request():
         conn.commit()
         service_request_id = cursor.lastrowid
 
-        # 2️⃣ Save AI diagnosis into SPEEGO_PAL
+        # Save AI diagnosis into SPEEGO_PAL
         insert_ai = """
             INSERT INTO speego_pal (CustomerID, ProductID, ServiceRequestID, Response, ConfidenceScore, InteractionDate)
             VALUES (%s, %s, %s, %s, %s, %s)
@@ -408,7 +408,7 @@ def create_service_request():
         ))
         conn.commit()
 
-        # 3️⃣ Create AI suggested entry in SERVICE_DIAGNOSIS
+        # Create AI suggested entry in SERVICE_DIAGNOSIS
         insert_diag = """
             INSERT INTO service_diagnosis (ServiceRequestID, DiagnosisDetails, TechnicianName, FindingsDate)
             VALUES (%s, %s, %s, %s)
@@ -430,11 +430,6 @@ def create_service_request():
         if conn.is_connected():
             cursor.close()
             conn.close()
-
-
-# ======================================================
-# MAIN ENTRY
-# ======================================================
 
 if __name__ == '__main__':
     app.run(debug=True)
