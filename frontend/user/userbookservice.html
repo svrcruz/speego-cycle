@@ -30,18 +30,6 @@
         </div>
     </header>
 
-    <div class="search-container">
-        <div class="search-box">
-            <span class="search-icon">
-                <i class="ph ph-magnifying-glass"></i>
-            </span>
-            <input type="text" class="search-input" placeholder="Search">
-            <span class="filter-icon">
-                <i class="ph ph-funnel-simple"></i>
-            </span>
-        </div>
-    </div>
-
     <main class="main-content">
         <h1 class="page-title">Book a Service</h1>
         <div class="breadcrumb">
@@ -52,9 +40,9 @@
             <section class="service-selection">
                 <h2 class="section-title">Select a Service</h2>
                 <div class="service-buttons">
-                    <button class="service-btn active" data-service="repair">Repair</button>
-                    <button class="service-btn" data-service="battery">Battery Replacement</button>
-                    <button class="service-btn" data-service="parts">Parts Installation</button>
+                    <button class="service-btn active" data-service="Repair">Repair</button>
+                    <button class="service-btn" data-service="Battery Replacement">Battery Replacement</button>
+                    <button class="service-btn" data-service="Parts Installation">Parts Installation</button>
                 </div>
             </section>
 
@@ -63,27 +51,31 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="model">MODEL</label>
-                        <input type="text" id="model" class="form-input" placeholder="">
+                        <input type="text" id="model" class="form-input">
                     </div>
                     <div class="form-group">
                         <label for="serialNumber">SERIAL NUMBER</label>
-                        <input type="text" id="serialNumber" class="form-input" placeholder="">
+                        <input type="text" id="serialNumber" class="form-input">
                     </div>
                     <div class="form-group">
-                        <label for="purchaseDateText">PURCHASE DATE</label>
-                        <div class="date-input-wrapper">
-                            <input type="text" id="purchaseDateText" class="form-input" placeholder="MM-DD-YYYY"
-                                readonly>
-                            <input type="date" id="purchaseDateHidden" class="hidden-date">
-                            <i class="ph ph-caret-down date-icon" id="openPicker" role="button"
-                                aria-label="Open date picker"></i>
-                        </div>
+                        <<<<<<< HEAD <label for="purchaseDateText">PURCHASE DATE</label>
+                            <div class="date-input-wrapper">
+                                <input type="text" id="purchaseDateText" class="form-input" placeholder="MM-DD-YYYY"
+                                    readonly>
+                                <input type="date" id="purchaseDateHidden" class="hidden-date">
+                                <i class="ph ph-caret-down date-icon" id="openPicker" role="button"
+                                    aria-label="Open date picker"></i>
+                            </div>
+                            =======
+                            <label for="purchaseDate">PURCHASE DATE</label>
+                            <input type="date" id="purchaseDate" class="form-input">
+                            >>>>>>> a1f79b1d63a06aea20a3a223b083fd14fbb66f7e
                     </div>
                 </div>
 
                 <div class="form-group full-width">
                     <label for="problemDescription">PROBLEM DESCRIPTION</label>
-                    <textarea id="problemDescription" class="form-textarea" placeholder="Enter an issue"></textarea>
+                    <textarea id="problemDescription" class="form-textarea" placeholder="Describe the issue"></textarea>
                 </div>
             </section>
 
@@ -126,131 +118,14 @@
         </div>
     </main>
 
-    <div class="sidebar" id="sidebar">
-        <a href="shoppingcart.html" class="sidebar-item">Shopping Cart</a>
-        <a href="orderhistory.html" class="sidebar-item">Order History</a>
-        <a href="aboutus.html" class="sidebar-item">About Us</a>
-        <a href="userservices.html" class="sidebar-item">Services</a>
-        <a href="logout.html" class="sidebar-item">Log Out</a>
-    </div>
-
-    <!-- Smart Schedule Modal -->
-    <div class="schedule-modal" id="scheduleModal">
-        <div class="schedule-modal-content">
-            <button class="modal-close" id="closeModal">
-                <i class="ph ph-x"></i>
-            </button>
-
-            <h2 class="modal-title">
-                <i class="ph ph-calendar-check"></i>
-                Select Your Appointment
-            </h2>
-            <p class="modal-subtitle">Choose your preferred date and time slot</p>
-
-            <!-- Calendar Section -->
-            <div class="calendar-section">
-                <div class="calendar-header">
-                    <button class="month-nav" id="prevMonth">
-                        <i class="ph ph-caret-left"></i>
-                    </button>
-                    <h3 class="current-month" id="currentMonth">October 2025</h3>
-                    <button class="month-nav" id="nextMonth">
-                        <i class="ph ph-caret-right"></i>
-                    </button>
-                </div>
-
-                <div class="calendar-grid">
-                    <div class="day-header">Sun</div>
-                    <div class="day-header">Mon</div>
-                    <div class="day-header">Tue</div>
-                    <div class="day-header">Wed</div>
-                    <div class="day-header">Thu</div>
-                    <div class="day-header">Fri</div>
-                    <div class="day-header">Sat</div>
-
-                    <!-- Calendar days -->
-                    <div class="calendar-day disabled">27</div>
-                    <div class="calendar-day disabled">28</div>
-                    <div class="calendar-day disabled">29</div>
-                    <div class="calendar-day disabled">30</div>
-                    <div class="calendar-day disabled">1</div>
-                    <div class="calendar-day disabled">2</div>
-                    <div class="calendar-day disabled">3</div>
-
-                    <div class="calendar-day disabled">4</div>
-                    <div class="calendar-day disabled">5</div>
-                    <div class="calendar-day disabled">6</div>
-                    <div class="calendar-day disabled">7</div>
-                    <div class="calendar-day disabled">8</div>
-                    <div class="calendar-day disabled">9</div>
-                    <div class="calendar-day disabled">10</div>
-
-                    <div class="calendar-day disabled">11</div>
-                    <div class="calendar-day disabled">12</div>
-                    <div class="calendar-day disabled">13</div>
-                    <div class="calendar-day disabled">14</div>
-                    <div class="calendar-day disabled">15</div>
-                    <div class="calendar-day disabled">16</div>
-                    <div class="calendar-day disabled">17</div>
-
-                    <div class="calendar-day disabled">18</div>
-                    <div class="calendar-day disabled">19</div>
-                    <div class="calendar-day disabled">20</div>
-                    <div class="calendar-day disabled">21</div>
-                    <div class="calendar-day available" data-date="2025-10-22">22</div>
-                    <div class="calendar-day available" data-date="2025-10-23">23</div>
-                    <div class="calendar-day available" data-date="2025-10-24">24</div>
-
-                    <div class="calendar-day available" data-date="2025-10-25">25</div>
-                    <div class="calendar-day available" data-date="2025-10-26">26</div>
-                    <div class="calendar-day available" data-date="2025-10-27">27</div>
-                    <div class="calendar-day available" data-date="2025-10-28">28</div>
-                    <div class="calendar-day available" data-date="2025-10-29">29</div>
-                    <div class="calendar-day available" data-date="2025-10-30">30</div>
-                    <div class="calendar-day available" data-date="2025-10-31">31</div>
-                </div>
-            </div>
-
-            <!-- Time Slots Section -->
-            <div class="time-slots-section" id="timeSlotsSection" style="display: none;">
-                <h3 class="slots-title">Available Time Slots</h3>
-                <p class="selected-date-display" id="selectedDateDisplay">Selected: October 25, 2025</p>
-
-                <div class="time-slots-grid">
-                    <button class="time-slot" data-time="09:00 AM">09:00 AM</button>
-                    <button class="time-slot" data-time="10:00 AM">10:00 AM</button>
-                    <button class="time-slot" data-time="11:00 AM">11:00 AM</button>
-                    <button class="time-slot" data-time="01:00 PM">01:00 PM</button>
-                    <button class="time-slot" data-time="02:00 PM">02:00 PM</button>
-                    <button class="time-slot" data-time="03:00 PM">03:00 PM</button>
-                    <button class="time-slot" data-time="04:00 PM">04:00 PM</button>
-                    <button class="time-slot disabled" data-time="05:00 PM">05:00 PM</button>
-                </div>
-            </div>
-
-            <!-- Confirm Button -->
-            <button class="modal-confirm-btn" id="confirmSchedule" style="display: none;">
-                Confirm Schedule
-            </button>
-        </div>
-    </div>
-
     <script>
-        // Global variables to store appointment data
+        let aiDiagnosis = "";
+        let aiConfidence = 0;
         let selectedDate = null;
         let selectedTime = null;
         let appointmentConfirmed = false;
 
-        // Service button selection
-        const serviceButtons = document.querySelectorAll('.service-btn');
-        serviceButtons.forEach(btn => {
-            btn.addEventListener('click', function () {
-                serviceButtons.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
-
-        // Smart Diagnosis (with cost and time)
+        // Smart Diagnosis
         document.getElementById('smartDiagnosisBtn').addEventListener('click', async function () {
             const problem = document.getElementById('problemDescription').value.trim();
             const resultBox = document.getElementById('diagnosisResult');
@@ -262,8 +137,6 @@
                 return;
             }
 
-            // Show loading placeholders
-            resultBox.style.display = 'block';
             resultBox.innerHTML = `<em>Analyzing issue...</em>`;
             costBox.innerHTML = `<i class="ph ph-currency-circle-dollar"></i> ...`;
             timeBox.innerHTML = `<i class="ph ph-timer"></i> ...`;
@@ -275,19 +148,69 @@
                     body: JSON.stringify({ description: problem })
                 });
 
-                if (!response.ok) throw new Error(`Server error: ${response.status}`);
+                const data = await response.json();
+
+                aiDiagnosis = data.diagnosis || "No diagnosis generated";
+                aiConfidence = Math.floor(Math.random() * 21) + 80; // fake confidence 80–100%
+
+                resultBox.innerHTML = `<strong>Diagnosis:</strong> ${aiDiagnosis}`;
+                costBox.innerHTML = `<i class="ph ph-currency-circle-dollar"></i> ${data.cost}`;
+                timeBox.innerHTML = `<i class="ph ph-timer"></i> ${data.time}`;
+            } catch (error) {
+                console.error("Smart Diagnosis Error:", error);
+                resultBox.innerHTML = `<span style="color:red;">Error connecting to AI service.</span>`;
+            }
+        });
+
+        // Confirm Appointment
+        document.getElementById('confirmBtn').addEventListener('click', async function () {
+            const model = document.getElementById('model').value.trim();
+            const serial = document.getElementById('serialNumber').value.trim();
+            const problem = document.getElementById('problemDescription').value.trim();
+            const purchaseDate = document.getElementById('purchaseDate').value;
+            const serviceType = document.querySelector('.service-btn.active').dataset.service;
+            const appointmentDate = selectedDate ? `${selectedDate} ${selectedTime}` : null;
+
+            if (!model || !serial || !problem) {
+                alert("Please fill in all required fields.");
+                return;
+            }
+            if (!appointmentDate) {
+                alert("Please select an appointment schedule first.");
+                return;
+            }
+
+            const requestData = {
+                customer_id: 1, // demo customer
+                admin_id: null,
+                service_type: serviceType,
+                product_id: 1, // placeholder; replace with real product ID later
+                problem_description: problem,
+                appointment_date: appointmentDate,
+                ai_diagnosis: aiDiagnosis,
+                confidence_score: aiConfidence
+            };
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/service-request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestData)
+                });
 
                 const data = await response.json();
 
-                resultBox.innerHTML = `<strong>Diagnosis:</strong> ${data.diagnosis}`;
-                costBox.innerHTML = `<i class="ph ph-currency-circle-dollar"></i> <span><strong>${data.cost}</strong></span>`;
-                timeBox.innerHTML = `<i class="ph ph-timer"></i> <span><strong>${data.time}</strong></span>`;
+                if (response.ok) {
+                    alert("Appointment confirmed and saved successfully!");
+                    console.log("Service Request ID:", data.service_request_id);
+                    location.reload();
+                } else {
+                    alert("Error: " + (data.error || "Unable to save service request."));
+                }
 
-            } catch (error) {
-                console.error("Smart Diagnosis Error:", error);
-                resultBox.innerHTML = `<span style="color:red;">Error: Unable to connect to the AI service.</span>`;
-                costBox.innerHTML = `<i class="ph ph-currency-circle-dollar"></i> N/A`;
-                timeBox.innerHTML = `<i class="ph ph-timer"></i> N/A`;
+            } catch (err) {
+                console.error(err);
+                alert("Server connection failed.");
             }
         });
 
@@ -541,7 +464,6 @@
 
         });
     </script>
-
 </body>
 
 </html>
