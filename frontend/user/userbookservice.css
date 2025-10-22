@@ -218,13 +218,21 @@ body {
 
 .date-icon {
     position: absolute;
-    right: 5px;
+    right: 10px;
     top: 50%;
     transform: translateY(-50%);
-    color: #666;
-    font-size: 18px;
+    cursor: pointer;
+}
+
+/* Keep it in the DOM, but invisible and clickable via JS */
+.hidden-date {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
     pointer-events: none;
 }
+
 
 .form-textarea {
     padding: 12px 15px;

@@ -70,11 +70,13 @@
                         <input type="text" id="serialNumber" class="form-input" placeholder="">
                     </div>
                     <div class="form-group">
-                        <label for="purchaseDate">PURCHASE DATE</label>
+                        <label for="purchaseDateText">PURCHASE DATE</label>
                         <div class="date-input-wrapper">
-                            <input type="text" id="purchaseDate" class="form-input" value="09-25-2025"
-                                placeholder="MM-DD-YYYY">
-                            <i class="ph ph-caret-down date-icon"></i>
+                            <input type="text" id="purchaseDateText" class="form-input" placeholder="MM-DD-YYYY"
+                                readonly>
+                            <input type="date" id="purchaseDateHidden" class="hidden-date">
+                            <i class="ph ph-caret-down date-icon" id="openPicker" role="button"
+                                aria-label="Open date picker"></i>
                         </div>
                     </div>
                 </div>
@@ -389,6 +391,102 @@
             });
         });
 
+
+        (function () {
+            const inp = document.getElementById('purchaseDate');
+            const caret = document.getElementById('purchaseDateCaret');
+
+            function formatToMMDDYYYY(isoValue) {
+                // isoValue expected 'YYYY-MM-DD'
+                if (!isoValue) return '';
+                const [y, m, d] = isoValue.split('-');
+                if (!y || !m || !d) return isoValue;
+                return `${m}-${d}-${y}`;
+            }
+
+            function openDatePicker() {
+                // create a temporary date input to trigger native picker reliably
+                // (this avoids some browser limitations when changing type in-place)
+                const temp = document.createElement('input');
+                temp.type = 'date';
+                temp.style.position = 'absolute';
+                temp.style.left = '-9999px';
+                document.body.appendChild(temp);
+
+                // if there's already a value in MM-DD-YYYY convert to ISO for showing in picker
+                if (inp.value) {
+                    const parts = inp.value.split('-');
+                    if (parts.length === 3) {
+                        // assume MM-DD-YYYY -> YYYY-MM-DD
+                        const iso = `${parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
+                        temp.value = iso;
+                    }
+                }
+
+                // show the native picker if supported, otherwise focus (some browsers won't show)
+                temp.focus();
+                temp.showPicker?.();
+
+                // When a date is chosen (change) — format and copy to visible input
+                function applyAndCleanup() {
+                    if (temp.value) {
+                        inp.value = formatToMMDDYYYY(temp.value);
+                    }
+                    cleanup();
+                }
+
+                // Remove the temp input and listeners
+                function cleanup() {
+                    temp.removeEventListener('change', applyAndCleanup);
+                    temp.removeEventListener('blur', cleanup);
+                    if (temp.parentNode) temp.parentNode.removeChild(temp);
+                }
+
+                temp.addEventListener('change', applyAndCleanup);
+                // Also cleanup on blur if user cancels
+                temp.addEventListener('blur', cleanup);
+
+                // For accessibility: move focus back to caret so keyboard users aren't lost
+                setTimeout(() => caret.focus(), 300);
+            }
+
+            // wire caret click (only caret opens the picker)
+            caret.addEventListener('click', function (e) {
+                e.stopPropagation();
+                openDatePicker();
+            });
+
+            // optional: allow Enter/Space on caret to open via keyboard
+            caret.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    openDatePicker();
+                }
+            });
+
+        })();
+
+        //PURCHASE DATE
+        const caret = document.getElementById("openPicker");
+        const hiddenDate = document.getElementById("purchaseDateHidden");
+        const textInput = document.getElementById("purchaseDateText");
+
+        caret.addEventListener("click", () => {
+            // Show the native picker
+            hiddenDate.showPicker?.(); // modern browsers
+            hiddenDate.focus();
+        });
+
+        // When user picks a date
+        hiddenDate.addEventListener("change", () => {
+            const selected = hiddenDate.value; // format: YYYY-MM-DD
+            if (selected) {
+                const [y, m, d] = selected.split("-");
+                textInput.value = `${m}-${d}-${y}`;
+            }
+        });
+
+
         // Confirm schedule in modal
         document.getElementById('confirmSchedule').addEventListener('click', function () {
             if (selectedDate && selectedTime) {
@@ -438,7 +536,8 @@
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
             const formattedDate = dateObj.toLocaleDateString('en-US', options);
 
-            alert(`Appointment confirmed!\n\nDetails:\nModel: ${model}\nSerial: ${serialNumber}\nDate: ${formattedDate}\nTime: ${selectedTime}\n\nYou will receive a confirmation email shortly.`);
+            alert(`Appointment confirmed!\n\nDetails:\nModel: ${model}\nSerial: ${serialNumber}\nDate: ${formattedDate}\nTime:
+    ${selectedTime}\n\nYou will receive a confirmation email shortly.`);
 
         });
     </script>
