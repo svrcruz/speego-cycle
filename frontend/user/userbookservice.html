@@ -58,25 +58,17 @@
                         <input type="text" id="serialNumber" class="form-input">
                     </div>
                     <div class="form-group">
-                        <<<<<<< HEAD <label for="purchaseDateText">PURCHASE DATE</label>
-                            <div class="date-input-wrapper">
-                                <input type="text" id="purchaseDateText" class="form-input" placeholder="MM-DD-YYYY"
-                                    readonly>
-                                <input type="date" id="purchaseDateHidden" class="hidden-date">
-                                <i class="ph ph-caret-down date-icon" id="openPicker" role="button"
-                                    aria-label="Open date picker"></i>
-                            </div>
-                            =======
-                            <label for="purchaseDate">PURCHASE DATE</label>
-                            <input type="date" id="purchaseDate" class="form-input">
-                            >>>>>>> a1f79b1d63a06aea20a3a223b083fd14fbb66f7e
+                        <label for="purchaseDate">PURCHASE DATE</label>
+                        <input type="date" id="purchaseDate" class="form-input" placeholder="MM-DD-YYYY">
                     </div>
-                </div>
 
-                <div class="form-group full-width">
-                    <label for="problemDescription">PROBLEM DESCRIPTION</label>
-                    <textarea id="problemDescription" class="form-textarea" placeholder="Describe the issue"></textarea>
-                </div>
+
+
+                    <div class="form-group full-width">
+                        <label for="problemDescription">PROBLEM DESCRIPTION</label>
+                        <textarea id="problemDescription" class="form-textarea"
+                            placeholder="Describe the issue"></textarea>
+                    </div>
             </section>
 
             <section class="diagnosis-cost-section">
@@ -388,26 +380,6 @@
             });
 
         })();
-
-        //PURCHASE DATE
-        const caret = document.getElementById("openPicker");
-        const hiddenDate = document.getElementById("purchaseDateHidden");
-        const textInput = document.getElementById("purchaseDateText");
-
-        caret.addEventListener("click", () => {
-            // Show the native picker
-            hiddenDate.showPicker?.(); // modern browsers
-            hiddenDate.focus();
-        });
-
-        // When user picks a date
-        hiddenDate.addEventListener("change", () => {
-            const selected = hiddenDate.value; // format: YYYY-MM-DD
-            if (selected) {
-                const [y, m, d] = selected.split("-");
-                textInput.value = `${m}-${d}-${y}`;
-            }
-        });
 
 
         // Confirm schedule in modal
