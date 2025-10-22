@@ -170,6 +170,46 @@
     });
   });
 </script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const customerId = 1; // Replace with actual logged-in customer ID
+    const container = document.querySelector('.section:nth-of-type(2) .card-container'); // "Recommended for You"
+
+    try {
+      const response = await fetch(`http://127.0.0.1:5000/recommendations/${customerId}`);
+      const data = await response.json();
+
+      container.innerHTML = ''; // Clear placeholder cards
+
+      if (data.recommendations.length === 0) {
+        container.innerHTML = '<p>No recommendations available right now.</p>';
+        return;
+      }
+
+      data.recommendations.forEach(item => {
+        const card = document.createElement('div');
+        card.classList.add('card');
+        card.innerHTML = `
+          <div class="card-image">
+            <img src="images/${item.ProductID}.jpg" alt="${item.Product_Name}" onerror="this.src='default.jpg'">
+          </div>
+          <div class="card-info">
+            <h4>${item.Product_Name}</h4>
+            <p>${item.Category}</p>
+            <p><strong>₱${item.Price}</strong></p>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    } catch (error) {
+      console.error('Error loading recommendations:', error);
+      container.innerHTML = '<p>Unable to load recommendations.</p>';
+    }
+  });
+</script>
+
+
 </body>
 
 </html>

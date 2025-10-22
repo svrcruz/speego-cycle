@@ -597,5 +597,67 @@ def schedule_appointment():
             cursor.close()
             conn.close()
 
+    @app.route('/recommendations/<int:customer_id>', methods=['GET'])
+    def get_recommendations(customer_id):
+        """Get AI-based recommendations for a customer"""
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({'recommendations': []}), 500
+
+        try:
+            cursor = conn.cursor(dictionary=True)
+
+            # Fetch customer purchase history (e.g., from ORDER or PURCHASE table)
+            cursor.execute("""
+                SELECT p.Product_Name, p.Category
+                FROM PURCHASE pu
+                JOIN PRODUCT p ON pu.ProductID = p.ProductID
+                WHERE pu.CustomerID = %s
+                ORDER BY pu.PurchaseDate DESC
+                LIMIT 5
+            """, (customer_id,))
+            purchased = cursor.fetchall()
+
+            if not purchased:
+                # No purchases yet — recommend popular or latest products
+                products = get_available_products()
+                return jsonify({'recommendations': products[:5]})
+
+            # Extract keywords from purchase history
+            keywords = set()
+            for item in purchased:
+                if item['Category']:
+                    keywords.add(item['Category'])
+                if item['Product_Name']:
+                    for word in item['Product_Name'].split():
+                        if len(word) > 3:
+                            keywords.add(word.lower())
+
+            # Get recommendations for each keyword
+            all_recs = []
+            for kw in keywords:
+                recs = get_product_recommendations(kw)
+                all_recs.extend(recs)
+
+            #  Remove duplicates
+            seen = set()
+            unique_recs = []
+            for rec in all_recs:
+                if rec['ProductID'] not in seen:
+                    seen.add(rec['ProductID'])
+                    unique_recs.append(rec)
+
+            # Return top 5 unique recommendations
+            return jsonify({'recommendations': unique_recs[:5]})
+
+        except Error as e:
+            print(f"Error getting recommendations: {e}")
+            return jsonify({'recommendations': []}), 500
+        finally:
+            if conn.is_connected():
+                cursor.close()
+                conn.close()
+
+
 if __name__ == '__main__':
     app.run(debug=True)
