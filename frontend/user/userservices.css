@@ -11,6 +11,7 @@ body {
   color: #333;
 }
 
+
 .header {
   padding: 20px 40px;
   display: flex;
@@ -196,10 +197,12 @@ body {
 }
 
 .book-service-container {
-  display: flex;
-  justify-content: center;
+  display: block;
+  text-align: center;
   margin-top: 40px;
+  width: 100%;
 }
+
 
 .book-service-btn {
   background-color: #dc2626;
@@ -213,6 +216,7 @@ body {
   transition: background-color 0.2s;
   font-family: 'Poppins', sans-serif;
   text-decoration: none;
+  display: inline-block;
 }
 
 .book-service-btn:hover {
