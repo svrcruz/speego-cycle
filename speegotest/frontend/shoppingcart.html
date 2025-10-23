@@ -40,60 +40,10 @@
     </div>
 
     <div class="cart-items" id="cartItems">
-      <!-- Cart Item 1 -->
-      <div class="cart-item" data-id="1">
-        <input type="checkbox" class="item-checkbox checkbox" data-id="1">
-        <div class="item-image"></div>
-        <div class="item-details">
-          <h3 class="item-name">E-BIKE 10</h3>
-          <p class="item-variant">Color: Red, Size: Medium</p>
-          <div class="item-footer">
-            <p class="item-price">₱32,000</p>
-            <div class="quantity-controls">
-              <button class="qty-btn minus" data-id="1">-</button>
-              <input type="text" class="qty-input" value="1" data-id="1" readonly>
-              <button class="qty-btn plus" data-id="1">+</button>
-            </div>
-          </div>
-        </div>
-      </div>
+  <p>Loading your cart...</p>
+</div>
 
-      <!-- Cart Item 2 -->
-      <div class="cart-item" data-id="2">
-        <input type="checkbox" class="item-checkbox checkbox" data-id="2">
-        <div class="item-image"></div>
-        <div class="item-details">
-          <h3 class="item-name">BATTERY 3</h3>
-          <p class="item-variant">Type: Lithium-ion, 48V</p>
-          <div class="item-footer">
-            <p class="item-price">₱25,000</p>
-            <div class="quantity-controls">
-              <button class="qty-btn minus" data-id="2">-</button>
-              <input type="text" class="qty-input" value="2" data-id="2" readonly>
-              <button class="qty-btn plus" data-id="2">+</button>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Cart Item 3 -->
-      <div class="cart-item" data-id="3">
-        <input type="checkbox" class="item-checkbox checkbox" data-id="3">
-        <div class="item-image"></div>
-        <div class="item-details">
-          <h3 class="item-name">WHEELS 5</h3>
-          <p class="item-variant">Size: 26 inch, Color: Black</p>
-          <div class="item-footer">
-            <p class="item-price">₱28,000</p>
-            <div class="quantity-controls">
-              <button class="qty-btn minus" data-id="3">-</button>
-              <input type="text" class="qty-input" value="1" data-id="3" readonly>
-              <button class="qty-btn plus" data-id="3">+</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <div class="voucher-section">
       <i class="ph ph-ticket voucher-icon"></i>
@@ -222,23 +172,40 @@
     });
 
     // Quantity controls
-    document.querySelectorAll('.qty-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-        const id = this.dataset.id;
-        const input = document.querySelector(`.qty-input[data-id="${id}"]`);
-        let quantity = parseInt(input.value);
+document.querySelectorAll('.qty-btn').forEach(btn => {
+  btn.addEventListener('click', function () {
+    const id = this.dataset.id;
+    const input = document.querySelector(`.qty-input[data-id="${id}"]`);
+    let quantity = parseInt(input.value);
 
-        if (this.classList.contains('plus')) {
-          quantity++;
-        } else if (this.classList.contains('minus') && quantity > 1) {
-          quantity--;
+    if (this.classList.contains('plus')) {
+      quantity++;
+    } else if (this.classList.contains('minus') && quantity > 1) {
+      quantity--;
+    }
+
+    input.value = quantity;
+    cartData[id].quantity = quantity;
+    updateTotal();
+
+    //Update database
+    fetch('updatecart.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        product_id: id,
+        quantity: quantity
+      })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (!data.success) {
+          alert('Failed to update cart');
         }
-
-        input.value = quantity;
-        cartData[id].quantity = quantity;
-        updateTotal();
-      });
-    });
+      })
+      .catch(err => console.error('Error updating cart:', err));
+  });
+});
 
     // Delete selected
     document.getElementById('deleteSelected').addEventListener('click', function() {

@@ -97,7 +97,7 @@
     <section class="product-section">
       <h2 class="section-title">Three Wheelers</h2>
       <div class="product-grid">
-        <div class="product-card">
+        <div class="product-card" data-id="1">
           <div class="product-image">
             <img src="images/Speego C7.png" alt="Speego C7">
           </div>
@@ -199,65 +199,61 @@
   </div>
 
   <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    // Build product list
-    const allProducts = [];
-    document.querySelectorAll('.product-section').forEach(section => {
-      const category = section.querySelector('.section-title').textContent;
-      section.querySelectorAll('.product-card').forEach(card => {
-        const name = card.querySelector('.product-name').textContent;
-        const priceText = card.querySelector('.product-price').textContent;
-        const price = parseInt(priceText.replace(/[₱,]/g, ''));
-        allProducts.push({ element: card, name, price, priceText, category });
-      });
-    });
+document.addEventListener('DOMContentLoaded', function () {
+  // Add data-id to each product card manually in your HTML
+  // Example: <div class="product-card" data-id="1">
 
-    // Product card click
-    document.querySelectorAll('.product-card').forEach(card => {
-      card.addEventListener('click', function () {
-        const productName = this.querySelector('.product-name').textContent;
-        const productPrice = this.querySelector('.product-price').textContent;
-        document.getElementById('popupProductName').textContent = productName;
-        document.getElementById('popupProductPrice').textContent = productPrice;
-        document.getElementById('cartPopup').classList.add('active');
-        document.getElementById('confirmAddToCart').dataset.name = productName;
-        document.getElementById('confirmAddToCart').dataset.price = productPrice;
-      });
-    });
+  // Product card click event
+  document.querySelectorAll('.product-card').forEach(card => {
+    card.addEventListener('click', function () {
+      const productName = this.querySelector('.product-name').textContent;
+      const productPrice = this.querySelector('.product-price').textContent;
+      const productId = this.dataset.id;
 
-    // Add to cart button
-    document.getElementById('confirmAddToCart').addEventListener('click', function () {
-      const name = this.dataset.name;
-      const price = this.dataset.price;
-      const formData = new FormData();
-      formData.append('productName', name);
-      formData.append('productPrice', price);
-      fetch('shoppingcart.php', { method: 'POST', body: formData })
-        .then(res => res.text())
-        .then(result => {
-          alert(result);
-          document.getElementById('cartPopup').classList.remove('active');
-        })
-        .catch(err => alert('Error adding to cart'));
-    });
+      document.getElementById('popupProductName').textContent = productName;
+      document.getElementById('popupProductPrice').textContent = productPrice;
 
-    // Close popup
-    document.getElementById('closePopup').addEventListener('click', function () {
-      document.getElementById('cartPopup').classList.remove('active');
-    });
-
-    // Sidebar
-    document.getElementById('menuToggle').addEventListener('click', function (e) {
-      e.stopPropagation();
-      document.getElementById('sidebar').classList.toggle('active');
-    });
-
-    document.addEventListener('click', function (e) {
-      const sidebar = document.getElementById('sidebar');
-      const toggle = document.getElementById('menuToggle');
-      if (!sidebar.contains(e.target) && !toggle.contains(e.target)) sidebar.classList.remove('active');
+      const btn = document.getElementById('confirmAddToCart');
+      btn.dataset.id = productId; // pass productID to button
+      document.getElementById('cartPopup').classList.add('active');
     });
   });
-  </script>
+
+  // Add to cart button
+  document.getElementById('confirmAddToCart').addEventListener('click', function () {
+    const productId = this.dataset.id;
+    const formData = new FormData();
+    formData.append('product_id', productId);
+    formData.append('customer_id', 1); // temporary user session
+    formData.append('quantity', 1); // default 1
+
+    fetch('shoppingcart.php', { method: 'POST', body: formData })
+      .then(res => res.text())
+      .then(result => {
+        alert(result);
+        document.getElementById('cartPopup').classList.remove('active');
+      })
+      .catch(err => alert('Error adding to cart'));
+  });
+
+  // Close popup
+  document.getElementById('closePopup').addEventListener('click', function () {
+    document.getElementById('cartPopup').classList.remove('active');
+  });
+
+  // Sidebar toggle
+  document.getElementById('menuToggle').addEventListener('click', function (e) {
+    e.stopPropagation();
+    document.getElementById('sidebar').classList.toggle('active');
+  });
+
+  document.addEventListener('click', function (e) {
+    const sidebar = document.getElementById('sidebar');
+    const toggle = document.getElementById('menuToggle');
+    if (!sidebar.contains(e.target) && !toggle.contains(e.target)) sidebar.classList.remove('active');
+  });
+});
+</script>
+
 </body>
 </html>
