@@ -32,7 +32,7 @@ if ($result->num_rows > 0) {
     $_SESSION['admin_logged_in'] = true;
     $_SESSION['admin_user'] = $user;
 
-    // ⬇️ CHANGED THIS LINE
+    
     header('Location: admindashboard.html');
     exit;
 
