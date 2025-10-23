@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders - Admin</title>
+    <link rel="stylesheet" href="adminorders.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <button class="toggle-btn" id="toggleBtn">
+                    <i class="ph ph-caret-left"></i>
+                </button>
+                <div class="admin-info">
+                    <h2>Hello there,</h2>
+                    <h1>ADMIN</h1>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="admindashboard.html" class="nav-item">
+                    <i class="ph ph-house"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="adminreports.html" class="nav-item">
+                    <i class="ph ph-chart-line"></i>
+                    <span>Reports</span>
+                </a>
+                <a href="adminservicerequest.html" class="nav-item">
+                    <i class="ph ph-wrench"></i>
+                    <span>Service Requests</span>
+                </a>
+                <a href="inventoryadmin.html" class="nav-item">
+                    <i class="ph ph-stack"></i>
+                    <span>Inventory</span>
+                </a>
+                <a href="adminorders.html" class="nav-item active">
+                    <i class="ph ph-truck"></i>
+                    <span>Orders</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <h1 class="page-title">Order List</h1>
+
+            <div class="search-container">
+                <i class="ph ph-magnifying-glass search-icon"></i>
+                <input type="text" class="search-input" id="searchInput" placeholder="Search">
+            </div>
+
+            <!-- Orders Table -->
+            <div class="orders-container">
+                <div class="table-header">
+                    <div class="header-cell">Order ID</div>
+                    <div class="header-cell">Customer</div>
+                    <div class="header-cell">Product(s)</div>
+                    <div class="header-cell">Quantity</div>
+                    <div class="header-cell">Total Price</div>
+                </div>
+
+                
+            </div>
+        </main>
+    </div>
+
+    <script>
+    // Sidebar toggle
+    const sidebar = document.getElementById('sidebar');
+    const toggleBtn = document.getElementById('toggleBtn');
+
+    toggleBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('collapsed');
+    });
+
+    // Fetch and display orders on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        fetch('get_admin_orders.php')
+            .then(res => res.json())
+            .then(data => {
+                const container = document.querySelector('.orders-container');
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                if (data.orders.length === 0) {
+                    container.innerHTML += '<p>No orders yet. Orders will appear here after purchases are made.</p>';
+                    return;
+                }
+                // Clear any existing rows (though none should be there)
+                const existingRows = container.querySelectorAll('.order-row');
+                existingRows.forEach(row => row.remove());
+
+                data.orders.forEach(order => {
+                    const orderRow = document.createElement('div');
+                    orderRow.className = 'order-row';
+                    orderRow.onclick = () => toggleOrderDetails(orderRow);
+
+                    // Parse items for display (e.g., show first item and "+X more" if applicable)
+                    const itemsArray = order.Items.split(', '); // Split GROUP_CONCAT result
+                    const firstItem = itemsArray[0];
+                    const moreCount = itemsArray.length - 1;
+                    const itemsDisplay = moreCount > 0 ? `${firstItem} <a href="#" class="more-link">+${moreCount} more</a>` : firstItem;
+
+                    // Calculate total quantity from items (sum quantities)
+                    const totalQuantity = itemsArray.reduce((sum, item) => {
+                        const qtyMatch = item.match(/\$Qty: (\d+)\$/);
+                        return sum + (qtyMatch ? parseInt(qtyMatch[1]) : 0);
+                    }, 0);
+
+                    orderRow.innerHTML = `
+                        <div class="order-cell">${order.OrderID}</div>
+                        <div class="order-cell customer-cell">
+                            <div class="customer-avatar"></div>
+                            <span>${order.FirstName} ${order.LastName}</span>
+                        </div>
+                        <div class="order-cell">${itemsDisplay}</div>
+                        <div class="order-cell">${totalQuantity}</div>
+                        <div class="order-cell">₱${parseFloat(order.Total).toFixed(2)}</div>
+                    `;
+                    container.appendChild(orderRow);
+                });
+
+                // Re-attach search functionality after dynamic loading
+                attachSearch();
+            })
+            .catch(err => console.error('Error fetching orders:', err));
+    });
+
+    // Search functionality (updated to work with dynamic rows)
+    function attachSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const orderRows = document.querySelectorAll('.order-row');
+
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            
+            orderRows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? 'grid' : 'none';
+            });
+        });
+    }
+
+    // Order row click
+    function toggleOrderDetails(row) {
+        const orderId = row.querySelector('.order-cell').textContent;
+        alert(`View details for order ${orderId}`);
+        // In a real application, this would open a modal or navigate to order details page
+    }
+
+    // Prevent more link from triggering row click
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('more-link')) {
+            e.stopPropagation();
+            const orderRow = e.target.closest('.order-row');
+            const orderId = orderRow.querySelector('.order-cell').textContent;
+            alert(`View all products for ${orderId}`);
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpeegoCycle - Parts</title>
+  <link rel="stylesheet" href="partsproduct.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+
+<body>
+  <header class="header">
+    <div class="user-info" onclick="window.location.href='userprofile.html'" style="cursor: pointer;">
+      <i class="ph ph-user-circle"></i>
+      <div>
+        <span class="greeting">Hello there,</span>
+        <span class="username">Juan Dela Cruz</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="home-icon" onclick="window.location.href='index.html'">
+        <i class="ph ph-house"></i>
+      </span>
+      <span class="menu-icon" id="menuToggle">
+        <i class="ph ph-list"></i>
+      </span>
+    </div>
+  </header>
+
+  <div class="search-container">
+    <div class="search-box">
+      <span class="search-icon">
+        <i class="ph ph-magnifying-glass"></i>
+      </span>
+      <input type="text" class="search-input" id="searchInput" placeholder="What are you looking for?">
+      <span class="filter-icon" id="filterToggle">
+        <i class="ph ph-funnel-simple" id="filterIcon"></i>
+      </span>
+    </div>
+
+    <div class="filter-panel" id="filterPanel">
+      <h3>Filter Options</h3>
+      <div class="filter-group">
+        <label>Category:</label>
+        <select id="filterCategory">
+          <option value="">All</option>
+          <option value="Battery">Battery</option>
+          <option value="Wheels">Wheels</option>
+          <option value="Handlebars">Handlebars</option>       
+         </select>
+      </div>
+      <div class="filter-group">
+        <label>Price Range:</label>
+        <select id="filterPrice">
+          <option value="">All</option>
+          <option value="0-30000">₱0 - ₱30,000</option>
+          <option value="30000-50000">₱30,000 - ₱50,000</option>
+          <option value="50000-70000">₱50,000 - ₱70,000</option>
+          <option value="70000-100000">₱70,000+</option>
+        </select>
+      </div>
+      <div class="filter-actions">
+        <button id="applyFilter" class="btn-apply">Apply Filters</button>
+        <button id="clearFilter" class="btn-clear">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="main-content">
+    <h1 class="page-title">PARTS</h1>
+
+    <!-- Battery Section -->
+    <section class="product-section">
+      <h2 class="section-title">Battery</h2>
+      <div class="product-grid">
+        <div class="product-card">
+          <div class="product-image">
+            <img src="images/Battery.png" alt="Battery">
+          </div>
+          <div class="product-info">
+            <p class="product-name">Battery</p>
+            <p class="product-price">₱4,000</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image">
+            <img src="images/Motor.png" alt="Motor">
+          </div>
+          <div class="product-info">
+            <p class="product-name">Motor - 1500W</p>
+            <p class="product-price">₱7,000</p>
+          </div>
+          </div>
+          <div class="product-card">
+            <div class="product-image">
+              <img src="images/Tail Light.jpg" alt="Tail Light">
+            </div>
+            <div class="product-info">
+              <p class="product-name">Tail Light</p>
+              <p class="product-price">₱800</p>
+            </div>
+          </div>
+          <div class="product-card">
+            <div class="product-image">
+              <img src="images/Charging Port.png" alt="Charging Port">
+            </div>
+            <div class="product-info">
+              <p class="product-name">Charging Port</p>
+              <p class="product-price">₱200</p>
+            </div>
+          </div>
+          <div class="product-card">
+            <div class="product-image">
+              <img src="images/Controller.png" alt="Controller">
+            </div>
+            <div class="product-info">
+              <p class="product-name">Controller</p>
+              <p class="product-price">₱4,000</p>
+            </div>
+            </div>
+    </section>
+
+    <!-- Wheels Section -->
+    <section class="product-section">
+      <h2 class="section-title">Wheels</h2>
+      <div class="product-grid">
+        <div class="product-card">
+          <div class="product-image">
+            <img src="images/Tire.webp" alt=""Tire>
+          </div>
+          <div class="product-info">
+            <p class="product-name">Tire</p>
+            <p class="product-price">₱1,000</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image">
+            <img src="images/Shock.png" alt="Shock">
+          </div>
+          <div class="product-info">
+            <p class="product-name">Shock</p>
+            <p class="product-price">₱400</p>
+          </div>
+        </div>
+    </section>
+
+    <!-- Handlebars Section -->
+    <section class="product-section">
+      <h2 class="section-title">Handlebars</h2>
+      <div class="product-grid">
+        <div class="product-card">
+          <div class="product-image">
+            <img src="images/Handlebar.png" alt="Handlebar">
+          </div>
+          <div class="product-info">
+            <p class="product-name">Handlebar</p>
+            <p class="product-price">₱800</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image">
+            <img src="images/Side Mirror.png" alt="Side Mirror">
+          </div>
+          <div class="product-info">
+            <p class="product-name">Side Mirror</p>
+            <p class="product-price">₱500</p>
+          </div>
+        </div>
+    </section>
+  </main>
+
+  <div class="sidebar" id="sidebar">
+    <a href="shoppingcart.html" class="sidebar-item">Shopping Cart</a>
+    <a href="orderhistory.html" class="sidebar-item">Order History</a>
+    <a href="aboutus.html" class="sidebar-item">About Us</a>
+    <a href="userservices.html" class="sidebar-item">Services</a>
+    <a href="logout.html" class="sidebar-item">Log Out</a>
+</div>
+
+  <script>
+    // Store all products with their categories and prices
+    const allProducts = [];
+    
+    // Build product data from DOM
+    document.querySelectorAll('.product-section').forEach(section => {
+      const category = section.querySelector('.section-title').textContent;
+      section.querySelectorAll('.product-card').forEach(card => {
+        const name = card.querySelector('.product-name').textContent;
+        const priceText = card.querySelector('.product-price').textContent;
+        const price = parseInt(priceText.replace(/[₱,]/g, ''));
+        allProducts.push({
+          element: card,
+          name: name,
+          price: price,
+          priceText: priceText,
+          category: category
+        });
+      });
+    });
+
+    let filteredProducts = [...allProducts];
+
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', function (e) {
+      const searchTerm = e.target.value.toLowerCase();
+      
+      filteredProducts.forEach(product => {
+        const matchesSearch = product.name.toLowerCase().includes(searchTerm) || 
+                             product.priceText.toLowerCase().includes(searchTerm);
+        product.element.style.display = matchesSearch ? 'block' : 'none';
+      });
+    });
+
+    // Filter panel toggle
+    document.getElementById('filterToggle').addEventListener('click', function () {
+      const panel = document.getElementById('filterPanel');
+      panel.classList.toggle('active');
+    });
+
+    // Apply filters
+    document.getElementById('applyFilter').addEventListener('click', function () {
+      const category = document.getElementById('filterCategory').value;
+      const priceRange = document.getElementById('filterPrice').value;
+
+      filteredProducts = allProducts.filter(product => {
+        const matchCategory = !category || product.category === category;
+        
+        let matchPrice = true;
+        if (priceRange) {
+          const [min, max] = priceRange.split('-').map(v => parseInt(v));
+          if (max) {
+            matchPrice = product.price >= min && product.price <= max;
+          } else {
+            matchPrice = product.price >= min;
+          }
+        }
+        
+        return matchCategory && matchPrice;
+      });
+
+      // Hide all products first
+      allProducts.forEach(product => product.element.style.display = 'none');
+      
+      // Show filtered products
+      filteredProducts.forEach(product => product.element.style.display = 'block');
+      
+      document.getElementById('filterPanel').classList.remove('active');
+    });
+
+    // Clear filters
+    document.getElementById('clearFilter').addEventListener('click', function () {
+      document.getElementById('filterCategory').value = '';
+      document.getElementById('filterPrice').value = '';
+      document.getElementById('searchInput').value = '';
+      
+      filteredProducts = [...allProducts];
+      allProducts.forEach(product => product.element.style.display = 'block');
+      
+      document.getElementById('filterPanel').classList.remove('active');
+    });
+
+    // Close filter panel when clicking outside
+    document.addEventListener('click', function (e) {
+      const filterPanel = document.getElementById('filterPanel');
+      const filterToggle = document.getElementById('filterToggle');
+
+      if (!filterPanel.contains(e.target) && !filterToggle.contains(e.target)) {
+        filterPanel.classList.remove('active');
+      }
+    });
+
+    // Product card click
+    document.querySelectorAll('.product-card').forEach(card => {
+      card.addEventListener('click', function () {
+        const productName = this.querySelector('.product-name').textContent;
+        alert(`Viewing details for ${productName}`);
+        // In a real application, this would navigate to the product details page
+      });
+    });
+
+    // Sidebar toggle functionality
+    document.getElementById('menuToggle').addEventListener('click', function (e) {
+      e.stopPropagation();
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('active');
+    });
+
+    // Close sidebar when clicking outside
+    document.addEventListener('click', function (e) {
+      const sidebar = document.getElementById('sidebar');
+      const menuToggle = document.getElementById('menuToggle');
+
+      if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+        sidebar.classList.remove('active');
+      }
+    });
+  </script>
+</body>
+
+</html>
