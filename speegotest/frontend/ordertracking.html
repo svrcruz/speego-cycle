@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpeegoCycle - Order Tracking</title>
+  <link rel="stylesheet" href="ordertracking.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+
+<body>
+  <!-- Header -->
+  <div class="header">
+    <div class="user-greeting" onclick="window.location.href='userprofile.html'" style="cursor: pointer;">
+      <div class="user-icon">
+        <i class="ph ph-user-circle"></i>
+      </div>
+      <div class="greeting-text">
+        <h3>Hello there,</h3>
+        <p>Juan Dela Cruz</p>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <button class="icon-btn" onclick="window.location.href='index.html'">
+        <i class="ph ph-house"></i>
+      </button>
+      <button class="icon-btn" id="menuToggle">
+        <i class="ph ph-list"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Page Title -->
+  <section class="page-title-section">
+    <h1 class="page-title">Track Your Order</h1>
+    <div class="breadcrumb">
+      <a href="index.html">Home</a> > <a href="orderhistory.html">Order History</a> > Order Tracking
+    </div>
+  </section>
+
+  <!-- Order Tracking Details -->
+  <main class="main-content">
+    <div class="tracking-card">
+      <div class="tracking-header">
+        <div class="tracking-info">
+          <div>
+            <p class="label">Order ID:</p>
+            <h3 class="value">#EBIKE123</h3>
+          </div>
+          <div>
+            <p class="label">Order Date:</p>
+            <h3 class="value">Sept 20, 2025</h3>
+          </div>
+          <div>
+            <p class="label">Estimated Delivery:</p>
+            <h3 class="value">Sept 25, 2025</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="progress-container">
+        <div class="progress-bar">
+          <div class="step completed">
+            <i class="ph ph-check-circle"></i>
+            <p>Order Placed</p>
+          </div>
+          <div class="step completed">
+            <i class="ph ph-truck"></i>
+            <p>Shipped</p>
+          </div>
+          <div class="step current">
+            <i class="ph ph-navigation-arrow"></i>
+            <p>Out for Delivery</p>
+          </div>
+          <div class="step">
+            <i class="ph ph-package"></i>
+            <p>Delivered</p>
+          </div>
+          <div class="progress-line"></div>
+        </div>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="order-summary">
+        <div class="product-image"></div>
+        <div class="product-details">
+          <h2>E-Bike 1</h2>
+          <p><strong>Color:</strong> White</p>
+          <p><strong>Capacity:</strong> 4 Seater</p>
+          <p><strong>Battery:</strong> 1500w</p>
+          <p><strong>Features:</strong> With Fan, Crownlight, Reverse Camera</p>
+        </div>
+      </div>
+
+      <!-- Status Updates -->
+      <div class="status-updates">
+        <h3>Delivery Updates</h3>
+        <ul>
+          <li>Package out for delivery – Sept 24, 2025, 9:00 AM</li>
+          <li> Package departed from Lipa Distribution Center – Sept 23, 2025, 4:00 PM</li>
+          <li>Order packed and ready for shipment – Sept 21, 2025, 2:00 PM</li>
+          <li>Order placed successfully – Sept 20, 2025, 10:00 AM</li>
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-item" onclick="window.location.href='shoppingcart.html'">Shopping Cart</div>
+    <div class="sidebar-item" onclick="window.location.href='orderhistory.html'">Order History</div>
+    <div class="sidebar-item">About Us</div>
+    <div class="sidebar-item">Services</div>
+    <div class="sidebar-item">Log Out</div>
+  </div>
+
+  <script>
+  const menuToggle = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+
+  menuToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    sidebar.classList.toggle('active');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+      sidebar.classList.remove('active');
+    }
+  });
+
+  //Fetch user data to update greeting dynamically
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("get_user_data.php")
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) return;
+        const nameDisplay = document.querySelector(".greeting-text p");
+        if (nameDisplay) {
+          nameDisplay.textContent = `${data.Customer_FName} ${data.Customer_LName}`;
+        }
+      })
+      .catch(err => console.error("User fetch error:", err));
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+  const params = new URLSearchParams(window.location.search);
+  const orderId = params.get("orderId");
+  if (!orderId) return;
+
+  fetch(`get_order_status.php?orderId=${orderId}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.error) return;
+      updateProgress(data.Status);
+    })
+    .catch(err => console.error("Status fetch error:", err));
+});
+
+function updateProgress(status) {
+  const steps = document.querySelectorAll('.step');
+  steps.forEach(step => step.classList.remove('completed', 'current'));
+
+  let currentStep = 0;
+  switch (status.toLowerCase()) {
+    case 'pending':
+    case 'confirmed':
+    case 'processing':
+      currentStep = 1;
+      break;
+    case 'shipped':
+      currentStep = 2;
+      break;
+    case 'out for delivery':
+      currentStep = 3;
+      break;
+    case 'delivered':
+      currentStep = 4;
+      break;
+  }
+
+  for (let i = 0; i < currentStep - 1; i++) {
+    steps[i].classList.add('completed');
+  }
+  if (currentStep > 0) {
+    steps[currentStep - 1].classList.add('current');
+  }
+}
+
+</script>
+
+</body>
+</html>
