@@ -1,209 +1,257 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SpeegoCycle - Book a Service</title>
-    <link rel="stylesheet" href="userbookservice.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpeegoCycle - Book a Service</title>
+  <link rel="stylesheet" href="userbookservice.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 
 <body>
-    <header class="header">
-        <div class="header-left">
-            <a href="#" class="back-arrow">
-                <i class="ph ph-caret-left"></i>
-            </a>
-        </div>
-        <div class="header-right">
-            <a href="userservicehistory.html" class="nav-link">Service History</a>
-            <a href="usertrack.html" class="nav-link">Track Service Requests</a>
-            <a href="index.html" class="home-icon">
-                <i class="ph ph-house"></i>
-            </span></a>
-            <span class="menu-icon" id="menuToggle">
-                <i class="ph ph-list"></i>
-            </span>
-        </div>
-    </header>
-
-    <div class="search-container">
-        <div class="search-box">
-            <span class="search-icon">
-                <i class="ph ph-magnifying-glass"></i>
-            </span>
-            <input type="text" class="search-input" placeholder="Search">
-            <span class="filter-icon">
-                <i class="ph ph-funnel-simple"></i>
-            </span>
-        </div>
+  <header class="header">
+    <div class="header-left">
+      <a href="#" class="back-arrow">
+        <i class="ph ph-caret-left"></i>
+      </a>
     </div>
-
-    <main class="main-content">
-        <h1 class="page-title">Book a Service</h1>
-        <div class="breadcrumb">
-            Home <span>›</span> Services <span>›</span> Book a Service
-        </div>
-
-        <div class="booking-container">
-            <section class="service-selection">
-                <h2 class="section-title">Select a Service</h2>
-                <div class="service-buttons">
-                    <button class="service-btn active" data-service="repair">Repair</button>
-                    <button class="service-btn" data-service="battery">Battery Replacement</button>
-                    <button class="service-btn" data-service="parts">Parts Installation</button>
-                </div>
-            </section>
-
-            <section class="ebike-details">
-                <h2 class="section-title">E-Bike Details</h2>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="model">MODEL</label>
-                        <input type="text" id="model" class="form-input" placeholder="">
-                    </div>
-                    <div class="form-group">
-                        <label for="serialNumber">SERIAL NUMBER</label>
-                        <input type="text" id="serialNumber" class="form-input" placeholder="">
-                    </div>
-                    <div class="form-group">
-                        <label for="purchaseDate">PURCHASE DATE</label>
-                        <div class="date-input-wrapper">
-                            <input type="text" id="purchaseDate" class="form-input" value="09-25-2025"
-                                placeholder="MM-DD-YYYY">
-                            <i class="ph ph-caret-down date-icon"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group full-width">
-                    <label for="problemDescription">PROBLEM DESCRIPTION</label>
-                    <textarea id="problemDescription" class="form-textarea" placeholder="Enter an issue"></textarea>
-                </div>
-            </section>
-
-            <section class="diagnosis-cost-section">
-                <div class="left-section">
-                    <button class="smart-diagnosis-btn" id="smartDiagnosisBtn">
-                        <span class="diagnosis-title">Smart Diagnosis</span>
-                        <i class="ph ph-first-aid-kit diagnosis-icon"></i>
-                    </button>
-                </div>
-
-                <div class="right-section">
-                    <div class="cost-time-box">
-                        <label>ESTIMATED REPAIR COST</label>
-                        <div class="display-box">
-                            <i class="ph ph-currency-circle-dollar"></i>
-                        </div>
-                    </div>
-                    <div class="cost-time-box">
-                        <label>ESTIMATED REPAIR TIME</label>
-                        <div class="display-box">
-                            <i class="ph ph-timer"></i>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="appointment-section">
-                <button class="smart-sched-btn">
-                    <i class="ph ph-calendar-check"></i>
-                    SPEEGOPAL SMART SCHED
-                </button>
-                <button class="confirm-btn">Confirm Appointment</button>
-            </section>
-        </div>
-    </main>
-
-    <div class="sidebar" id="sidebar">
-        <a href="shoppingcart.html" class="sidebar-item">Shopping Cart</a>
-        <a href="orderhistory.html" class="sidebar-item">Order History</a>
-        <a href="aboutus.html" class="sidebar-item">About Us</a>
-        <a href="userservices.html" class="sidebar-item">Services</a>
-        <a href="logout.html" class="sidebar-item">Log Out</a>
+    <div class="header-right">
+      <a href="userservicehistory.html" class="nav-link">Service History</a>
+      <a href="usertrack.html" class="nav-link">Track Service Requests</a>
+      <a href="index.html" class="home-icon"><i class="ph ph-house"></i></a>
+      <span class="menu-icon" id="menuToggle"><i class="ph ph-list"></i></span>
     </div>
+  </header>
 
+  <main class="main-content">
+    <h1 class="page-title">Book a Service</h1>
+    <div class="breadcrumb">Home <span>›</span> Services <span>›</span> Book a Service</div>
 
-    <script>
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('active');
+    <div class="booking-container">
+
+      <!-- Service Selection -->
+      <section class="service-selection">
+        <h2 class="section-title">Select a Service</h2>
+        <div class="service-buttons">
+          <button class="service-btn active" data-service="Repair">Repair</button>
+          <button class="service-btn" data-service="Battery Replacement">Battery Replacement</button>
+          <button class="service-btn" data-service="Parts Installation">Parts Installation</button>
+        </div>
+      </section>
+
+      <!-- E-bike Details -->
+      <section class="ebike-details">
+        <h2 class="section-title">E-Bike Details</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="model">MODEL</label>
+            <input type="text" id="model" class="form-input" placeholder="Enter model" />
+          </div>
+          <div class="form-group">
+            <label for="serialNumber">SERIAL NUMBER</label>
+            <input type="text" id="serialNumber" class="form-input" placeholder="Enter serial number" />
+          </div>
+          <div class="form-group">
+            <label for="purchaseDate">PURCHASE DATE</label>
+            <input type="date" id="purchaseDate" class="form-input" />
+          </div>
+          <div class="form-group full-width">
+            <label for="problemDescription">PROBLEM DESCRIPTION</label>
+            <textarea id="problemDescription" class="form-textarea" placeholder="Describe the issue"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- Smart Diagnosis -->
+      <section class="diagnosis-cost-section">
+        <div class="left-section">
+          <button class="smart-diagnosis-btn" id="smartDiagnosisBtn">
+            <i class="ph ph-first-aid-kit diagnosis-icon"></i>
+            <span class="diagnosis-title">Smart Diagnosis</span>
+            <div id="diagnosisResult" class="diagnosis-result"></div>
+          </button>
+        </div>
+
+        <div class="right-section">
+          <div class="cost-time-box">
+            <label>ESTIMATED REPAIR COST</label>
+            <div class="display-box" id="costDisplay">
+                <span class="peso-symbol"></span><span id="costValue">--</span>
+            </div>
+            </div>
+          <div class="cost-time-box">
+            <label>ESTIMATED REPAIR TIME</label>
+            <div class="display-box" id="timeDisplay"><i class="ph ph-timer"></i></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Appointment Section -->
+      <section class="appointment-section">
+        <button class="smart-sched-btn" id="smartSchedBtn">
+          <i class="ph ph-calendar-check"></i> Choose an Appointment Schedule
+        </button>
+        <div class="selected-appointment" id="selectedAppointment" style="display: none;">
+          <i class="ph ph-calendar-check"></i>
+          <span id="appointmentDisplay"></span>
+        </div>
+        <button class="confirm-btn" id="confirmBtn">Confirm Appointment</button>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Smart Schedule Modal -->
+  <div class="schedule-modal" id="scheduleModal">
+    <div class="schedule-modal-content">
+      <button class="modal-close" id="closeModal"><i class="ph ph-x"></i></button>
+      <h2 class="modal-title"><i class="ph ph-calendar-check"></i> Select Your Appointment</h2>
+      <p class="modal-subtitle">Choose your preferred date and time slot</p>
+
+      <div class="calendar-section">
+        <div class="calendar-header">
+          <h3 class="current-month" id="currentMonth">October 2025</h3>
+        </div>
+        <div class="calendar-grid">
+          <div class="day-header">Sun</div><div class="day-header">Mon</div><div class="day-header">Tue</div>
+          <div class="day-header">Wed</div><div class="day-header">Thu</div><div class="day-header">Fri</div><div class="day-header">Sat</div>
+          <div class="calendar-day available" data-date="2025-10-23">23</div>
+          <div class="calendar-day available" data-date="2025-10-24">24</div>
+          <div class="calendar-day available" data-date="2025-10-25">25</div>
+          <div class="calendar-day available" data-date="2025-10-26">26</div>
+          <div class="calendar-day available" data-date="2025-10-27">27</div>
+          <div class="calendar-day available" data-date="2025-10-28">28</div>
+        </div>
+      </div>
+
+      <div class="time-slots-section" id="timeSlotsSection" style="display:none;">
+        <h3>Available Time Slots</h3>
+        <p id="selectedDateDisplay">Selected: —</p>
+        <div class="time-slots-grid">
+          <button class="time-slot" data-time="09:00 AM">09:00 AM</button>
+          <button class="time-slot" data-time="10:00 AM">10:00 AM</button>
+          <button class="time-slot" data-time="11:00 AM">11:00 AM</button>
+          <button class="time-slot" data-time="01:00 PM">01:00 PM</button>
+          <button class="time-slot" data-time="02:00 PM">02:00 PM</button>
+          <button class="time-slot" data-time="03:00 PM">03:00 PM</button>
+        </div>
+      </div>
+      <button class="modal-confirm-btn" id="confirmSchedule" style="display:none;">Confirm Schedule</button>
+    </div>
+  </div>
+
+  <script>
+    let selectedDate = null;
+    let selectedTime = null;
+    let appointmentConfirmed = false;
+
+    // 🔹 Smart Diagnosis Integration
+    document.getElementById('smartDiagnosisBtn').addEventListener('click', async () => {
+      const problem = document.getElementById('problemDescription').value.trim();
+      const result = document.getElementById('diagnosisResult');
+      const cost = document.getElementById('costDisplay');
+      const time = document.getElementById('timeDisplay');
+
+      if (!problem) return alert('Please enter a problem description first.');
+
+      result.textContent = 'Analyzing issue...';
+      cost.innerHTML = `<i class="ph ph-currency-circle-dollar"></i> ...`;
+      time.innerHTML = `<i class="ph ph-timer"></i> ...`;
+
+      try {
+        const res = await fetch('http://127.0.0.1:5000/diagnose', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ description: problem })
+        });
+        const data = await res.json();
+        result.textContent = data.diagnosis;
+        cost.innerHTML = `<span class="peso-symbol"></span>${data.cost}`;
+        time.innerHTML = `<i class="ph ph-timer"></i> ${data.time}`;
+      } catch (err) {
+        console.error(err);
+        result.textContent = 'Error: Unable to connect to AI service.';
+      }
+    });
+
+    // 🔹 Appointment Modal Logic
+    document.getElementById('smartSchedBtn').addEventListener('click', () => {
+      document.getElementById('scheduleModal').classList.add('active');
+    });
+    document.getElementById('closeModal').addEventListener('click', () => {
+      document.getElementById('scheduleModal').classList.remove('active');
+    });
+
+    document.querySelectorAll('.calendar-day.available').forEach(day => {
+      day.addEventListener('click', () => {
+        document.querySelectorAll('.calendar-day').forEach(d => d.classList.remove('selected'));
+        day.classList.add('selected');
+        selectedDate = day.getAttribute('data-date');
+        document.getElementById('timeSlotsSection').style.display = 'block';
+        document.getElementById('selectedDateDisplay').textContent = `Selected: ${selectedDate}`;
+      });
+    });
+
+    document.querySelectorAll('.time-slot').forEach(slot => {
+      slot.addEventListener('click', () => {
+        document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+        slot.classList.add('selected');
+        selectedTime = slot.getAttribute('data-time');
+        document.getElementById('confirmSchedule').style.display = 'block';
+      });
+    });
+
+    document.getElementById('confirmSchedule').addEventListener('click', () => {
+      if (selectedDate && selectedTime) {
+        document.getElementById('selectedAppointment').style.display = 'flex';
+        document.getElementById('appointmentDisplay').textContent = `${selectedDate} at ${selectedTime}`;
+        appointmentConfirmed = true;
+        alert(`✅ Appointment scheduled for ${selectedDate} at ${selectedTime}`);
+        document.getElementById('scheduleModal').classList.remove('active');
+      }
+    });
+
+    // 🔹 Confirm Appointment + Save to DB
+    document.getElementById('confirmBtn').addEventListener('click', async () => {
+      const model = document.getElementById('model').value.trim();
+      const serial = document.getElementById('serialNumber').value.trim();
+      const problem = document.getElementById('problemDescription').value.trim();
+      const aiDiagnosis = document.getElementById('diagnosisResult').innerText || 'No diagnosis';
+      const serviceType = document.querySelector('.service-btn.active').dataset.service;
+
+      if (!model || !serial || !problem) return alert('Please fill in all required fields.');
+      if (!appointmentConfirmed) return alert('Please choose an appointment schedule first.');
+
+      const appointmentDate = `${selectedDate} ${selectedTime}`;
+      const requestData = {
+        customer_id: 1,
+        admin_id: null,
+        service_type: serviceType,
+        product_id: 1,
+        problem_description: problem,
+        appointment_date: appointmentDate,
+        ai_diagnosis: aiDiagnosis,
+        confidence_score: Math.floor(Math.random() * 21) + 80
+      };
+
+      try {
+        const res = await fetch('http://127.0.0.1:5000/api/service-request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestData)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert(`✅ Appointment confirmed and saved!\nService Request ID: ${data.service_request_id}`);
+        } else {
+          alert(`❌ Error saving: ${data.error}`);
         }
-
-        document.addEventListener('click', function (e) {
-            const sidebar = document.getElementById('sidebar');
-            const menuBtn = document.querySelector('.header-right .icon-btn:last-child');
-
-            if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
-                sidebar.classList.remove('active');
-            }
-        });
-
-
-        // Service button selection
-        const serviceButtons = document.querySelectorAll('.service-btn');
-        serviceButtons.forEach(btn => {
-            btn.addEventListener('click', function () {
-                serviceButtons.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
-
-        // Smart Diagnosis button
-        document.getElementById('smartDiagnosisBtn').addEventListener('click', function () {
-            alert('Smart Diagnosis feature coming soon!');
-            // In a real application, this would trigger the diagnosis process
-        });
-
-        // Date picker simulation
-        document.getElementById('purchaseDate').addEventListener('click', function () {
-            // In a real application, this would open a date picker
-            this.showPicker ? this.showPicker() : null;
-        });
-
-        // Sidebar toggle functionality
-        document.getElementById('menuToggle').addEventListener('click', function (e) {
-            e.stopPropagation();
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('active');
-        });
-
-        // Close sidebar when clicking outside
-        document.addEventListener('click', function (e) {
-            const sidebar = document.getElementById('sidebar');
-            const menuToggle = document.getElementById('menuToggle');
-
-            if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-                sidebar.classList.remove('active');
-            }
-        });
-
-        // Back button
-        document.querySelector('.back-arrow').addEventListener('click', function (e) {
-            e.preventDefault();
-            window.history.back();
-        });
-
-        // Confirm Appointment
-        document.querySelector('.confirm-btn').addEventListener('click', function () {
-            const model = document.getElementById('model').value;
-            const serialNumber = document.getElementById('serialNumber').value;
-            const purchaseDate = document.getElementById('purchaseDate').value;
-            const problem = document.getElementById('problemDescription').value;
-
-            if (!model || !serialNumber || !problem) {
-                alert('Please fill in all required fields');
-                return;
-            }
-
-            alert('Appointment confirmed! You will receive a confirmation email shortly.');
-            // In a real application, this would submit the form to the server
-        });
-    </script>
+      } catch (err) {
+        console.error(err);
+        alert('❌ Could not connect to Flask backend.');
+      }
+    });
+  </script>
 </body>
-
 </html>

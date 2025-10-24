@@ -59,93 +59,9 @@
 
     <main class="main-content">
         <h1 class="page-title">RECOMMENDED FOR YOU</h1>
-
         <section class="product-section">
-            <div class="product-grid">
-                <div class="product-card">
-                    <div class="product-image"></div>
-                    <div class="product-info">
-                        <p class="product-name">PRODUCT 1</p>
-                        <p class="product-price">₱15,000</p>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image"></div>
-                    <div class="product-info">
-                        <p class="product-name">PRODUCT 2</p>
-                        <p class="product-price">₱22,000</p>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image"></div>
-                    <div class="product-info">
-                        <p class="product-name">PRODUCT 3</p>
-                        <p class="product-price">₱18,500</p>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image"></div>
-                    <div class="product-info">
-                        <p class="product-name">PRODUCT 4</p>
-                        <p class="product-price">₱32,000</p>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image"></div>
-                    <div class="product-info">
-                        <p class="product-name">PRODUCT 5</p>
-                        <p class="product-price">₱8,500</p>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image"></div>
-                    <div class="product-info">
-                        <p class="product-name">PRODUCT 6</p>
-                        <p class="product-price">₱45,000</p>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image"></div>
-                    <div class="product-info">
-                        <p class="product-name">PRODUCT 7</p>
-                        <p class="product-price">₱12,000</p>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image"></div>
-                    <div class="product-info">
-                        <p class="product-name">PRODUCT 8</p>
-                        <p class="product-price">₱28,000</p>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image"></div>
-                    <div class="product-info">
-                        <p class="product-name">PRODUCT 9</p>
-                        <p class="product-price">₱19,500</p>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image"></div>
-                    <div class="product-info">
-                        <p class="product-name">PRODUCT 10</p>
-                        <p class="product-price">₱35,000</p>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image"></div>
-                    <div class="product-info">
-                        <p class="product-name">PRODUCT 11</p>
-                        <p class="product-price">₱25,000</p>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image"></div>
-                    <div class="product-info">
-                        <p class="product-name">PRODUCT 12</p>
-                        <p class="product-price">₱42,000</p>
-                    </div>
-                </div>
+            <div class="product-grid" id="productGrid">
+                <!-- Products dynamically loaded here -->
             </div>
         </section>
     </main>
@@ -159,109 +75,106 @@
     </div>
 
     <script>
-        // Store all products with their prices
-        const allProducts = [];
-        
-        document.querySelectorAll('.product-card').forEach(card => {
-            const name = card.querySelector('.product-name').textContent;
-            const priceText = card.querySelector('.product-price').textContent;
-            const price = parseInt(priceText.replace(/[₱,]/g, ''));
-            allProducts.push({
-                element: card,
-                name: name,
-                price: price,
-                priceText: priceText
+        const API_URL = "http://127.0.0.1:5000/recommended_products"; // Change if backend hosted elsewhere
+        const productGrid = document.getElementById("productGrid");
+
+        // Fetch recommended products from backend
+        async function fetchRecommendedProducts(customerId = 1) {
+            try {
+                const res = await fetch(`${API_URL}?customer_id=${customerId}`);
+                const data = await res.json();
+                renderProducts(data);
+            } catch (error) {
+                console.error("Failed to fetch recommended products:", error);
+                productGrid.innerHTML = "<p>Failed to load recommendations. Please try again later.</p>";
+            }
+        }
+
+        // Render products dynamically
+        function renderProducts(products) {
+            productGrid.innerHTML = "";
+            if (!products || products.length === 0) {
+                productGrid.innerHTML = "<p>No recommended products available.</p>";
+                return;
+            }
+
+            products.forEach(p => {
+                const card = document.createElement("div");
+                card.classList.add("product-card");
+                card.setAttribute("data-id", p.ProductID);
+
+                card.innerHTML = `
+                    <div class="product-image"></div>
+                    <div class="product-info">
+                        <p class="product-name">${p.Product_Name}</p>
+                        <p class="product-price">₱${Number(p.Price).toLocaleString()}</p>
+                        <p class="recommend-reason">${p.recommendation_reason}</p>
+                    </div>
+                `;
+
+                card.addEventListener("click", () => {
+                    alert(`Viewing details for ${p.Product_Name}`);
+                });
+
+                productGrid.appendChild(card);
             });
-        });
+        }
 
-        let filteredProducts = [...allProducts];
-
-        // Search functionality
-        document.getElementById('searchInput').addEventListener('input', function (e) {
+        // --- Search Functionality ---
+        document.getElementById("searchInput").addEventListener("input", function (e) {
             const searchTerm = e.target.value.toLowerCase();
-            
-            filteredProducts.forEach(product => {
-                const matchesSearch = product.name.toLowerCase().includes(searchTerm) || 
-                                     product.priceText.toLowerCase().includes(searchTerm);
-                product.element.style.display = matchesSearch ? 'block' : 'none';
+            document.querySelectorAll(".product-card").forEach(card => {
+                const name = card.querySelector(".product-name").textContent.toLowerCase();
+                const price = card.querySelector(".product-price").textContent.toLowerCase();
+                card.style.display = (name.includes(searchTerm) || price.includes(searchTerm)) ? "block" : "none";
             });
         });
 
-        // Filter panel toggle
-        document.getElementById('filterToggle').addEventListener('click', function () {
-            const panel = document.getElementById('filterPanel');
-            panel.classList.toggle('active');
+        // --- Filter Panel Toggle ---
+        document.getElementById("filterToggle").addEventListener("click", () => {
+            document.getElementById("filterPanel").classList.toggle("active");
         });
 
-        // Apply filters
-        document.getElementById('applyFilter').addEventListener('click', function () {
-            const priceRange = document.getElementById('filterPrice').value;
+        // --- Apply Filters ---
+        document.getElementById("applyFilter").addEventListener("click", () => {
+            const priceRange = document.getElementById("filterPrice").value;
+            const [min, max] = priceRange ? priceRange.split("-").map(Number) : [0, Infinity];
 
-            filteredProducts = allProducts.filter(product => {
-                let matchPrice = true;
-                if (priceRange) {
-                    const [min, max] = priceRange.split('-').map(v => parseInt(v));
-                    if (max) {
-                        matchPrice = product.price >= min && product.price <= max;
-                    } else {
-                        matchPrice = product.price >= min;
-                    }
-                }
-                
-                return matchPrice;
+            document.querySelectorAll(".product-card").forEach(card => {
+                const priceText = card.querySelector(".product-price").textContent.replace(/[₱,]/g, "");
+                const price = parseFloat(priceText);
+                const visible = price >= (min || 0) && price <= (max || Infinity);
+                card.style.display = visible ? "block" : "none";
             });
 
-            allProducts.forEach(product => product.element.style.display = 'none');
-            filteredProducts.forEach(product => product.element.style.display = 'block');
-            
-            document.getElementById('filterPanel').classList.remove('active');
+            document.getElementById("filterPanel").classList.remove("active");
         });
 
-        // Clear filters
-        document.getElementById('clearFilter').addEventListener('click', function () {
-            document.getElementById('filterPrice').value = '';
-            document.getElementById('searchInput').value = '';
-            
-            filteredProducts = [...allProducts];
-            allProducts.forEach(product => product.element.style.display = 'block');
-            
-            document.getElementById('filterPanel').classList.remove('active');
+        // --- Clear Filters ---
+        document.getElementById("clearFilter").addEventListener("click", () => {
+            document.getElementById("filterPrice").value = "";
+            document.getElementById("searchInput").value = "";
+            document.querySelectorAll(".product-card").forEach(card => card.style.display = "block");
+            document.getElementById("filterPanel").classList.remove("active");
         });
 
-        // Close filter panel when clicking outside
-        document.addEventListener('click', function (e) {
-            const filterPanel = document.getElementById('filterPanel');
-            const filterToggle = document.getElementById('filterToggle');
-
-            if (!filterPanel.contains(e.target) && !filterToggle.contains(e.target)) {
-                filterPanel.classList.remove('active');
-            }
-        });
-
-        // Product card click
-        document.querySelectorAll('.product-card').forEach(card => {
-            card.addEventListener('click', function () {
-                const productName = this.querySelector('.product-name').textContent;
-                alert(`Viewing details for ${productName}`);
-            });
-        });
-
-        // Sidebar toggle
-        document.getElementById('menuToggle').addEventListener('click', function (e) {
+        // --- Sidebar Toggle ---
+        document.getElementById("menuToggle").addEventListener("click", function (e) {
             e.stopPropagation();
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('active');
+            const sidebar = document.getElementById("sidebar");
+            sidebar.classList.toggle("active");
         });
 
-        // Close sidebar when clicking outside
-        document.addEventListener('click', function (e) {
-            const sidebar = document.getElementById('sidebar');
-            const menuToggle = document.getElementById('menuToggle');
-
+        document.addEventListener("click", function (e) {
+            const sidebar = document.getElementById("sidebar");
+            const menuToggle = document.getElementById("menuToggle");
             if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-                sidebar.classList.remove('active');
+                sidebar.classList.remove("active");
             }
         });
+
+        // --- Initialize Page ---
+        fetchRecommendedProducts(1); // Replace 1 with the logged-in user's CustomerID
     </script>
 </body>
 </html>
