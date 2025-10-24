@@ -585,5 +585,31 @@ def create_service_request():
             cursor.close()
             conn.close()
 
+@app.route('/save-conversation', methods=['POST'])
+def save_conversation():
+    data = request.json
+    conversation = data.get('conversation', [])
+    if not conversation:
+        return jsonify({'error': 'No conversation data'}), 400
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        for msg in conversation:
+            cursor.execute("""
+                INSERT INTO conversation_logs (sender, message_text, timestamp)
+                VALUES (%s, %s, %s)
+            """, (msg['sender'], msg['text'], msg['timestamp']))
+        conn.commit()
+        return jsonify({'message': 'Conversation saved successfully'})
+    except Error as e:
+        print(f"Error saving conversation: {e}")
+        return jsonify({'error': 'Failed to save conversation'}), 500
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+            
 if __name__ == '__main__':
     app.run(debug=True)
+
