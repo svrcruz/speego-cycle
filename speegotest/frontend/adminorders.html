@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders - Admin</title>
+    <link rel="stylesheet" href="adminorders.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <button class="toggle-btn" id="toggleBtn">
+                    <i class="ph ph-caret-left"></i>
+                </button>
+                <div class="admin-info">
+                    <h2>Hello there,</h2>
+                    <h1>ADMIN</h1>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="admindashboard.html" class="nav-item">
+                    <i class="ph ph-house"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="adminreports.html" class="nav-item">
+                    <i class="ph ph-chart-line"></i>
+                    <span>Reports</span>
+                </a>
+                <a href="adminservicerequest.html" class="nav-item">
+                    <i class="ph ph-wrench"></i>
+                    <span>Service Requests</span>
+                </a>
+                <a href="inventoryadmin.html" class="nav-item">
+                    <i class="ph ph-stack"></i>
+                    <span>Inventory</span>
+                </a>
+                <a href="adminorders.html" class="nav-item active">
+                    <i class="ph ph-truck"></i>
+                    <span>Orders</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <h1 class="page-title">Order List</h1>
+
+            <div class="search-container">
+                <i class="ph ph-magnifying-glass search-icon"></i>
+                <input type="text" class="search-input" id="searchInput" placeholder="Search">
+            </div>
+
+            <!-- Orders Table -->
+            <div class="orders-container">
+                <div class="table-header">
+                    <div class="header-cell">Order ID</div>
+                    <div class="header-cell">Customer</div>
+                    <div class="header-cell">Product(s)</div>
+                    <div class="header-cell">Quantity</div>
+                    <div class="header-cell">Total Price</div>
+                </div>
+                <!-- rows added by JS -->
+            </div>
+        </main>
+    </div>
+
+    <script>
+    // Sidebar toggle
+    const sidebar = document.getElementById('sidebar');
+    const toggleBtn = document.getElementById('toggleBtn');
+    toggleBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
+
+    // Load orders
+    document.addEventListener('DOMContentLoaded', () => {
+        fetch('get_admin_orders.php')
+            .then(res => res.json())
+            .then(data => {
+                const container = document.querySelector('.orders-container');
+                const existingRows = container.querySelectorAll('.order-row');
+                existingRows.forEach(row => row.remove());
+
+                if (!data.orders || data.orders.length === 0) {
+                    const msg = document.createElement('p');
+                    msg.textContent = "No orders yet. Orders will appear here after purchases are made.";
+                    container.appendChild(msg);
+                    return;
+                }
+
+                data.orders.forEach(order => {
+                    const row = document.createElement('div');
+                    row.className = 'order-row';
+                    row.innerHTML = `
+                        <div class="order-cell">#${order.OrderID}</div>
+                        <div class="order-cell customer-cell">
+                            <div class="customer-avatar"></div>
+                            <span>${order.Customer}</span>
+                        </div>
+                        <div class="order-cell">${order.Items}</div>
+                        <div class="order-cell">${order.Quantity}</div>
+                        <div class="order-cell">₱${parseFloat(order.TotalAmount).toFixed(2)}</div>
+                    `;
+                    container.appendChild(row);
+                });
+
+                attachSearch();
+            })
+            .catch(err => console.error('Error loading orders:', err));
+    });
+
+    // Search filter
+    function attachSearch() {
+        const input = document.getElementById('searchInput');
+        input.addEventListener('input', () => {
+            const term = input.value.toLowerCase();
+            document.querySelectorAll('.order-row').forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(term) ? 'grid' : 'none';
+            });
+        });
+    }
+    </script>
+</body>
+</html>
