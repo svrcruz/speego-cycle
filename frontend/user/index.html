@@ -213,6 +213,51 @@
                 chatOverlay.classList.remove('active');
             }
         });
+
+        //recommended for you
+        const RECOMMENDED_API = "http://127.0.0.1:5000/recommended_products"; // backend endpoint
+        const recommendedTrack = document.getElementById("recommended");
+
+        async function loadRecommendedProducts(customerId = 1) {
+            try {
+                const res = await fetch(`${RECOMMENDED_API}?customer_id=${customerId}`);
+                const data = await res.json();
+                renderRecommended(data);
+            } catch (err) {
+                console.error("Failed to load recommendations:", err);
+                recommendedTrack.innerHTML = "<p style='padding:1rem;'>Unable to load recommendations.</p>";
+            }
+        }
+
+        function renderRecommended(products) {
+            recommendedTrack.innerHTML = ""; // clear placeholder cards
+            if (!products || products.length === 0) {
+                recommendedTrack.innerHTML = "<p style='padding:1rem;'>No recommended products available.</p>";
+                return;
+            }
+
+            // Limit to 6 products (like your original layout)
+            const limitedProducts = products.slice(0, 6);
+
+            limitedProducts.forEach(p => {
+                const card = document.createElement("div");
+                card.classList.add("card");
+                card.innerHTML = `
+                    <img src="images/${p.Product_Image || 'default.png'}" alt="${p.Product_Name}">
+                    <div class="card-info">
+                        <p class="name">${p.Product_Name}</p>
+                        <p class="price">₱${Number(p.Price).toLocaleString()}</p>
+                    </div>
+                `;
+                card.addEventListener("click", () => {
+                    window.location.href = "productdetails.html?id=" + p.ProductID;
+                });
+                recommendedTrack.appendChild(card);
+            });
+        }
+
+        // Load when the page opens
+        loadRecommendedProducts(1); // Replace 1 with the logged-in user's ID if available
     </script>
 </body>
 </html>
