@@ -45,74 +45,94 @@
   </footer>
 
 
-  <script>
-    const chatMessages = document.getElementById('chat-messages');
-    const messageInput = document.getElementById('message-input');
-    const sendBtn = document.getElementById('send-btn');
+<script>
+  const chatMessages = document.getElementById('chat-messages');
+  const messageInput = document.getElementById('message-input');
+  const sendBtn = document.getElementById('send-btn');
 
-    const responses = {
-      'service': 'I can help you book a service! Would you like to schedule a repair, maintenance, or parts installation?',
-      'repair': 'Great! I can schedule a repair service for you. What seems to be the issue with your E-Bike?',
-      'maintenance': 'Your next maintenance is scheduled for next week. Would you like to reschedule or get more details?',
-      'parts': 'I can help you find and install parts. What part are you looking for?',
-      'battery': 'We have various battery options available. Would you like to see our battery catalog or schedule a battery replacement?',
-      'price': 'Our services range from ₱17,000 to ₱98,300 depending on the type of service. What specific service are you interested in?',
-      'schedule': 'I can help you schedule an appointment. What date works best for you?',
-      'track': 'You can track your service requests in the Track Service Requests section. Would you like me to show you your current requests?',
-      'default': 'I\'m here to help! You can ask me about services, parts, scheduling, or anything else related to your E-Bike.'
-    };
+  let conversation = [];
 
-    function addMessage(text, type) {
-      const messageDiv = document.createElement('div');
-      messageDiv.className = `message ${type}-message`;
+  const responses = {
+    'service': 'I can help you book a service! Would you like to schedule a repair, maintenance, or parts installation?',
+    'repair': 'Great! I can schedule a repair service for you. What seems to be the issue with your E-Bike?',
+    'maintenance': 'Your next maintenance is scheduled for next week. Would you like to reschedule or get more details?',
+    'parts': 'I can help you find and install parts. What part are you looking for?',
+    'battery': 'We have various battery options available. Would you like to see our battery catalog or schedule a battery replacement?',
+    'price': 'Our services range from ₱17,000 to ₱98,300 depending on the type of service. What specific service are you interested in?',
+    'schedule': 'I can help you schedule an appointment. What date works best for you?',
+    'track': 'You can track your service requests in the Track Service Requests section. Would you like me to show you your current requests?',
+    'default': 'I\'m here to help! You can ask me about services, parts, scheduling, or anything else related to your E-Bike.'
+  };
 
-      const bubbleDiv = document.createElement('div');
-      bubbleDiv.className = 'message-bubble';
-      bubbleDiv.textContent = text;
+  function addMessage(text, type) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${type}-message`;
 
-      messageDiv.appendChild(bubbleDiv);
-      chatMessages.appendChild(messageDiv);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
+    const bubbleDiv = document.createElement('div');
+    bubbleDiv.className = 'message-bubble';
+    bubbleDiv.textContent = text;
 
-    async function sendMessage() {
-      const message = messageInput.value.trim();
-      if (!message) return;
+    messageDiv.appendChild(bubbleDiv);
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
 
-      addMessage(message, 'user');
-      messageInput.value = '';
+    // Save message in conversation array
+    conversation.push({ sender: type, text: text, timestamp: new Date().toISOString() });
+  }
 
-      try {
-        const res = await fetch('http://127.0.0.1:5000/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message })
-        });
-        const data = await res.json();
-        if (data.reply) {
-          addMessage(data.reply, 'bot');
-        } else {
-          addMessage(getFallbackResponse(message), 'bot');
-        }
-      } catch (err) {
+  async function sendMessage() {
+    const message = messageInput.value.trim();
+    if (!message) return;
+
+    addMessage(message, 'user');
+    messageInput.value = '';
+
+    try {
+      const res = await fetch('http://127.0.0.1:5000/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message })
+      });
+      const data = await res.json();
+      if (data.reply) {
+        addMessage(data.reply, 'bot');
+      } else {
         addMessage(getFallbackResponse(message), 'bot');
       }
+    } catch (err) {
+      addMessage(getFallbackResponse(message), 'bot');
     }
+  }
 
-    function getFallbackResponse(message) {
-      const lowerMessage = message.toLowerCase();
-      for (const [keyword, response] of Object.entries(responses)) {
-        if (lowerMessage.includes(keyword)) {
-          return response;
-        }
+  function getFallbackResponse(message) {
+    const lowerMessage = message.toLowerCase();
+    for (const [keyword, response] of Object.entries(responses)) {
+      if (lowerMessage.includes(keyword)) {
+        return response;
       }
-      return responses.default;
     }
+    return responses.default;
+  }
 
-    sendBtn.addEventListener('click', sendMessage);
-    messageInput.addEventListener('keypress', e => {
-      if (e.key === 'Enter') sendMessage();
-    });
+  sendBtn.addEventListener('click', sendMessage);
+  messageInput.addEventListener('keypress', e => {
+    if (e.key === 'Enter') sendMessage();
+  });
+
+  async function goBack() {
+    if (conversation.length > 0) {
+      try {
+        await fetch('http://127.0.0.1:5000/save-conversation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ conversation })
+        });
+      } catch (err) {
+        console.error('Failed to save conversation:', err);
+      }
+    }
+    window.location.href = 'userservices.html'; 
+  }
 </script>
 </body>
 
