@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OTP Verification</title>
+  <link rel="stylesheet" href="authenticationuser.css">
+</head>
+<body>
+  <div class="otp-container">
+    <div class="otp-card">
+      <h2>OTP Verification</h2>
+      <p>Please enter the 4-digit code sent to your registered email.</p>
+
+      <form action="authenticationuser.php" method="POST">
+        <input type="hidden" name="email" value="<?php echo $_GET['email']; ?>">
+        <div class="otp-inputs">
+          <input type="text" name="otp[]" maxlength="1" required>
+          <input type="text" name="otp[]" maxlength="1" required>
+          <input type="text" name="otp[]" maxlength="1" required>
+          <input type="text" name="otp[]" maxlength="1" required>
+        </div>
+        <button type="submit" name="verify">Verify</button>
+      </form>
+
+      <form action="authenticationuser.php" method="POST">
+        <input type="hidden" name="resend_email" value="<?php echo $_GET['email']; ?>">
+        <button type="submit" name="resend">Resend Code</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
