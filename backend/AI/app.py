@@ -230,10 +230,122 @@ def save_service_request_to_db(request_data):
             cursor.close()
             conn.close()
 
+# ======================================================
+# NEW FUNCTION: RECOMMENDED FOR YOU
+# ======================================================
+
+def get_recommended_for_you(customer_id=None, limit=12):
+    """
+    Get personalized product recommendations for a customer
+    Based on:
+    1. Purchase history (similar categories)
+    2. Service request history (related products)
+    3. Popular products (fallback)
+    """
+    conn = get_db_connection()
+    if not conn:
+        return []
+    
+    try:
+        cursor = conn.cursor(dictionary=True)
+        recommended_products = []
+        
+        if customer_id:
+            # Get customer's purchase history categories
+            cursor.execute("""
+                SELECT DISTINCT p.Category
+                FROM PRODUCT p
+                JOIN PURCHASE pur ON p.ProductID = pur.ProductID
+                WHERE pur.CustomerID = %s
+                LIMIT 3
+            """, (customer_id,))
+            purchased_categories = [row['Category'] for row in cursor.fetchall()]
+            
+            # Get products from same categories (excluding already purchased)
+            if purchased_categories:
+                category_placeholders = ','.join(['%s'] * len(purchased_categories))
+                cursor.execute(f"""
+                    SELECT DISTINCT p.ProductID, p.Product_Name, p.Category, p.Price, 
+                           p.Stock, i.Stock_level, i.Availability,
+                           'Based on your purchases' as recommendation_reason
+                    FROM PRODUCT p
+                    JOIN INVENTORY i ON p.ProductID = i.ProductID
+                    WHERE p.Category IN ({category_placeholders})
+                    AND p.ProductID NOT IN (
+                        SELECT ProductID FROM PURCHASE WHERE CustomerID = %s
+                    )
+                    AND i.Stock_level > i.Low_level 
+                    AND i.Availability = 'Available'
+                    ORDER BY p.Price DESC
+                    LIMIT %s
+                """, (*purchased_categories, customer_id, limit))
+                recommended_products.extend(cursor.fetchall())
+            
+            # Get products related to service requests
+            if len(recommended_products) < limit:
+                cursor.execute("""
+                    SELECT DISTINCT p.ProductID, p.Product_Name, p.Category, p.Price,
+                           p.Stock, i.Stock_level, i.Availability,
+                           'Related to your service requests' as recommendation_reason
+                    FROM service_request sr
+                    JOIN PRODUCT p ON (
+                        p.Product_Name LIKE CONCAT('%', SUBSTRING_INDEX(sr.ProblemDescription, ' ', 1), '%')
+                        OR p.Category LIKE CONCAT('%', sr.ServiceType, '%')
+                    )
+                    JOIN INVENTORY i ON p.ProductID = i.ProductID
+                    WHERE sr.CustomerID = %s
+                    AND p.ProductID NOT IN (
+                        SELECT ProductID FROM PURCHASE WHERE CustomerID = %s
+                    )
+                    AND i.Stock_level > i.Low_level 
+                    AND i.Availability = 'Available'
+                    LIMIT %s
+                """, (customer_id, customer_id, limit - len(recommended_products)))
+                recommended_products.extend(cursor.fetchall())
+        
+        # Fill remaining slots with popular/featured products
+        if len(recommended_products) < limit:
+            cursor.execute("""
+                SELECT p.ProductID, p.Product_Name, p.Category, p.Price,
+                       p.Stock, i.Stock_level, i.Availability,
+                       'Popular choice' as recommendation_reason
+                FROM PRODUCT p
+                JOIN INVENTORY i ON p.ProductID = i.ProductID
+                WHERE i.Stock_level > i.Low_level 
+                AND i.Availability = 'Available'
+                ORDER BY p.Price DESC, i.Stock_level DESC
+                LIMIT %s
+            """, (limit - len(recommended_products),))
+            recommended_products.extend(cursor.fetchall())
+        
+        # Remove duplicates while preserving order
+        seen = set()
+        unique_products = []
+        for product in recommended_products:
+            if product['ProductID'] not in seen:
+                seen.add(product['ProductID'])
+                unique_products.append(product)
+        
+        return unique_products[:limit]
+        
+    except Error as e:
+        print(f"Error getting recommendations: {e}")
+        return []
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
 
 # ======================================================
 # AI & ROUTES 
 # ======================================================
+
+@app.route('/recommended_products', methods=['GET'])
+def recommended_products():
+    customer_id = request.args.get('customer_id', default=None, type=int)
+    products = get_recommended_for_you(customer_id)
+    return jsonify(products)
 
 @app.route('/chat', methods=['POST'])
 def chat():
