@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpeegoCycle - Order History</title>
+  <link rel="stylesheet" href="orderhistory.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+
+<body>
+  <div class="header">
+    <div class="user-greeting" onclick="window.location.href='userprofile.html'" style="cursor: pointer;">
+      <div class="user-icon">
+        <i class="ph ph-user-circle"></i>
+      </div>
+      <div class="greeting-text">
+        <h3>Hello there,</h3>
+        <p>Loading...</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="icon-btn" onclick="window.location.href='index.html'">
+        <i class="ph ph-house"></i>
+      </button>
+      <button class="icon-btn" id="menuToggle">
+        <i class="ph ph-list"></i>
+      </button>
+    </div>
+  </div>
+
+  <section class="search-section">
+    <div class="search-bar">
+      <i class="ph ph-magnifying-glass"></i>
+      <input type="text" placeholder="Search Products">
+      <i class="ph ph-funnel filter-icon"></i>
+    </div>
+  </section>
+
+  <section class="page-title-section">
+    <h1 class="page-title">Order History</h1>
+    <div class="breadcrumb">
+      <a href="index.html">Home</a> > Order History
+    </div>
+  </section>
+
+  <main class="main-content" id="ordersContainer">
+    <p style="text-align:center; color:#888;">Loading your orders...</p>
+  </main>
+
+  <div class="sidebar" id="sidebar">
+    <a href="shoppingcart.html" class="sidebar-item">Shopping Cart</a>
+    <a href="orderhistory.html" class="sidebar-item">Order History</a>
+    <a href="aboutus.html" class="sidebar-item">About Us</a>
+    <a href="userservices.html" class="sidebar-item">Services</a>
+    <a href="logout.html" class="sidebar-item">Log Out</a>
+  </div>
+
+  <script>
+    // Sidebar toggle
+    document.getElementById('menuToggle').addEventListener('click', function (e) {
+      e.stopPropagation();
+      document.getElementById('sidebar').classList.toggle('active');
+    });
+
+    document.addEventListener('click', function (e) {
+      const sidebar = document.getElementById('sidebar');
+      const menuToggle = document.getElementById('menuToggle');
+      if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+        sidebar.classList.remove('active');
+      }
+    });
+
+    // Load user data dynamically
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("get_user_data.php")
+        .then(res => res.json())
+        .then(data => {
+          if (!data.error) {
+            const nameEl = document.querySelector(".greeting-text p");
+            nameEl.textContent = `${data.Customer_FName} ${data.Customer_LName}`;
+          }
+        })
+        .catch(err => console.error("User fetch error:", err));
+    });
+
+    // Load orders dynamically
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("get_orders.php")
+        .then(res => res.json())
+        .then(data => {
+          const container = document.getElementById("ordersContainer");
+          container.innerHTML = "";
+
+          if (!data || data.length === 0) {
+            container.innerHTML = `<p style="text-align:center; color:#888;">No orders found.</p>`;
+            return;
+          }
+
+          data.forEach(order => {
+            const orderCard = document.createElement("div");
+            orderCard.classList.add("order-card");
+
+            const orderDate = new Date(order.OrderDate).toLocaleDateString("en-US", {
+              month: "short", day: "numeric", year: "numeric"
+            });
+
+            const totalAmount = parseFloat(order.TotalAmount).toLocaleString();
+
+            let itemsHTML = "";
+            order.items.forEach(item => {
+              itemsHTML += `
+                <div class="product-section">
+                  <div class="product-image"></div>
+                  <div class="product-details">
+                    <h3 class="product-name">${item.ProductName}</h3>
+                    <div class="specifications">
+                      <span class="spec-label">Quantity:</span>
+                      <span class="spec-item">${item.Quantity}</span>
+                      <span class="spec-label">Price:</span>
+                      <span class="spec-item">₱${parseFloat(item.Price).toLocaleString()}</span>
+                    </div>
+                    <div class="product-actions">
+                      <button class="action-btn">
+                        <i class="ph ph-arrow-counter-clockwise"></i> Buy It Again
+                      </button>
+                      <button class="action-btn">
+                        <i class="ph ph-eye"></i> View Product
+                      </button>
+                    </div>
+                  </div>
+                </div>`;
+            });
+
+            orderCard.innerHTML = `
+              <div class="order-header">
+                <div class="order-info">
+                  <div class="info-item">
+                    <span class="info-label">Order Date:</span>
+                    <span class="info-value">${orderDate}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">Total Amount:</span>
+                    <span class="info-value">₱${totalAmount}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">Ship To:</span>
+                    <span class="info-value">${order.ShippingAddress || '—'}</span>
+                  </div>
+                </div>
+                <div class="order-header-right">
+                  <span class="order-id">Order ID: #${order.OrderID}</span>
+                  <button class="track-btn" onclick="window.location.href='ordertracking.html?orderId=${order.OrderID}'">Track Order</button>
+                </div>
+              </div>
+              <div class="order-body">
+                <div class="order-status">
+                  <span class="status-badge expected">${order.Status || 'Processing'}</span>
+                </div>
+                ${itemsHTML}
+              </div>`;
+
+            container.appendChild(orderCard);
+          });
+        })
+        .catch(err => {
+          console.error("Order fetch error:", err);
+          document.getElementById("ordersContainer").innerHTML = `<p style="text-align:center; color:red;">Error loading orders.</p>`;
+        });
+    });
+  </script>
+
+</body>
+
+</html>
