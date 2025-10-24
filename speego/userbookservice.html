@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpeegoCycle - Book a Service</title>
+    <link rel="stylesheet" href="userbookservice.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-left">
+            <a href="#" class="back-arrow">
+                <i class="ph ph-caret-left"></i>
+            </a>
+        </div>
+        <div class="header-right">
+            <a href="userservicehistory.html" class="nav-link">Service History</a>
+            <a href="usertrack.html" class="nav-link">Track Service Requests</a>
+            <a href="index.html" class="home-icon">
+                <i class="ph ph-house"></i>
+            </span></a>
+            <span class="menu-icon" id="menuToggle">
+                <i class="ph ph-list"></i>
+            </span>
+        </div>
+    </header>
+
+    <div class="search-container">
+        <div class="search-box">
+            <span class="search-icon">
+                <i class="ph ph-magnifying-glass"></i>
+            </span>
+            <input type="text" class="search-input" placeholder="Search">
+            <span class="filter-icon">
+                <i class="ph ph-funnel-simple"></i>
+            </span>
+        </div>
+    </div>
+
+    <main class="main-content">
+        <h1 class="page-title">Book a Service</h1>
+        <div class="breadcrumb">
+            Home <span>›</span> Services <span>›</span> Book a Service
+        </div>
+
+        <div class="booking-container">
+            <section class="service-selection">
+                <h2 class="section-title">Select a Service</h2>
+                <div class="service-buttons">
+                    <button class="service-btn active" data-service="repair">Repair</button>
+                    <button class="service-btn" data-service="battery">Battery Replacement</button>
+                    <button class="service-btn" data-service="parts">Parts Installation</button>
+                </div>
+            </section>
+
+            <section class="ebike-details">
+                <h2 class="section-title">E-Bike Details</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="model">MODEL</label>
+                        <input type="text" id="model" class="form-input" placeholder="">
+                    </div>
+                    <div class="form-group">
+                        <label for="serialNumber">SERIAL NUMBER</label>
+                        <input type="text" id="serialNumber" class="form-input" placeholder="">
+                    </div>
+                    <div class="form-group">
+                        <label for="purchaseDate">PURCHASE DATE</label>
+                        <div class="date-input-wrapper">
+                            <input type="text" id="purchaseDate" class="form-input" value="09-25-2025"
+                                placeholder="MM-DD-YYYY">
+                            <i class="ph ph-caret-down date-icon"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="problemDescription">PROBLEM DESCRIPTION</label>
+                    <textarea id="problemDescription" class="form-textarea" placeholder="Enter an issue"></textarea>
+                </div>
+            </section>
+
+            <section class="diagnosis-cost-section">
+                <div class="left-section">
+                    <button class="smart-diagnosis-btn" id="smartDiagnosisBtn">
+                        <span class="diagnosis-title">Smart Diagnosis</span>
+                        <i class="ph ph-first-aid-kit diagnosis-icon"></i>
+                    </button>
+                </div>
+
+                <div class="right-section">
+                    <div class="cost-time-box">
+                        <label>ESTIMATED REPAIR COST</label>
+                        <div class="display-box">
+                            <i class="ph ph-currency-circle-dollar"></i>
+                        </div>
+                    </div>
+                    <div class="cost-time-box">
+                        <label>ESTIMATED REPAIR TIME</label>
+                        <div class="display-box">
+                            <i class="ph ph-timer"></i>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="appointment-section">
+                <button class="smart-sched-btn">
+                    <i class="ph ph-calendar-check"></i>
+                    SPEEGOPAL SMART SCHED
+                </button>
+                <button class="confirm-btn">Confirm Appointment</button>
+            </section>
+        </div>
+    </main>
+
+    <div class="sidebar" id="sidebar">
+        <a href="shoppingcart.html" class="sidebar-item">Shopping Cart</a>
+        <a href="orderhistory.html" class="sidebar-item">Order History</a>
+        <a href="aboutus.html" class="sidebar-item">About Us</a>
+        <a href="userservices.html" class="sidebar-item">Services</a>
+        <a href="logout.html" class="sidebar-item">Log Out</a>
+    </div>
+
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('active');
+        }
+
+        document.addEventListener('click', function (e) {
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.querySelector('.header-right .icon-btn:last-child');
+
+            if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+                sidebar.classList.remove('active');
+            }
+        });
+
+
+        // Service button selection
+        const serviceButtons = document.querySelectorAll('.service-btn');
+        serviceButtons.forEach(btn => {
+            btn.addEventListener('click', function () {
+                serviceButtons.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Smart Diagnosis button
+        document.getElementById('smartDiagnosisBtn').addEventListener('click', function () {
+            alert('Smart Diagnosis feature coming soon!');
+            // In a real application, this would trigger the diagnosis process
+        });
+
+        // Date picker simulation
+        document.getElementById('purchaseDate').addEventListener('click', function () {
+            // In a real application, this would open a date picker
+            this.showPicker ? this.showPicker() : null;
+        });
+
+        // Sidebar toggle functionality
+        document.getElementById('menuToggle').addEventListener('click', function (e) {
+            e.stopPropagation();
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('active');
+        });
+
+        // Close sidebar when clicking outside
+        document.addEventListener('click', function (e) {
+            const sidebar = document.getElementById('sidebar');
+            const menuToggle = document.getElementById('menuToggle');
+
+            if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                sidebar.classList.remove('active');
+            }
+        });
+
+        // Back button
+        document.querySelector('.back-arrow').addEventListener('click', function (e) {
+            e.preventDefault();
+            window.history.back();
+        });
+
+        // Confirm Appointment
+        document.querySelector('.confirm-btn').addEventListener('click', function () {
+            const model = document.getElementById('model').value;
+            const serialNumber = document.getElementById('serialNumber').value;
+            const purchaseDate = document.getElementById('purchaseDate').value;
+            const problem = document.getElementById('problemDescription').value;
+
+            if (!model || !serialNumber || !problem) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            alert('Appointment confirmed! You will receive a confirmation email shortly.');
+            // In a real application, this would submit the form to the server
+        });
+    </script>
+</body>
+
+</html>

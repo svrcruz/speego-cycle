@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpeegoCycle | Create Account</title>
+  <link rel="stylesheet" href="loginuser.css" />
+  <link href="https://unpkg.com/phosphor-icons@1.4.2/src/css/phosphor.css" rel="stylesheet">
+</head>
+
+<body>
+  <div class="login-wrapper">
+    <div class="login-card">
+      <h1 class="brand">Speego<span>Cycle</span></h1>
+      <p class="subtitle">Create your new account</p>
+
+      <form action="register.php" method="POST">
+        <div class="input-group">
+          <i class="ph ph-user"></i>
+          <input type="text" name="Customer_FName" required />
+          <label>First Name</label>
+        </div>
+
+        <div class="input-group">
+          <i class="ph ph-user"></i>
+          <input type="text" name="Customer_LName" required />
+          <label>Last Name</label>
+        </div>
+
+        <div class="input-group">
+          <i class="ph ph-envelope"></i>
+          <input type="email" name="Customer_Email" required />
+          <label>Email</label>
+        </div>
+
+        <div class="input-group">
+          <i class="ph ph-lock"></i>
+          <input type="password" name="Customer_Password" required />
+          <label>Password</label>
+        </div>
+
+        <div class="input-group">
+          <i class="ph ph-phone"></i>
+          <input type="text" name="Customer_Phone" required />
+          <label>Phone</label>
+        </div>
+
+        <div class="input-group">
+          <i class="ph ph-map-pin"></i>
+          <input type="text" name="Customer_Address" required />
+          <label>Address</label>
+        </div>
+
+        <button type="submit" class="login-btn">Register</button>
+
+        <div class="links">
+          <a href="loginuser.html">Already have an account?</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
