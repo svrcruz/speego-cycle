@@ -1,3 +1,4 @@
+/* userbookservice.css */
 * {
     margin: 0;
     padding: 0;
@@ -10,6 +11,7 @@ body {
     color: #333;
 }
 
+/* Header */
 .header {
     padding: 20px 40px;
     display: flex;
@@ -52,9 +54,9 @@ body {
     font-size: 24px;
     cursor: pointer;
     color: #333;
-    text-decoration: none;
 }
 
+/* Search */
 .search-container {
     max-width: 600px;
     margin: 30px auto;
@@ -72,7 +74,7 @@ body {
     padding: 15px 50px;
     border: none;
     border-radius: 30px;
-    background-color: #e5e5e5;
+    background: #e5e5e5;
     font-size: 14px;
     outline: none;
 }
@@ -96,6 +98,7 @@ body {
     cursor: pointer;
 }
 
+/* Main content */
 .main-content {
     max-width: 900px;
     margin: 0 auto;
@@ -121,8 +124,9 @@ body {
     margin: 0 5px;
 }
 
+/* Booking container */
 .booking-container {
-    background-color: white;
+    background: white;
     border-radius: 20px;
     padding: 40px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -135,7 +139,7 @@ body {
     margin-bottom: 20px;
 }
 
-/* Service Selection */
+/* Service selection */
 .service-selection {
     margin-bottom: 40px;
 }
@@ -149,27 +153,26 @@ body {
 .service-btn {
     padding: 15px 30px;
     border: 2px solid #dc2626;
-    background-color: white;
+    background: white;
     color: #666;
     font-size: 15px;
     font-weight: 500;
     border-radius: 12px;
     cursor: pointer;
-    transition: all 0.3s;
-    font-family: 'Poppins', sans-serif;
+    transition: all .3s;
+    font-family: 'Poppins';
 }
 
 .service-btn.active {
-    background-color: white;
     color: #dc2626;
     border-color: #dc2626;
 }
 
 .service-btn:hover {
-    background-color: #fff5f5;
+    background: #fff5f5;
 }
 
-/* E-Bike Details */
+/* E-Bike details */
 .ebike-details {
     margin-bottom: 40px;
 }
@@ -195,7 +198,7 @@ body {
     font-weight: 600;
     color: #333;
     margin-bottom: 8px;
-    letter-spacing: 0.5px;
+    letter-spacing: .5px;
 }
 
 .form-input {
@@ -204,8 +207,8 @@ body {
     border-radius: 8px;
     font-size: 14px;
     outline: none;
-    transition: border-color 0.2s;
-    font-family: 'Poppins', sans-serif;
+    transition: border-color .2s;
+    font-family: 'Poppins';
 }
 
 .form-input:focus {
@@ -218,21 +221,26 @@ body {
 
 .date-icon {
     position: absolute;
-    right: 5px;
+    right: 10px;
     top: 50%;
     transform: translateY(-50%);
-    color: #666;
-    font-size: 18px;
-    pointer-events: none;
+    cursor: pointer;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+    width: 100%;
 }
 
 .form-textarea {
+    width: 100%;
+    box-sizing: border-box;
     padding: 12px 15px;
     border: 1px solid #d1d1d1;
     border-radius: 8px;
     font-size: 14px;
     outline: none;
-    min-height: 100px;
+    min-height: 140px;
     resize: vertical;
     font-family: 'Poppins', sans-serif;
 }
@@ -241,7 +249,7 @@ body {
     border-color: #dc2626;
 }
 
-/* Diagnosis and Cost Section */
+/* Diagnosis / cost */
 .diagnosis-cost-section {
     display: flex;
     gap: 30px;
@@ -260,24 +268,27 @@ body {
     gap: 20px;
 }
 
+/* Smart diagnosis card */
 .smart-diagnosis-btn {
-    width: 100%;
-    height: 100%;
-    min-height: 200px;
-    border: 2px solid #dc2626;
-    background-color: white;
-    border-radius: 15px;
-    cursor: pointer;
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 20px;
-    transition: all 0.3s;
+    gap: 8px;
+    padding: 40px 20px;
+    border: 2px solid #e63946;
+    border-radius: 10px;
+    background: #fff;
+    color: #e63946;
+    width: 100%;
+    height: 100%;
+    transition: 0.3s;
+    min-height: 180px;
 }
 
 .smart-diagnosis-btn:hover {
-    background-color: #fff5f5;
+    background: #fff5f5;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
 }
@@ -286,7 +297,7 @@ body {
     font-size: 18px;
     font-weight: 600;
     color: #dc2626;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Poppins';
 }
 
 .diagnosis-icon {
@@ -294,17 +305,21 @@ body {
     color: #dc2626;
 }
 
-.cost-time-box {
-    display: flex;
-    flex-direction: column;
+.diagnosis-result {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #333;
+    text-align: center;
+    max-width: 90%;
 }
 
+/* Cost/time display boxes */
 .cost-time-box label {
     font-size: 11px;
     font-weight: 600;
     color: #999;
     margin-bottom: 8px;
-    letter-spacing: 0.5px;
+    letter-spacing: .5px;
 }
 
 .display-box {
@@ -314,7 +329,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: white;
+    background: white;
     min-height: 80px;
 }
 
@@ -323,20 +338,41 @@ body {
     color: #dc2626;
 }
 
-/* Appointment Section */
+/* Appointment section
+   Layout: left column stacks smart sched + selected appointment
+   right column holds confirm button (unchanged) */
 .appointment-section {
     display: flex;
-    gap: 20px;
-    justify-content: center;
-    align-items: center;
+    justify-content: space-between;
+    align-items: flex-start;
     margin-top: 30px;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 40px;
+    gap: 20px;
 }
 
+/* Left stack */
+.appointment-left {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    width: 60%;
+    max-width: 520px;
+}
+
+/* Smart sched button — pulled up slightly and aligned with container */
 .smart-sched-btn {
+    align-self: flex-start;
+    position: relative;
+    margin-top: -22px;
+    /* pulled up a bit (closer to container above) */
     background-color: #8b0000;
     color: white;
     border: none;
-    padding: 15px 30px;
+    padding: 16px 30px;
     border-radius: 10px;
     font-size: 13px;
     font-weight: 600;
@@ -344,48 +380,65 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    transition: background-color 0.3s;
-    font-family: 'Poppins', sans-serif;
-    letter-spacing: 0.5px;
-}
-
-.smart-sched-btn:hover {
-    background-color: #6b0000;
+    transition: background-color .3s;
+    font-family: 'Poppins';
+    letter-spacing: .5px;
 }
 
 .smart-sched-btn i {
     font-size: 20px;
 }
 
+.smart-sched-btn:hover {
+    background-color: #6b0000;
+}
+
+/* Selected appointment text directly beneath the smart sched button */
+.selected-appointment {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #dc2626;
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-left: 0;
+}
+
+/* Confirm button — stays on the right, unchanged */
 .confirm-btn {
     background-color: #a52a2a;
     color: white;
     border: none;
-    padding: 15px 50px;
-    border-radius: 25px;
-    font-size: 16px;
+    padding: 12px 35px;
+    border-radius: 20px;
+    font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.3s;
-    font-family: 'Poppins', sans-serif;
+    transition: background-color .3s;
+    font-family: 'Poppins';
+    margin-left: auto;
+    margin: auto;
 }
 
 .confirm-btn:hover {
     background-color: #8b2323;
 }
 
+/* Sidebar */
 .sidebar {
     position: fixed;
-    right: 0px;
+    right: 0;
     top: 60px;
     width: 180px;
     height: 31.8h;
-    background-color: rgba(141, 1, 1, 0.8);
+    background: rgba(141, 1, 1, 0.8);
     transform: translateX(220px);
-    transition: transform 0.3s ease;
+    transition: transform .3s ease;
     z-index: 1000;
     box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
-    border-radius: 15px 0px 0px 15px;
+    border-radius: 15px 0 0 15px;
 }
 
 .sidebar.active {
@@ -397,22 +450,264 @@ body {
     padding: 18px 25px;
     color: white;
     text-decoration: none;
-    cursor: pointer;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
     font-size: 15px;
     text-align: right;
-    transition: background-color 0.2s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .sidebar-item:hover {
-    background-color: rgba(0, 0, 0, 0.15);
+    background: rgba(0, 0, 0, 0.15);
 }
 
-.sidebar-item:first-child {
-    margin-top: 0;
+/* Modal */
+.schedule-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 3000;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn .3s ease;
 }
 
-/* Responsive */
+.schedule-modal.active {
+    display: flex;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0
+    }
+
+    to {
+        opacity: 1
+    }
+}
+
+.schedule-modal-content {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow: auto;
+    position: relative;
+    animation: slideUp .3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px)
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0)
+    }
+}
+
+.modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    padding: 5px;
+}
+
+.modal-close:hover {
+    color: #dc2626;
+}
+
+.modal-title {
+    font-size: 28px;
+    font-weight: 600;
+    color: #dc2626;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-subtitle {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 30px;
+}
+
+/* Calendar & time slots styles (kept as you had) */
+.calendar-section {
+    margin-bottom: 30px;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.current-month {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+}
+
+.month-nav {
+    background: none;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.month-nav:hover {
+    background: #f5f5f5;
+    border-color: #dc2626;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.day-header {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: #999;
+    padding: 10px 0;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all .2s;
+    border: 2px solid transparent;
+}
+
+.calendar-day.disabled {
+    color: #d1d1d1;
+    cursor: not-allowed;
+    background: #f9f9f9;
+}
+
+.calendar-day.available {
+    background: white;
+    border: 2px solid #e0e0e0;
+    color: #333;
+}
+
+.calendar-day.available:hover {
+    background: #fff5f5;
+    border-color: #dc2626;
+    transform: scale(1.05);
+}
+
+.calendar-day.selected {
+    background: #dc2626;
+    color: white;
+    border-color: #dc2626;
+}
+
+/* time slots */
+.time-slots-section {
+    margin-top: 30px;
+    padding-top: 30px;
+    border-top: 2px solid #f0f0f0;
+}
+
+.slots-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.selected-date-display {
+    font-size: 14px;
+    color: #dc2626;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.time-slots-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.time-slot {
+    padding: 15px 10px;
+    border: 2px solid #e0e0e0;
+    background: white;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .2s;
+    font-family: 'Poppins';
+}
+
+.time-slot:hover:not(.disabled) {
+    background: #fff5f5;
+    border-color: #dc2626;
+    transform: translateY(-2px);
+}
+
+.time-slot.selected {
+    background: #dc2626;
+    color: white;
+    border-color: #dc2626;
+}
+
+.time-slot.disabled {
+    background: #f5f5f5;
+    color: #d1d1d1;
+    cursor: not-allowed;
+    border-color: #f0f0f0;
+}
+
+/* modal confirm */
+.modal-confirm-btn {
+    width: 100%;
+    padding: 15px;
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 30px;
+}
+
+.modal-confirm-btn:hover {
+    background: #b91c1c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+/* Responsive adjustments */
 @media (max-width: 768px) {
     .header {
         padding: 15px 20px;
@@ -457,10 +752,22 @@ body {
 
     .appointment-section {
         flex-direction: column;
+        padding: 0;
+        gap: 12px;
+    }
+
+    .appointment-left {
+        width: 100%;
+        max-width: none;
     }
 
     .smart-sched-btn,
     .confirm-btn {
         width: 100%;
+        margin-top: 0;
+    }
+
+    .time-slots-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }

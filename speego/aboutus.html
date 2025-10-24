@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About Us - SpeegoCycle</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="user-greeting" onclick="window.location.href='userprofile.html'" style="cursor: pointer;">
+            <div class="user-icon">
+                <i class="ph ph-user-circle"></i>
+            </div>
+            <div class="greeting-text">
+                <h3>Hello there,</h3>
+                <p>Juan Dela Cruz</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <span class="home-icon" onclick="window.location.href='index.html'">
+                <i class="ph ph-house"></i>
+            </span>
+            <button class="icon-btn" onclick="toggleSidebar()">
+                <i class="ph ph-list"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <a href="shoppingcart.html" class="sidebar-item">Shopping Cart</a>
+        <a href="orderhistory.html" class="sidebar-item">Order History</a>
+        <a href="aboutus.html" class="sidebar-item">About Us</a>
+        <a href="userservices.html" class="sidebar-item">Services</a>
+        <a href="logout.html" class="sidebar-item">Log Out</a>
+    </div>
+
+    <!-- About Section -->
+    <div class="about-section">
+        <div class="about-content">
+            <div class="about-text">
+                <h1>About <span class="highlight">Speego Cycle</span></h1>
+                <p>
+                    Speego Cycle, an e-bike business, faces growing challenges in managing its operations as demand for
+                    electric bicycles continues to rise.
+                    Currently, customer inquiries, sales transactions, and after-sales services such as repairs, battery
+                    checks, and maintenance requests are
+                    handled manually or through fragmented channels like social media messages, phone calls, and
+                    in-person visits.
+                </p>
+            </div>
+
+            <div class="about-image">
+                <img src="images/Speego C22.png" alt="SpeegoCycle Electric Bike">
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Overlay -->
+    <div id="chatOverlay" class="chat-overlay">
+        <div class="chat-box">
+            <div class="chat-header">
+                <h3>SpeegoPal</h3>
+                <button class="close-chat" id="closeChatBtn">&times;</button>
+            </div>
+            <div class="chat-body">
+                <p>Hello! How can I help you today? 🚴‍♀️</p>
+            </div>
+            <div class="chat-footer">
+                <input type="text" placeholder="Type a message..." />
+                <button class="send-btn"><i class="ph ph-arrow-up"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('active');
+        }
+
+        document.addEventListener('click', function (e) {
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.querySelector('.header-right .icon-btn:last-child');
+
+            if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+                sidebar.classList.remove('active');
+            }
+        });
+
+        const chatOverlay = document.getElementById('chatOverlay');
+        const openChatBtn = document.getElementById('openChatBtn');
+        const closeChatBtn = document.getElementById('closeChatBtn');
+
+        openChatBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            chatOverlay.classList.add('active');
+        });
+
+        closeChatBtn.addEventListener('click', () => {
+            chatOverlay.classList.remove('active');
+        });
+
+        window.addEventListener('click', (e) => {
+            if (chatOverlay.classList.contains('active') && !chatOverlay.querySelector('.chat-box').contains(e.target) && e.target !== openChatBtn) {
+                chatOverlay.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+
+</html>

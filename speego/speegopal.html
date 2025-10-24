@@ -27,40 +27,29 @@
   </header>
 
   <main class="chat-container" id="chatContainer">
-    <div class="chat-messages" id="chatMessages">
-      <!-- Initial messages -->
+    <div class="chat-messages" id="chat-messages">
       <div class="message bot-message">
         <div class="message-bubble">
-          Hello! The next maintainance for your E-Bike is scheduled next week.
-        </div>
-      </div>
-      <div class="message bot-message">
-        <div class="message-bubble">
-          Hi! I'm SpeegoPal, your virtual assisant! What would you like to do today?
+          Hi! I'm SpeegoPal, your virtual assistant. How can I help you today?
         </div>
       </div>
     </div>
   </main>
 
+
   <footer class="chat-footer">
     <div class="input-container">
-      <button class="add-btn" id="addBtn">
-        <i class="ph ph-plus"></i>
-      </button>
-      <input type="text" class="message-input" id="messageInput" placeholder="Need Assistance?">
-      <button class="send-btn" id="sendBtn">
-        <i class="ph ph-arrow-up"></i>
-      </button>
+      <input type="text" id="message-input" class="message-input" placeholder="Type your message..." />
+      <button id="send-btn" class="send-btn">➤</button>
     </div>
   </footer>
 
-  <script>
-    const chatMessages = document.getElementById('chatMessages');
-    const messageInput = document.getElementById('messageInput');
-    const sendBtn = document.getElementById('sendBtn');
-    const addBtn = document.getElementById('addBtn');
 
-    // Auto responses based on keywords
+  <script>
+    const chatMessages = document.getElementById('chat-messages');
+    const messageInput = document.getElementById('message-input');
+    const sendBtn = document.getElementById('send-btn');
+
     const responses = {
       'service': 'I can help you book a service! Would you like to schedule a repair, maintenance, or parts installation?',
       'repair': 'Great! I can schedule a repair service for you. What seems to be the issue with your E-Bike?',
@@ -73,72 +62,56 @@
       'default': 'I\'m here to help! You can ask me about services, parts, scheduling, or anything else related to your E-Bike.'
     };
 
-    // Send message function
-    function sendMessage() {
-      const message = messageInput.value.trim();
-      if (message === '') return;
+    function addMessage(text, type) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${type}-message`;
 
-      // Add user message
+      const bubbleDiv = document.createElement('div');
+      bubbleDiv.className = 'message-bubble';
+      bubbleDiv.textContent = text;
+
+      messageDiv.appendChild(bubbleDiv);
+      chatMessages.appendChild(messageDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const message = messageInput.value.trim();
+      if (!message) return;
+
       addMessage(message, 'user');
       messageInput.value = '';
 
-      // Simulate bot thinking
-      setTimeout(() => {
-        const botResponse = getBotResponse(message);
-        addMessage(botResponse, 'bot');
-      }, 1000);
+      try {
+        const res = await fetch('http://127.0.0.1:5000/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message })
+        });
+        const data = await res.json();
+        if (data.reply) {
+          addMessage(data.reply, 'bot');
+        } else {
+          addMessage(getFallbackResponse(message), 'bot');
+        }
+      } catch (err) {
+        addMessage(getFallbackResponse(message), 'bot');
+      }
     }
 
-    // Get bot response based on keywords
-    function getBotResponse(message) {
+    function getFallbackResponse(message) {
       const lowerMessage = message.toLowerCase();
-      
       for (const [keyword, response] of Object.entries(responses)) {
         if (lowerMessage.includes(keyword)) {
           return response;
         }
       }
-      
       return responses.default;
     }
 
-    // Add message to chat
-    function addMessage(text, type) {
-      const messageDiv = document.createElement('div');
-      messageDiv.className = `message ${type}-message`;
-      
-      const bubbleDiv = document.createElement('div');
-      bubbleDiv.className = 'message-bubble';
-      bubbleDiv.textContent = text;
-      
-      messageDiv.appendChild(bubbleDiv);
-      chatMessages.appendChild(messageDiv);
-      
-      // Scroll to bottom
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-    // Event listeners
     sendBtn.addEventListener('click', sendMessage);
-
-    messageInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        sendMessage();
-      }
-    });
-
-    addBtn.addEventListener('click', function() {
-      alert('Attachment feature coming soon!');
-    });
-
-    // Back button
-    function goBack() {
-      window.history.back();
-    }
-
-    // Auto scroll to bottom on load
-    window.addEventListener('load', function() {
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+    messageInput.addEventListener('keypress', e => {
+      if (e.key === 'Enter') sendMessage();
     });
   </script>
 </body>

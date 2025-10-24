@@ -1,4 +1,3 @@
-/* Reset & Global */
 * {
   margin: 0;
   padding: 0;
@@ -12,7 +11,6 @@ body {
   margin: 0 auto;
 }
 
-/* Header */
 .header {
   background-color: transparent;
   padding: 20px 30px;
@@ -65,7 +63,6 @@ body {
   font-size: 20px;
 }
 
-/* Search Bar */
 .search-bar {
   margin: 20px auto;
   position: relative;
@@ -89,7 +86,15 @@ body {
   color: #999;
 }
 
-.close-icon,
+.close-icon {
+  position: absolute;
+  right: 45px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  cursor: pointer;
+}
+
 .filter-icon {
   position: absolute;
   right: 45px;
@@ -100,7 +105,6 @@ body {
   font-size: 18px;
 }
 
-/* Hero Section */
 .hero-section {
   margin: 20px 30px;
   background: linear-gradient(to right, white 40%, #e0e0e0 40%);
@@ -138,7 +142,6 @@ body {
   border-color: #999;
 }
 
-/* Hero Image */
 .hero-image {
   position: relative;
   width: 400px;
@@ -146,6 +149,7 @@ body {
   background-color: #f0f0f0;
   border-radius: 15px;
   overflow: hidden;
+  /* ensures image stays inside the rounded edges */
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: center;
@@ -156,8 +160,11 @@ body {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  /* or 'cover' if you want it to fill fully */
   border-radius: 15px;
 }
+
+
 
 .sale-badge {
   position: absolute;
@@ -171,7 +178,6 @@ body {
   font-weight: bold;
 }
 
-/* Sections */
 .section {
   margin: 30px;
   max-width: 1340px;
@@ -198,7 +204,6 @@ body {
   font-size: 14px;
 }
 
-/* Carousel */
 .carousel-container {
   position: relative;
   overflow: hidden;
@@ -218,34 +223,35 @@ body {
   display: none;
 }
 
-/* Card Styles */
 .card {
   min-width: 280px;
-  height: 180px;
+  height: 200px;
   background-color: white;
-  border-radius: 15px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 10px;
   overflow: hidden;
+  /* ensures images stay inside rounded corners */
 }
 
 .card img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  border-radius: 12px;
+  /* keeps image proportions inside the card */
+  border-radius: 10px;
   transition: transform 0.3s ease;
 }
 
 .card:hover img {
   transform: scale(1.05);
+  /* optional zoom effect */
 }
 
-/* Sidebar */
+
 .sidebar {
   position: fixed;
   right: 0px;
@@ -284,14 +290,11 @@ body {
   margin-top: 0;
 }
 
-/* Chat Overlay (optional) */
+/* ==== Chat Overlay & Box ==== */
 .chat-overlay {
   position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background: rgba(0, 0, 0, 0.4);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
   display: none;
   justify-content: flex-end;
   align-items: flex-end;
@@ -303,20 +306,132 @@ body {
 }
 
 .chat-box {
-  background: white;
-  width: 350px;
-  height: 450px;
-  border-radius: 12px 12px 0 0;
-  padding: 1rem;
+  background: #ffffff;
+  width: 360px;
+  height: 520px;
+  border-radius: 20px 20px 0 0;
+  margin: 0 25px 0 0;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   transform: translateY(100%);
-  transition: transform 0.3s ease;
+  transition: transform 0.35s ease;
 }
 
 .chat-overlay.active .chat-box {
   transform: translateY(0);
 }
 
-/* Responsive */
+/* ==== Chat Header ==== */
+.chat-header {
+  background-color: #AF0101;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.close-chat {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.close-chat:hover {
+  transform: scale(1.2);
+}
+
+/* ==== Chat Body ==== */
+.chat-body {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  background: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chat-body p {
+  background: #ffffff;
+  align-self: flex-start;
+  color: #333;
+  font-size: 14px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  max-width: 80%;
+  line-height: 1.4;
+}
+
+/* Optional user response bubble (if you add one later) */
+.chat-body .user-msg {
+  background: #AF0101;
+  color: #fff;
+  align-self: flex-end;
+}
+
+/* ==== Chat Footer ==== */
+.chat-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #fff;
+  border-top: 1px solid #ddd;
+}
+
+.chat-footer input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s;
+}
+
+.chat-footer input:focus {
+  border-color: #AF0101;
+  box-shadow: 0 0 0 1px #AF0101;
+}
+
+.send-btn {
+  background-color: #AF0101;
+  border: none;
+  color: white;
+  padding: 10px 12px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.send-btn:hover {
+  background-color: #C71515;
+}
+
+/* ==== Mobile Adjustments ==== */
+@media (max-width: 600px) {
+  .chat-box {
+    width: 100%;
+    height: 65%;
+    margin: 0;
+    border-radius: 20px 20px 0 0;
+  }
+}
+
+
 @media (max-width: 768px) {
   .hero-section {
     flex-direction: column;
@@ -330,4 +445,92 @@ body {
   .card {
     min-width: 150px;
   }
+}
+
+/* ==== About Us Section ==== */
+.about-section {
+  margin: 40px auto;
+  padding: 60px 50px;
+  background: linear-gradient(to right, white 50%, #e0e0e0 50%);
+  border-radius: 15px;
+  max-width: 1340px;
+  min-height: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.about-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.about-text {
+  flex: 1;
+  min-width: 320px;
+}
+
+.about-text h1 {
+  font-size: 40px;
+  color: #525252;
+  margin-bottom: 20px;
+}
+
+.about-text .highlight {
+  color: #AF0101;
+  /* yellow accent for brand consistency */
+}
+
+.about-text p {
+  font-size: 15px;
+  color: #333;
+  margin-bottom: 15px;
+  line-height: 1.7;
+  text-align: justify;
+}
+
+.about-image {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.about-image img {
+  width: 100%;
+  max-width: 450px;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  object-fit: contain;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .about-section {
+    background: #fff;
+    padding: 40px 25px;
+  }
+
+  .about-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .about-text h1 {
+    font-size: 32px;
+  }
+
+  .about-image img {
+    max-width: 300px;
+    margin-top: 20px;
+  }
+}
+
+.home-icon {
+  font-size: 24px;
+  cursor: pointer;
+  color: #333;
 }

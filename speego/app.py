@@ -13,7 +13,7 @@ CORS(app)
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
-    'password': '',
+    'password': 'Password1$',
     'database': 'speegotest'
 }
 

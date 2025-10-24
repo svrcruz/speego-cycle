@@ -63,10 +63,10 @@
         <div class="service-image"></div>
         <h3 class="service-name">Parts Installation</h3>
       </div>
-      <div class="service-card">
+      <a href="speegopal.html" class="service-card">
         <div class="service-image"></div>
         <h3 class="service-name">SpeegoPal ChatBot</h3>
-      </div>
+    </div>
     </div>
 
     <div class="book-service-container">
@@ -83,44 +83,29 @@
   </div>
 
   <script>
-  // Sidebar toggle functionality
-  const menuToggle = document.getElementById('menuToggle');
-  menuToggle.addEventListener('click', function (e) {
-    e.stopPropagation();
-    const sidebar = document.getElementById('sidebar');
-    sidebar.classList.toggle('active');
-  });
-
-  // Close sidebar when clicking outside
-  document.addEventListener('click', function (e) {
-    const sidebar = document.getElementById('sidebar');
+    // Sidebar toggle functionality
     const menuToggle = document.getElementById('menuToggle');
+    menuToggle.addEventListener('click', function (e) {
+      e.stopPropagation();
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('active');
+    });
 
-    if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-      sidebar.classList.remove('active');
-    }
-  });
+    // Close sidebar when clicking outside
+    document.addEventListener('click', function (e) {
+      const sidebar = document.getElementById('sidebar');
+      const menuToggle = document.getElementById('menuToggle');
 
-  // Prevent sidebar from closing when clicking inside it
-  document.getElementById('sidebar').addEventListener('click', function (e) {
-    e.stopPropagation();
-  });
+      if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+        sidebar.classList.remove('active');
+      }
+    });
 
-  // ✅ NEW: Fetch user data to update greeting dynamically
-  document.addEventListener("DOMContentLoaded", () => {
-    fetch("get_user_data.php")
-      .then(response => response.json())
-      .then(data => {
-        if (data.error) return;
-        const nameDisplay = document.querySelector(".greeting-text p");
-        if (nameDisplay) {
-          nameDisplay.textContent = `${data.Customer_FName} ${data.Customer_LName}`;
-        }
-      })
-      .catch(err => console.error("User fetch error:", err));
-  });
-</script>
-
+    // Prevent sidebar from closing when clicking inside it
+    document.getElementById('sidebar').addEventListener('click', function (e) {
+      e.stopPropagation();
+    });
+  </script>
 </body>
 
 </html>
