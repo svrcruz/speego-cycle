@@ -55,64 +55,64 @@
     <a href="orderhistory.html" class="sidebar-item">Order History</a>
     <a href="aboutus.html" class="sidebar-item">About Us</a>
     <a href="userservices.html" class="sidebar-item">Services</a>
-    <a href="logout.html" class="sidebar-item">Log Out</a>
+    <a href="loginuser.html" class="sidebar-item">Log Out</a>
   </div>
 
   <script>
-  // Sidebar toggle
-  document.getElementById('menuToggle').addEventListener('click', function (e) {
-    e.stopPropagation();
-    document.getElementById('sidebar').classList.toggle('active');
-  });
+    // Sidebar toggle
+    document.getElementById('menuToggle').addEventListener('click', function (e) {
+      e.stopPropagation();
+      document.getElementById('sidebar').classList.toggle('active');
+    });
 
-  document.addEventListener('click', function (e) {
-    const sidebar = document.getElementById('sidebar');
-    const menuToggle = document.getElementById('menuToggle');
-    if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-      sidebar.classList.remove('active');
-    }
-  });
+    document.addEventListener('click', function (e) {
+      const sidebar = document.getElementById('sidebar');
+      const menuToggle = document.getElementById('menuToggle');
+      if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+        sidebar.classList.remove('active');
+      }
+    });
 
-  // Load user name
-  document.addEventListener("DOMContentLoaded", () => {
-    fetch("get_user_data.php")
-      .then(res => res.json())
-      .then(data => {
-        if (!data.error) {
-          const nameEl = document.querySelector(".greeting-text p");
-          nameEl.textContent = `${data.Customer_FName} ${data.Customer_LName}`;
-        }
-      })
-      .catch(err => console.error("User fetch error:", err));
-  });
+    // Load user name
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("get_user_data.php")
+        .then(res => res.json())
+        .then(data => {
+          if (!data.error) {
+            const nameEl = document.querySelector(".greeting-text p");
+            nameEl.textContent = `${data.Customer_FName} ${data.Customer_LName}`;
+          }
+        })
+        .catch(err => console.error("User fetch error:", err));
+    });
 
-  // Load orders with shipping address
-  document.addEventListener("DOMContentLoaded", () => {
-    fetch("get_orders.php")
-      .then(res => res.json())
-      .then(data => {
-        const container = document.getElementById("ordersContainer");
-        container.innerHTML = "";
+    // Load orders with shipping address
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("get_orders.php")
+        .then(res => res.json())
+        .then(data => {
+          const container = document.getElementById("ordersContainer");
+          container.innerHTML = "";
 
-        if (!data || data.length === 0) {
-          container.innerHTML = `<p style="text-align:center; color:#888;">No orders found.</p>`;
-          return;
-        }
+          if (!data || data.length === 0) {
+            container.innerHTML = `<p style="text-align:center; color:#888;">No orders found.</p>`;
+            return;
+          }
 
-        data.forEach(order => {
-          const orderCard = document.createElement("div");
-          orderCard.classList.add("order-card");
+          data.forEach(order => {
+            const orderCard = document.createElement("div");
+            orderCard.classList.add("order-card");
 
-          const orderDate = new Date(order.OrderDate).toLocaleDateString("en-US", {
-            month: "short", day: "numeric", year: "numeric"
-          });
+            const orderDate = new Date(order.OrderDate).toLocaleDateString("en-US", {
+              month: "short", day: "numeric", year: "numeric"
+            });
 
-          const totalAmount = parseFloat(order.TotalAmount).toLocaleString();
-          const shippingAddress = order.ShippingAddress || "No address provided";
+            const totalAmount = parseFloat(order.TotalAmount).toLocaleString();
+            const shippingAddress = order.ShippingAddress || "No address provided";
 
-          let itemsHTML = "";
-          order.items.forEach(item => {
-            itemsHTML += `
+            let itemsHTML = "";
+            order.items.forEach(item => {
+              itemsHTML += `
               <div class="product-section">
                 <div class="product-image"></div>
                 <div class="product-details">
@@ -133,9 +133,9 @@
                   </div>
                 </div>
               </div>`;
-          });
+            });
 
-          orderCard.innerHTML = `
+            orderCard.innerHTML = `
             <div class="order-header">
               <div class="order-info">
                 <div class="info-item">
@@ -163,15 +163,15 @@
               ${itemsHTML}
             </div>`;
 
-          container.appendChild(orderCard);
+            container.appendChild(orderCard);
+          });
+        })
+        .catch(err => {
+          console.error("Order fetch error:", err);
+          document.getElementById("ordersContainer").innerHTML = `<p style="text-align:center; color:red;">Error loading orders.</p>`;
         });
-      })
-      .catch(err => {
-        console.error("Order fetch error:", err);
-        document.getElementById("ordersContainer").innerHTML = `<p style="text-align:center; color:red;">Error loading orders.</p>`;
-      });
-  });
-</script>
+    });
+  </script>
 
 
 </body>

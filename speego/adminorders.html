@@ -1,13 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orders - Admin</title>
     <link rel="stylesheet" href="adminorders.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+
+    </style>
 </head>
+
 <body>
     <div class="admin-container">
         <!-- Sidebar -->
@@ -64,106 +70,122 @@
                     <div class="header-cell">Quantity</div>
                     <div class="header-cell">Total Price</div>
                 </div>
-
-                
+                <!-- rows added by JS -->
             </div>
         </main>
     </div>
 
+    <!-- STATUS MODAL -->
+    <div id="statusModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Update Order Status</h3>
+            <select id="statusSelect">
+                <option value="Pending">Pending</option>
+                <option value="Processing">Processing</option>
+                <option value="Shipped">Shipped</option>
+                <option value="Delivered">Delivered</option>
+                <option value="Cancelled">Cancelled</option>
+            </select>
+            <div class="modal-buttons">
+                <button id="saveStatusBtn" class="save-btn">Save</button>
+                <button id="closeModalBtn" class="cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-    // Sidebar toggle
-    const sidebar = document.getElementById('sidebar');
-    const toggleBtn = document.getElementById('toggleBtn');
+        // Sidebar toggle
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('toggleBtn');
+        toggleBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
 
-    toggleBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('collapsed');
-    });
+        // Load orders
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('get_admin_orders.php')
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.querySelector('.orders-container');
+                    const existingRows = container.querySelectorAll('.order-row');
+                    existingRows.forEach(row => row.remove());
 
-    // Fetch and display orders on page load
-    document.addEventListener('DOMContentLoaded', () => {
-        fetch('get_admin_orders.php')
-            .then(res => res.json())
-            .then(data => {
-                const container = document.querySelector('.orders-container');
-                if (data.error) {
-                    alert(data.error);
-                    return;
-                }
-                if (data.orders.length === 0) {
-                    container.innerHTML += '<p>No orders yet. Orders will appear here after purchases are made.</p>';
-                    return;
-                }
-                // Clear any existing rows (though none should be there)
-                const existingRows = container.querySelectorAll('.order-row');
-                existingRows.forEach(row => row.remove());
+                    if (!data.orders || data.orders.length === 0) {
+                        const msg = document.createElement('p');
+                        msg.textContent = "No orders yet. Orders will appear here after purchases are made.";
+                        container.appendChild(msg);
+                        return;
+                    }
 
-                data.orders.forEach(order => {
-                    const orderRow = document.createElement('div');
-                    orderRow.className = 'order-row';
-                    orderRow.onclick = () => toggleOrderDetails(orderRow);
+                    data.orders.forEach(order => {
+                        const row = document.createElement('div');
+                        row.className = 'order-row';
+                        row.innerHTML = `
+                      <div class="order-cell">#${order.OrderID}</div>
+                      <div class="order-cell customer-cell">
+                          <div class="customer-avatar"></div>
+                          <span>${order.Customer}</span>
+                      </div>
+                      <div class="order-cell">${order.Items}</div>
+                      <div class="order-cell">${order.Quantity}</div>
+                      <div class="order-cell">₱${parseFloat(order.TotalAmount).toFixed(2)}</div>
+                  `;
+                        container.appendChild(row);
+                    });
 
-                    // Parse items for display (e.g., show first item and "+X more" if applicable)
-                    const itemsArray = order.Items.split(', '); // Split GROUP_CONCAT result
-                    const firstItem = itemsArray[0];
-                    const moreCount = itemsArray.length - 1;
-                    const itemsDisplay = moreCount > 0 ? `${firstItem} <a href="#" class="more-link">+${moreCount} more</a>` : firstItem;
-
-                    // Calculate total quantity from items (sum quantities)
-                    const totalQuantity = itemsArray.reduce((sum, item) => {
-                        const qtyMatch = item.match(/\$Qty: (\d+)\$/);
-                        return sum + (qtyMatch ? parseInt(qtyMatch[1]) : 0);
-                    }, 0);
-
-                    orderRow.innerHTML = `
-                        <div class="order-cell">${order.OrderID}</div>
-                        <div class="order-cell customer-cell">
-                            <div class="customer-avatar"></div>
-                            <span>${order.FirstName} ${order.LastName}</span>
-                        </div>
-                        <div class="order-cell">${itemsDisplay}</div>
-                        <div class="order-cell">${totalQuantity}</div>
-                        <div class="order-cell">₱${parseFloat(order.Total).toFixed(2)}</div>
-                    `;
-                    container.appendChild(orderRow);
-                });
-
-                // Re-attach search functionality after dynamic loading
-                attachSearch();
-            })
-            .catch(err => console.error('Error fetching orders:', err));
-    });
-
-    // Search functionality (updated to work with dynamic rows)
-    function attachSearch() {
-        const searchInput = document.getElementById('searchInput');
-        const orderRows = document.querySelectorAll('.order-row');
-
-        searchInput.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            
-            orderRows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? 'grid' : 'none';
-            });
+                    attachSearch();
+                    attachRowClick();
+                })
+                .catch(err => console.error('Error loading orders:', err));
         });
-    }
 
-    // Order row click
-    function toggleOrderDetails(row) {
-        const orderId = row.querySelector('.order-cell').textContent;
-        alert(`View details for order ${orderId}`);
-        // In a real application, this would open a modal or navigate to order details page
-    }
-
-    // Prevent more link from triggering row click
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('more-link')) {
-            e.stopPropagation();
-            const orderRow = e.target.closest('.order-row');
-            const orderId = orderRow.querySelector('.order-cell').textContent;
-            alert(`View all products for ${orderId}`);
+        // Search filter
+        function attachSearch() {
+            const input = document.getElementById('searchInput');
+            input.addEventListener('input', () => {
+                const term = input.value.toLowerCase();
+                document.querySelectorAll('.order-row').forEach(row => {
+                    row.style.display = row.textContent.toLowerCase().includes(term) ? 'grid' : 'none';
+                });
+            });
         }
-    });
-</script>
+
+        // When clicking an order row, show modal
+        let selectedOrderId = null;
+
+        function attachRowClick() {
+            document.querySelectorAll('.order-row').forEach(row => {
+                row.addEventListener('click', () => {
+                    selectedOrderId = row.querySelector('.order-cell').textContent.replace('#', '').trim();
+                    document.getElementById('statusModal').classList.remove('hidden');
+                });
+            });
+        }
+
+        // Modal Buttons
+        document.getElementById('closeModalBtn').addEventListener('click', () => {
+            document.getElementById('statusModal').classList.add('hidden');
+        });
+
+        document.getElementById('saveStatusBtn').addEventListener('click', () => {
+            const newStatus = document.getElementById('statusSelect').value;
+            if (!selectedOrderId) return;
+
+            fetch('update_order_status.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderId: selectedOrderId, status: newStatus })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Order status updated!');
+                        location.reload();
+                    } else {
+                        alert('Failed to update order status.');
+                    }
+                })
+                .catch(err => console.error('Update error:', err));
+        });
+    </script>
 </body>
+
 </html>

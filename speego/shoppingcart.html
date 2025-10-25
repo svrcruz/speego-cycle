@@ -40,8 +40,8 @@
     </div>
 
     <div class="cart-items" id="cartItems">
-  <p>Loading your cart...</p>
-</div>
+      <p>Loading your cart...</p>
+    </div>
 
 
 
@@ -62,47 +62,47 @@
           <span class="total-amount" id="totalAmount">₱0</span>
         </div>
       </div>
-      <button class="checkout-btn" id="checkoutBtn"  style="cursor: pointer;">
+      <button class="checkout-btn" id="checkoutBtn" style="cursor: pointer;">
         Check Out (<span id="itemCount">0</span>)
       </button>
     </div>
   </footer>
 
   <div class="sidebar" id="sidebar">
-    <div class="sidebar-item">Shopping Cart</div>
-    <div class="sidebar-item">Order History</div>
-    <div class="sidebar-item">About Us</div>
-    <div class="sidebar-item">Services</div>
-    <div class="sidebar-item">Log Out</div>
+    <div class="sidebar-item" onclick="window.location.href='shoppingcart.html'">Shopping Cart</div>
+    <div class="sidebar-item" onclick="window.location.href='orderhistory.html'">Order History</div>
+    <div class="sidebar-item" onclick="window.location.href='aboutus.html'">About Us</div>
+    <div class="sidebar-item" onclick="window.location.href='userservices.html'">Services</div>
+    <div class="sidebar-item" onclick="window.location.href='loginuser.html'">Log Out</div>
   </div>
 
   <script>
-  // --- Fetch cart data from PHP ---
-  const cartData = {};
+    // --- Fetch cart data from PHP ---
+    const cartData = {};
 
-  fetch('shoppingcart.php')
-    .then(response => response.json())
-    .then(data => {
-      if (data.error) {
-        alert(data.error);
-        return;
-      }
+    fetch('shoppingcart.php')
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          alert(data.error);
+          return;
+        }
 
-      const cartContainer = document.getElementById('cartItems');
-      cartContainer.innerHTML = '';
+        const cartContainer = document.getElementById('cartItems');
+        cartContainer.innerHTML = '';
 
-      data.cart.forEach(item => {
-        const id = item.ProductID;
-        cartData[id] = {
-          name: item.ProductName,
-          price: parseInt(item.Price),
-          quantity: parseInt(item.Quantity)
-        };
+        data.cart.forEach(item => {
+          const id = item.ProductID;
+          cartData[id] = {
+            name: item.ProductName,
+            price: parseInt(item.Price),
+            quantity: parseInt(item.Quantity)
+          };
 
-        const cartItem = document.createElement('div');
-        cartItem.classList.add('cart-item');
-        cartItem.dataset.id = id;
-        cartItem.innerHTML = `
+          const cartItem = document.createElement('div');
+          cartItem.classList.add('cart-item');
+          cartItem.dataset.id = id;
+          cartItem.innerHTML = `
           <input type="checkbox" class="item-checkbox checkbox" data-id="${id}">
           <div class="item-image">
             <img src="${item.ImageURL || 'placeholder.png'}" alt="">
@@ -120,151 +120,151 @@
             </div>
           </div>
         `;
-        cartContainer.appendChild(cartItem);
-      });
+          cartContainer.appendChild(cartItem);
+        });
 
-      initializeCartFunctions();
-      updateTotal();
-    })
-    .catch(err => console.error('Error loading cart:', err));
-
-  // --- CART FUNCTIONS ---
-  function updateTotal() {
-    let total = 0;
-    let count = 0;
-    
-    document.querySelectorAll('.item-checkbox:checked').forEach(checkbox => {
-      const id = checkbox.dataset.id;
-      const item = cartData[id];
-      total += item.price * item.quantity;
-      count++;
-    });
-
-    document.getElementById('totalAmount').textContent = `₱${total.toLocaleString()}`;
-    document.getElementById('itemCount').textContent = count;
-  }
-
-  function initializeCartFunctions() {
-    // Select all functionality
-    document.getElementById('selectAll').addEventListener('change', function() {
-      const checkboxes = document.querySelectorAll('.item-checkbox');
-      checkboxes.forEach(cb => cb.checked = this.checked);
-      document.getElementById('selectAllBottom').checked = this.checked;
-      updateTotal();
-    });
-
-    document.getElementById('selectAllBottom').addEventListener('change', function() {
-      const checkboxes = document.querySelectorAll('.item-checkbox');
-      checkboxes.forEach(cb => cb.checked = this.checked);
-      document.getElementById('selectAll').checked = this.checked;
-      updateTotal();
-    });
-
-    // Individual checkbox
-    document.querySelectorAll('.item-checkbox').forEach(checkbox => {
-      checkbox.addEventListener('change', function() {
-        const allChecked = document.querySelectorAll('.item-checkbox:checked').length === 
-                          document.querySelectorAll('.item-checkbox').length;
-        document.getElementById('selectAll').checked = allChecked;
-        document.getElementById('selectAllBottom').checked = allChecked;
+        initializeCartFunctions();
         updateTotal();
+      })
+      .catch(err => console.error('Error loading cart:', err));
+
+    // --- CART FUNCTIONS ---
+    function updateTotal() {
+      let total = 0;
+      let count = 0;
+
+      document.querySelectorAll('.item-checkbox:checked').forEach(checkbox => {
+        const id = checkbox.dataset.id;
+        const item = cartData[id];
+        total += item.price * item.quantity;
+        count++;
       });
-    });
 
-    // Quantity controls
-document.querySelectorAll('.qty-btn').forEach(btn => {
-  btn.addEventListener('click', function () {
-    const id = this.dataset.id;
-    const input = document.querySelector(`.qty-input[data-id="${id}"]`);
-    let quantity = parseInt(input.value);
-
-    if (this.classList.contains('plus')) {
-      quantity++;
-    } else if (this.classList.contains('minus') && quantity > 1) {
-      quantity--;
+      document.getElementById('totalAmount').textContent = `₱${total.toLocaleString()}`;
+      document.getElementById('itemCount').textContent = count;
     }
 
-    input.value = quantity;
-    cartData[id].quantity = quantity;
-    updateTotal();
-
-    //Update database
-    fetch('updatecart.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        product_id: id,
-        quantity: quantity
-      })
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (!data.success) {
-          alert('Failed to update cart');
-        }
-      })
-      .catch(err => console.error('Error updating cart:', err));
-  });
-});
-
-    // Delete selected
-    document.getElementById('deleteSelected').addEventListener('click', function() {
-      const selectedItems = document.querySelectorAll('.item-checkbox:checked');
-      
-      if (selectedItems.length === 0) {
-        alert('Please select items to delete');
-        return;
-      }
-
-      if (confirm(`Delete ${selectedItems.length} item(s)?`)) {
-        selectedItems.forEach(checkbox => {
-          const id = checkbox.dataset.id;
-          delete cartData[id];
-          checkbox.closest('.cart-item').remove();
-        });
+    function initializeCartFunctions() {
+      // Select all functionality
+      document.getElementById('selectAll').addEventListener('change', function () {
+        const checkboxes = document.querySelectorAll('.item-checkbox');
+        checkboxes.forEach(cb => cb.checked = this.checked);
+        document.getElementById('selectAllBottom').checked = this.checked;
         updateTotal();
-      }
-    });
+      });
 
-    // Modify the checkout button click handler
-  document.getElementById('checkoutBtn').addEventListener('click', function() {
-  const selectedItems = [];
-  document.querySelectorAll('.item-checkbox:checked').forEach(cb => {
-    selectedItems.push(cb.dataset.id);
-  });
-  if (selectedItems.length > 0) {
-    localStorage.setItem('selectedCartItems', JSON.stringify(selectedItems));
-    window.location.href = 'checkout.html'; // navigate AFTER saving
-  } else {
-    alert('No items selected');
-  }
-});
+      document.getElementById('selectAllBottom').addEventListener('change', function () {
+        const checkboxes = document.querySelectorAll('.item-checkbox');
+        checkboxes.forEach(cb => cb.checked = this.checked);
+        document.getElementById('selectAll').checked = this.checked;
+        updateTotal();
+      });
+
+      // Individual checkbox
+      document.querySelectorAll('.item-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function () {
+          const allChecked = document.querySelectorAll('.item-checkbox:checked').length ===
+            document.querySelectorAll('.item-checkbox').length;
+          document.getElementById('selectAll').checked = allChecked;
+          document.getElementById('selectAllBottom').checked = allChecked;
+          updateTotal();
+        });
+      });
+
+      // Quantity controls
+      document.querySelectorAll('.qty-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+          const id = this.dataset.id;
+          const input = document.querySelector(`.qty-input[data-id="${id}"]`);
+          let quantity = parseInt(input.value);
+
+          if (this.classList.contains('plus')) {
+            quantity++;
+          } else if (this.classList.contains('minus') && quantity > 1) {
+            quantity--;
+          }
+
+          input.value = quantity;
+          cartData[id].quantity = quantity;
+          updateTotal();
+
+          //Update database
+          fetch('updatecart.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              product_id: id,
+              quantity: quantity
+            })
+          })
+            .then(res => res.json())
+            .then(data => {
+              if (!data.success) {
+                alert('Failed to update cart');
+              }
+            })
+            .catch(err => console.error('Error updating cart:', err));
+        });
+      });
+
+      // Delete selected
+      document.getElementById('deleteSelected').addEventListener('click', function () {
+        const selectedItems = document.querySelectorAll('.item-checkbox:checked');
+
+        if (selectedItems.length === 0) {
+          alert('Please select items to delete');
+          return;
+        }
+
+        if (confirm(`Delete ${selectedItems.length} item(s)?`)) {
+          selectedItems.forEach(checkbox => {
+            const id = checkbox.dataset.id;
+            delete cartData[id];
+            checkbox.closest('.cart-item').remove();
+          });
+          updateTotal();
+        }
+      });
+
+      // Modify the checkout button click handler
+      document.getElementById('checkoutBtn').addEventListener('click', function () {
+        const selectedItems = [];
+        document.querySelectorAll('.item-checkbox:checked').forEach(cb => {
+          selectedItems.push(cb.dataset.id);
+        });
+        if (selectedItems.length > 0) {
+          localStorage.setItem('selectedCartItems', JSON.stringify(selectedItems));
+          window.location.href = 'checkout.html'; // navigate AFTER saving
+        } else {
+          alert('No items selected');
+        }
+      });
 
 
 
-    // Sidebar toggle
-    document.getElementById('menuToggle').addEventListener('click', function(e) {
-      e.stopPropagation();
-      document.getElementById('sidebar').classList.toggle('active');
-    });
+      // Sidebar toggle
+      document.getElementById('menuToggle').addEventListener('click', function (e) {
+        e.stopPropagation();
+        document.getElementById('sidebar').classList.toggle('active');
+      });
 
-    document.addEventListener('click', function(e) {
-      const sidebar = document.getElementById('sidebar');
-      const menuToggle = document.getElementById('menuToggle');
-      if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-        sidebar.classList.remove('active');
-      }
-    });
+      document.addEventListener('click', function (e) {
+        const sidebar = document.getElementById('sidebar');
+        const menuToggle = document.getElementById('menuToggle');
+        if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+          sidebar.classList.remove('active');
+        }
+      });
 
-    // Back button
-    document.querySelector('.back-arrow').addEventListener('click', function(e) {
-      e.preventDefault();
-      window.history.back();
-    });
-  }
+      // Back button
+      document.querySelector('.back-arrow').addEventListener('click', function (e) {
+        e.preventDefault();
+        window.history.back();
+      });
+    }
 
-  
-</script>
+
+  </script>
 
 </body>
 

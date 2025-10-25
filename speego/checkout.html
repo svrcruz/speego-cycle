@@ -122,53 +122,53 @@
     <a href="orderhistory.html" class="sidebar-item">Order History</a>
     <a href="aboutus.html" class="sidebar-item">About Us</a>
     <a href="userservices.html" class="sidebar-item">Services</a>
-    <a href="logout.html" class="sidebar-item">Log Out</a>
-</div>
+    <a href="loginuser.html" class="sidebar-item">Log Out</a>
+  </div>
 
   <script>
-  const sidebar = document.getElementById('sidebar');
-  const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    const menuToggle = document.getElementById('menuToggle');
 
-  menuToggle.addEventListener('click', function (e) {
-    e.stopPropagation();
-    sidebar.classList.toggle('active');
-  });
+    menuToggle.addEventListener('click', function (e) {
+      e.stopPropagation();
+      sidebar.classList.toggle('active');
+    });
 
-  document.addEventListener('click', function (e) {
-    if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-      sidebar.classList.remove('active');
-    }
-  });
+    document.addEventListener('click', function (e) {
+      if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+        sidebar.classList.remove('active');
+      }
+    });
 
-  // NEW: Fetch and display selected cart items on page load
- document.addEventListener("DOMContentLoaded", () => {
-  const selectedIds = JSON.parse(localStorage.getItem('selectedCartItems') || '[]');
-  const orderItemsContainer = document.getElementById('orderItems');
-  
-  if (selectedIds.length === 0) {
-    orderItemsContainer.innerHTML = '<p>No items selected for checkout.</p>';
-    document.getElementById('totalAmount').textContent = '₱0';
-    return;
-  }
+    // NEW: Fetch and display selected cart items on page load
+    document.addEventListener("DOMContentLoaded", () => {
+      const selectedIds = JSON.parse(localStorage.getItem('selectedCartItems') || '[]');
+      const orderItemsContainer = document.getElementById('orderItems');
 
-  fetch('shoppingcart.php')
-    .then(res => res.json())
-    .then(data => {
-      const selectedItems = data.cart.filter(item => selectedIds.includes(item.ProductID.toString()));
-      if (selectedItems.length === 0) {
-        orderItemsContainer.innerHTML = '<p>No matching items found.</p>';
+      if (selectedIds.length === 0) {
+        orderItemsContainer.innerHTML = '<p>No items selected for checkout.</p>';
         document.getElementById('totalAmount').textContent = '₱0';
         return;
       }
 
-      let total = 0;
-      orderItemsContainer.innerHTML = '';
-      selectedItems.forEach(item => {
-        const subtotal = parseFloat(item.Price) * parseInt(item.Quantity);
-        total += subtotal;
-        const div = document.createElement('div');
-        div.classList.add('summary-item');
-        div.innerHTML = `
+      fetch('shoppingcart.php')
+        .then(res => res.json())
+        .then(data => {
+          const selectedItems = data.cart.filter(item => selectedIds.includes(item.ProductID.toString()));
+          if (selectedItems.length === 0) {
+            orderItemsContainer.innerHTML = '<p>No matching items found.</p>';
+            document.getElementById('totalAmount').textContent = '₱0';
+            return;
+          }
+
+          let total = 0;
+          orderItemsContainer.innerHTML = '';
+          selectedItems.forEach(item => {
+            const subtotal = parseFloat(item.Price) * parseInt(item.Quantity);
+            total += subtotal;
+            const div = document.createElement('div');
+            div.classList.add('summary-item');
+            div.innerHTML = `
           <div class="item-left">
             <div class="item-img"></div>
             <div class="item-details">
@@ -178,49 +178,49 @@
           </div>
           <p class="item-price">₱${subtotal.toLocaleString()}</p>
         `;
-        orderItemsContainer.appendChild(div);
-      });
-      document.getElementById('totalAmount').textContent = `₱${total.toLocaleString()}`;
+            orderItemsContainer.appendChild(div);
+          });
+          document.getElementById('totalAmount').textContent = `₱${total.toLocaleString()}`;
+        });
     });
-});
 
 
-  document.getElementById('purchaseBtn').addEventListener('click', function() {
-  const selectedItems = JSON.parse(localStorage.getItem('selectedCartItems') || '[]');
-  if (selectedItems.length === 0) {
-    alert('No items selected');
-    return;
-  }
-  // Collect form data
-  const formData = new FormData();
-formData.append('selectedItems', JSON.stringify(selectedItems));
-formData.append('firstName', document.querySelector('input[placeholder="ex. Juan"]').value);
-formData.append('lastName', document.querySelector('input[placeholder="ex. Dela Cruz"]').value);
-formData.append('email', document.querySelector('input[type="email"]').value);
-formData.append('phone', document.querySelector('input[placeholder="ex. 09123456789"]').value);
-formData.append('address', document.querySelector('input[placeholder^="ex. #"]').value); // street address
-formData.append('city', document.querySelector('input[placeholder="ex. Lipa"]').value);
-formData.append('zip', document.querySelector('input[placeholder="ex. 4217"]').value);
-formData.append('deliveryMethod', document.querySelector('input[name="delivery"]:checked').value);
-formData.append('paymentMethod', document.querySelector('input[name="payment"]:checked').value);
-
-
-  // Add other form fields similarly
-  formData.append('paymentMethod', document.querySelector('input[name="payment"]:checked').value);
-  fetch('process_order.php', { method: 'POST', body: formData })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-  localStorage.removeItem('selectedCartItems');
-  window.location.href = 'orderhistory.html';
-}
- else {
-        alert('Order failed: ' + data.message);
+    document.getElementById('purchaseBtn').addEventListener('click', function () {
+      const selectedItems = JSON.parse(localStorage.getItem('selectedCartItems') || '[]');
+      if (selectedItems.length === 0) {
+        alert('No items selected');
+        return;
       }
-    });
-});
+      // Collect form data
+      const formData = new FormData();
+      formData.append('selectedItems', JSON.stringify(selectedItems));
+      formData.append('firstName', document.querySelector('input[placeholder="ex. Juan"]').value);
+      formData.append('lastName', document.querySelector('input[placeholder="ex. Dela Cruz"]').value);
+      formData.append('email', document.querySelector('input[type="email"]').value);
+      formData.append('phone', document.querySelector('input[placeholder="ex. 09123456789"]').value);
+      formData.append('address', document.querySelector('input[placeholder^="ex. #"]').value); // street address
+      formData.append('city', document.querySelector('input[placeholder="ex. Lipa"]').value);
+      formData.append('zip', document.querySelector('input[placeholder="ex. 4217"]').value);
+      formData.append('deliveryMethod', document.querySelector('input[name="delivery"]:checked').value);
+      formData.append('paymentMethod', document.querySelector('input[name="payment"]:checked').value);
 
-</script>
+
+      // Add other form fields similarly
+      formData.append('paymentMethod', document.querySelector('input[name="payment"]:checked').value);
+      fetch('process_order.php', { method: 'POST', body: formData })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            localStorage.removeItem('selectedCartItems');
+            window.location.href = 'orderhistory.html';
+          }
+          else {
+            alert('Order failed: ' + data.message);
+          }
+        });
+    });
+
+  </script>
 
 </body>
 

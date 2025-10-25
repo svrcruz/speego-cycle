@@ -48,8 +48,8 @@
           <option value="">All</option>
           <option value="Battery">Battery</option>
           <option value="Wheels">Wheels</option>
-          <option value="Handlebars">Handlebars</option>       
-         </select>
+          <option value="Handlebars">Handlebars</option>
+        </select>
       </div>
       <div class="filter-group">
         <label>Price Range:</label>
@@ -92,34 +92,34 @@
             <p class="product-name">Motor - 1500W</p>
             <p class="product-price">₱7,000</p>
           </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image">
+            <img src="images/Tail Light.jpg" alt="Tail Light">
           </div>
-          <div class="product-card">
-            <div class="product-image">
-              <img src="images/Tail Light.jpg" alt="Tail Light">
-            </div>
-            <div class="product-info">
-              <p class="product-name">Tail Light</p>
-              <p class="product-price">₱800</p>
-            </div>
+          <div class="product-info">
+            <p class="product-name">Tail Light</p>
+            <p class="product-price">₱800</p>
           </div>
-          <div class="product-card">
-            <div class="product-image">
-              <img src="images/Charging Port.png" alt="Charging Port">
-            </div>
-            <div class="product-info">
-              <p class="product-name">Charging Port</p>
-              <p class="product-price">₱200</p>
-            </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image">
+            <img src="images/Charging Port.png" alt="Charging Port">
           </div>
-          <div class="product-card">
-            <div class="product-image">
-              <img src="images/Controller.png" alt="Controller">
-            </div>
-            <div class="product-info">
-              <p class="product-name">Controller</p>
-              <p class="product-price">₱4,000</p>
-            </div>
-            </div>
+          <div class="product-info">
+            <p class="product-name">Charging Port</p>
+            <p class="product-price">₱200</p>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-image">
+            <img src="images/Controller.png" alt="Controller">
+          </div>
+          <div class="product-info">
+            <p class="product-name">Controller</p>
+            <p class="product-price">₱4,000</p>
+          </div>
+        </div>
     </section>
 
     <!-- Wheels Section -->
@@ -128,7 +128,7 @@
       <div class="product-grid">
         <div class="product-card">
           <div class="product-image">
-            <img src="images/Tire.webp" alt=""Tire>
+            <img src="images/Tire.webp" alt="" Tire>
           </div>
           <div class="product-info">
             <p class="product-name">Tire</p>
@@ -176,13 +176,13 @@
     <a href="orderhistory.html" class="sidebar-item">Order History</a>
     <a href="aboutus.html" class="sidebar-item">About Us</a>
     <a href="userservices.html" class="sidebar-item">Services</a>
-    <a href="logout.html" class="sidebar-item">Log Out</a>
-</div>
+    <a href="loginuser.html" class="sidebar-item">Log Out</a>
+  </div>
 
   <script>
     // Store all products with their categories and prices
     const allProducts = [];
-    
+
     // Build product data from DOM
     document.querySelectorAll('.product-section').forEach(section => {
       const category = section.querySelector('.section-title').textContent;
@@ -205,10 +205,10 @@
     // Search functionality
     document.getElementById('searchInput').addEventListener('input', function (e) {
       const searchTerm = e.target.value.toLowerCase();
-      
+
       filteredProducts.forEach(product => {
-        const matchesSearch = product.name.toLowerCase().includes(searchTerm) || 
-                             product.priceText.toLowerCase().includes(searchTerm);
+        const matchesSearch = product.name.toLowerCase().includes(searchTerm) ||
+          product.priceText.toLowerCase().includes(searchTerm);
         product.element.style.display = matchesSearch ? 'block' : 'none';
       });
     });
@@ -226,7 +226,7 @@
 
       filteredProducts = allProducts.filter(product => {
         const matchCategory = !category || product.category === category;
-        
+
         let matchPrice = true;
         if (priceRange) {
           const [min, max] = priceRange.split('-').map(v => parseInt(v));
@@ -236,16 +236,16 @@
             matchPrice = product.price >= min;
           }
         }
-        
+
         return matchCategory && matchPrice;
       });
 
       // Hide all products first
       allProducts.forEach(product => product.element.style.display = 'none');
-      
+
       // Show filtered products
       filteredProducts.forEach(product => product.element.style.display = 'block');
-      
+
       document.getElementById('filterPanel').classList.remove('active');
     });
 
@@ -254,10 +254,10 @@
       document.getElementById('filterCategory').value = '';
       document.getElementById('filterPrice').value = '';
       document.getElementById('searchInput').value = '';
-      
+
       filteredProducts = [...allProducts];
       allProducts.forEach(product => product.element.style.display = 'block');
-      
+
       document.getElementById('filterPanel').classList.remove('active');
     });
 

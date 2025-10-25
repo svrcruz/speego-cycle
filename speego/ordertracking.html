@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,7 +19,7 @@
       </div>
       <div class="greeting-text">
         <h3>Hello there,</h3>
-        <p>Juan Dela Cruz</p>
+        <p>Loading...</p>
       </div>
     </div>
 
@@ -47,15 +48,15 @@
         <div class="tracking-info">
           <div>
             <p class="label">Order ID:</p>
-            <h3 class="value">#EBIKE123</h3>
+            <h3 class="value" id="orderId">Loading...</h3>
           </div>
           <div>
             <p class="label">Order Date:</p>
-            <h3 class="value">Sept 20, 2025</h3>
+            <h3 class="value" id="orderDate">Loading...</h3>
           </div>
           <div>
             <p class="label">Estimated Delivery:</p>
-            <h3 class="value">Sept 25, 2025</h3>
+            <h3 class="value" id="estimatedDelivery">Loading...</h3>
           </div>
         </div>
       </div>
@@ -63,19 +64,19 @@
       <!-- Progress Bar -->
       <div class="progress-container">
         <div class="progress-bar">
-          <div class="step completed">
+          <div class="step" id="step1">
             <i class="ph ph-check-circle"></i>
             <p>Order Placed</p>
           </div>
-          <div class="step completed">
+          <div class="step" id="step2">
             <i class="ph ph-truck"></i>
             <p>Shipped</p>
           </div>
-          <div class="step current">
+          <div class="step" id="step3">
             <i class="ph ph-navigation-arrow"></i>
             <p>Out for Delivery</p>
           </div>
-          <div class="step">
+          <div class="step" id="step4">
             <i class="ph ph-package"></i>
             <p>Delivered</p>
           </div>
@@ -87,22 +88,15 @@
       <div class="order-summary">
         <div class="product-image"></div>
         <div class="product-details">
-          <h2>E-Bike 1</h2>
-          <p><strong>Color:</strong> White</p>
-          <p><strong>Capacity:</strong> 4 Seater</p>
-          <p><strong>Battery:</strong> 1500w</p>
-          <p><strong>Features:</strong> With Fan, Crownlight, Reverse Camera</p>
+          <h2 id="productName">Loading...</h2>
         </div>
       </div>
 
       <!-- Status Updates -->
       <div class="status-updates">
         <h3>Delivery Updates</h3>
-        <ul>
-          <li>Package out for delivery – Sept 24, 2025, 9:00 AM</li>
-          <li> Package departed from Lipa Distribution Center – Sept 23, 2025, 4:00 PM</li>
-          <li>Order packed and ready for shipment – Sept 21, 2025, 2:00 PM</li>
-          <li>Order placed successfully – Sept 20, 2025, 10:00 AM</li>
+        <ul id="deliveryUpdates">
+          <li>Loading status updates...</li>
         </ul>
       </div>
     </div>
@@ -112,40 +106,134 @@
   <div class="sidebar" id="sidebar">
     <div class="sidebar-item" onclick="window.location.href='shoppingcart.html'">Shopping Cart</div>
     <div class="sidebar-item" onclick="window.location.href='orderhistory.html'">Order History</div>
-    <div class="sidebar-item">About Us</div>
-    <div class="sidebar-item">Services</div>
-    <div class="sidebar-item">Log Out</div>
+    <div class="sidebar-item" onclick="window.location.href='aboutus.html'">About Us</div>
+    <div class="sidebar-item" onclick="window.location.href='userservices.html'">Services</div>
+    <div class="sidebar-item" onclick="window.location.href='loginuser.html'">Log Out</div>
   </div>
 
   <script>
-  const menuToggle = document.getElementById('menuToggle');
-  const sidebar = document.getElementById('sidebar');
+    // Sidebar toggle
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
 
-  menuToggle.addEventListener('click', (e) => {
-    e.stopPropagation();
-    sidebar.classList.toggle('active');
-  });
+    menuToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sidebar.classList.toggle('active');
+    });
 
-  document.addEventListener('click', (e) => {
-    if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-      sidebar.classList.remove('active');
+    document.addEventListener('click', (e) => {
+      if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+        sidebar.classList.remove('active');
+      }
+    });
+
+    // Fetch user data
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("get_user_data.php")
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) return;
+          const nameDisplay = document.querySelector(".greeting-text p");
+          if (nameDisplay) {
+            nameDisplay.textContent = `${data.Customer_FName} ${data.Customer_LName}`;
+          }
+        })
+        .catch(err => console.error("User fetch error:", err));
+    });
+
+    // Fetch order details
+    document.addEventListener("DOMContentLoaded", () => {
+      const params = new URLSearchParams(window.location.search);
+      const orderId = params.get("orderId");
+      if (!orderId) return;
+
+      fetch(`get_order_details.php?orderId=${orderId}`)
+        .then(res => res.json())
+        .then(order => {
+          if (order.error) return;
+
+          // Fill header info
+          document.getElementById("orderId").textContent = `#${order.OrderID}`;
+          const orderDate = new Date(order.OrderDate);
+          document.getElementById("orderDate").textContent = orderDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+          // Estimated delivery = +5 days
+          const estimatedDate = new Date(orderDate);
+          estimatedDate.setDate(orderDate.getDate() + 5);
+          document.getElementById("estimatedDelivery").textContent = estimatedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+          // Product name
+          document.getElementById("productName").textContent =
+            (order.items && order.items[0] && order.items[0].ProductName) || 'Unknown Item';
+
+          // Progress update
+          updateProgress(order.Status);
+
+          // Delivery updates list (based on status)
+          const updates = document.getElementById("deliveryUpdates");
+          updates.innerHTML = generateDeliveryUpdates(order.Status, order.OrderDate);
+        })
+        .catch(err => console.error("Order details fetch error:", err));
+    });
+
+    // Update progress bar based on status
+    function updateProgress(status) {
+      const steps = document.querySelectorAll('.step');
+      steps.forEach(step => step.classList.remove('completed', 'current'));
+
+      let stepIndex = 0;
+      switch (status.toLowerCase()) {
+        case 'pending':
+        case 'processing':
+          stepIndex = 1; break;
+        case 'shipped':
+          stepIndex = 2; break;
+        case 'out for delivery':
+          stepIndex = 3; break;
+        case 'delivered':
+          stepIndex = 4; break;
+        default:
+          stepIndex = 1;
+      }
+
+      for (let i = 0; i < stepIndex - 1; i++) {
+        steps[i].classList.add('completed');
+      }
+      if (stepIndex > 0) {
+        steps[stepIndex - 1].classList.add('current');
+      }
     }
-  });
 
-  //Fetch user data to update greeting dynamically
-  document.addEventListener("DOMContentLoaded", () => {
-    fetch("get_user_data.php")
-      .then(response => response.json())
-      .then(data => {
-        if (data.error) return;
-        const nameDisplay = document.querySelector(".greeting-text p");
-        if (nameDisplay) {
-          nameDisplay.textContent = `${data.Customer_FName} ${data.Customer_LName}`;
-        }
-      })
-      .catch(err => console.error("User fetch error:", err));
-  });
-</script>
+    // Generate delivery updates text based on status
+    function generateDeliveryUpdates(status, orderDate) {
+      const updates = [];
+      const baseDate = new Date(orderDate);
 
+      updates.push(`Order placed successfully – ${baseDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`);
+
+      if (["processing", "shipped", "out for delivery", "delivered"].includes(status.toLowerCase())) {
+        const packed = new Date(baseDate); packed.setDate(baseDate.getDate() + 1);
+        updates.unshift(`Order packed and ready for shipment – ${packed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`);
+      }
+
+      if (["shipped", "out for delivery", "delivered"].includes(status.toLowerCase())) {
+        const departed = new Date(baseDate); departed.setDate(baseDate.getDate() + 2);
+        updates.unshift(`Package departed from Distribution Center – ${departed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`);
+      }
+
+      if (["out for delivery", "delivered"].includes(status.toLowerCase())) {
+        const out = new Date(baseDate); out.setDate(baseDate.getDate() + 3);
+        updates.unshift(`Package out for delivery – ${out.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`);
+      }
+
+      if (status.toLowerCase() === "delivered") {
+        const delivered = new Date(baseDate); delivered.setDate(baseDate.getDate() + 4);
+        updates.unshift(`Package delivered – ${delivered.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`);
+      }
+
+      return updates.map(u => `<li>${u}</li>`).join("");
+    }
+  </script>
 </body>
+
 </html>

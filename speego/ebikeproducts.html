@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -185,7 +186,7 @@
     <a href="orderhistory.html" class="sidebar-item">Order History</a>
     <a href="aboutus.html" class="sidebar-item">About Us</a>
     <a href="userservices.html" class="sidebar-item">Services</a>
-    <a href="logout.html" class="sidebar-item">Log Out</a>
+    <a href="loginuser.html" class="sidebar-item">Log Out</a>
   </div>
 
   <!-- Add-to-Cart Popup -->
@@ -198,99 +199,100 @@
     </div>
   </div>
 
- <script>
-document.addEventListener('DOMContentLoaded', function () {
-    let currentCustomerID = null;
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      let currentCustomerID = null;
 
-    // Fetch logged-in user data
-    fetch('get_user_data.php')
+      // Fetch logged-in user data
+      fetch('get_user_data.php')
         .then(response => response.json())
         .then(data => {
-            if (data.error) {
-                alert('Please log in to add items to cart.');
-                window.location.href = 'loginuser.html';
-                return;
-            }
-            currentCustomerID = data.CustomerID;
-            console.log('Logged-in CustomerID:', currentCustomerID);
-        })
-        .catch(err => {
-            console.error('Error fetching user data:', err);
-            alert('Unable to load user data. Please log in.');
+          if (data.error) {
+            alert('Please log in to add items to cart.');
             window.location.href = 'loginuser.html';
-        });
-
-    // Attach click listeners to product cards
-    document.querySelectorAll('.product-card').forEach(card => {
-        card.addEventListener('click', function () {
-            if (!currentCustomerID) {
-                alert('Please log in to add items to cart.');
-                return;
-            }
-
-            const productName = this.querySelector('.product-name').textContent;
-            const productPrice = this.querySelector('.product-price').textContent;
-            const productId = this.dataset.id;
-
-            document.getElementById('popupProductName').textContent = productName;
-            document.getElementById('popupProductPrice').textContent = productPrice;
-
-            const btn = document.getElementById('confirmAddToCart');
-            btn.dataset.id = productId;
-            document.getElementById('cartPopup').classList.add('active');
-        });
-    });
-
-    // Add to cart button
-document.getElementById('confirmAddToCart').addEventListener('click', function () {
-    if (!currentCustomerID) {
-        alert('Please log in to add items to cart.');
-        return;
-    }
-
-    const productId = this.dataset.id;
-    const formData = new FormData();
-    formData.append('product_id', productId);
-    formData.append('customer_id', currentCustomerID);
-    formData.append('quantity', 1);
-
-    fetch('add_to_cart.php', { method: 'POST', body: formData })
-        .then(res => res.text())
-        .then(result => {
-            if (result.includes('successfully') || result.includes('added')) {  // Check for success (adjust based on your backend response)
-                alert('Item added to cart! Redirecting to cart...');
-                document.getElementById('cartPopup').classList.remove('active');
-                // Redirect to shopping cart page
-                window.location.href = 'shoppingcart.html';
-            } else {
-                alert('Error: ' + result);  // Show error if not successful
-            }
+            return;
+          }
+          currentCustomerID = data.CustomerID;
+          console.log('Logged-in CustomerID:', currentCustomerID);
         })
         .catch(err => {
+          console.error('Error fetching user data:', err);
+          alert('Unable to load user data. Please log in.');
+          window.location.href = 'loginuser.html';
+        });
+
+      // Attach click listeners to product cards
+      document.querySelectorAll('.product-card').forEach(card => {
+        card.addEventListener('click', function () {
+          if (!currentCustomerID) {
+            alert('Please log in to add items to cart.');
+            return;
+          }
+
+          const productName = this.querySelector('.product-name').textContent;
+          const productPrice = this.querySelector('.product-price').textContent;
+          const productId = this.dataset.id;
+
+          document.getElementById('popupProductName').textContent = productName;
+          document.getElementById('popupProductPrice').textContent = productPrice;
+
+          const btn = document.getElementById('confirmAddToCart');
+          btn.dataset.id = productId;
+          document.getElementById('cartPopup').classList.add('active');
+        });
+      });
+
+      // Add to cart button
+      document.getElementById('confirmAddToCart').addEventListener('click', function () {
+        if (!currentCustomerID) {
+          alert('Please log in to add items to cart.');
+          return;
+        }
+
+        const productId = this.dataset.id;
+        const formData = new FormData();
+        formData.append('product_id', productId);
+        formData.append('customer_id', currentCustomerID);
+        formData.append('quantity', 1);
+
+        fetch('add_to_cart.php', { method: 'POST', body: formData })
+          .then(res => res.text())
+          .then(result => {
+            if (result.includes('successfully') || result.includes('added')) {  // Check for success (adjust based on your backend response)
+              alert('Item added to cart! Redirecting to cart...');
+              document.getElementById('cartPopup').classList.remove('active');
+              // Redirect to shopping cart page
+              window.location.href = 'shoppingcart.html';
+            } else {
+              alert('Error: ' + result);  // Show error if not successful
+            }
+          })
+          .catch(err => {
             alert('Error adding to cart. Please try again.');
             console.error(err);
-        });
-});
+          });
+      });
 
-    // Close popup
-    document.getElementById('closePopup').addEventListener('click', function () {
+      // Close popup
+      document.getElementById('closePopup').addEventListener('click', function () {
         document.getElementById('cartPopup').classList.remove('active');
+      });
+
+
+      // Sidebar toggle
+      document.getElementById('menuToggle').addEventListener('click', function (e) {
+        e.stopPropagation();
+        document.getElementById('sidebar').classList.toggle('active');
+      });
+
+      document.addEventListener('click', function (e) {
+        const sidebar = document.getElementById('sidebar');
+        const toggle = document.getElementById('menuToggle');
+        if (!sidebar.contains(e.target) && !toggle.contains(e.target)) sidebar.classList.remove('active');
+      });
     });
-
-
-  // Sidebar toggle
-  document.getElementById('menuToggle').addEventListener('click', function (e) {
-    e.stopPropagation();
-    document.getElementById('sidebar').classList.toggle('active');
-  });
-
-  document.addEventListener('click', function (e) {
-    const sidebar = document.getElementById('sidebar');
-    const toggle = document.getElementById('menuToggle');
-    if (!sidebar.contains(e.target) && !toggle.contains(e.target)) sidebar.classList.remove('active');
-  });
-});
-</script>
+  </script>
 
 </body>
+
 </html>
