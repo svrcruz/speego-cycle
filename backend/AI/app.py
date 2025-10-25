@@ -532,7 +532,23 @@ def create_service_request():
     appointment_date = data.get('appointment_date')
     ai_diagnosis = data.get('ai_diagnosis')
     confidence_score = data.get('confidence_score')
-    product_id = data.get('product_id')
+    product_name = data.get('product_name')
+    product_id = None
+
+    # Try to find the product by name
+    cursor.execute("SELECT ProductID FROM product WHERE Product_Name = %s LIMIT 1", (product_name,))
+    found_product = cursor.fetchone()
+
+    if found_product:
+        product_id = found_product[0]
+    else:
+        # Optionally add a placeholder if product doesn't exist
+        cursor.execute("""
+            INSERT INTO product (Product_Name, Category, Price, Stock, Reorder_Level)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (product_name, 'Unknown', 0, 0, 0))
+        product_id = cursor.lastrowid
+        conn.commit()
 
     conn = get_db_connection()
     if not conn:
