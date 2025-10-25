@@ -48,7 +48,7 @@
     <section class="product-section">
       <h2 class="section-title">New Arrivals!</h2>
       <div class="product-grid">
-        <div class="product-card">
+        <div class="product-card" data-id="21">
           <div class="product-image">
             <img src="images/Charger.png" alt="Charger">
           </div>
@@ -57,7 +57,7 @@
             <p class="product-price">₱1,250</p>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="22">
           <div class="product-image">
             <img src="images/Mini Fan.png" alt="Mini Fan">
           </div>
@@ -71,7 +71,7 @@
     <section class="product-section">
       <h2 class="section-title">Popular Accessories</h2>
       <div class="product-grid">
-        <div class="product-card">
+        <div class="product-card" data-id="23">
           <div class="product-image">
             <img src="images/Horn.png" alt="Horn">
           </div>
@@ -80,7 +80,7 @@
             <p class="product-price">₱500</p>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="24">
           <div class="product-image">
             <img src="images/Speaker.jpg" alt="Speaker">
           </div>
@@ -89,7 +89,7 @@
             <p class="product-price">₱650</p>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="25">
           <div class="product-image">
             <img src="images/Throttle.png" alt="Throttle">
           </div>
@@ -108,53 +108,129 @@
     <a href="userservices.html" class="sidebar-item">Services</a>
     <a href="logout.html" class="sidebar-item">Log Out</a>
 </div>
+<!-- Add-to-Cart Popup -->
+<div id="cartPopup" class="cart-popup">
+  <div class="popup-content">
+    <h3 id="popupProductName"></h3>
+    <p id="popupProductPrice"></p>
+    <button id="confirmAddToCart">Add to Cart</button>
+    <button id="closePopup">Cancel</button>
+  </div>
+</div>
 
-  <script>
-    // same JS logic reused
-    const allProducts = [];
-    document.querySelectorAll('.product-section').forEach(section => {
-      const category = section.querySelector('.section-title').textContent;
-      section.querySelectorAll('.product-card').forEach(card => {
-        const name = card.querySelector('.product-name').textContent;
-        const priceText = card.querySelector('.product-price').textContent;
-        const price = parseInt(priceText.replace(/[₱,]/g, ''));
-        allProducts.push({
-          element: card,
-          name: name,
-          price: price,
-          priceText: priceText,
-          category: category
+
+   <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      let currentCustomerID = null;
+
+      // Fetch logged-in user
+      fetch('get_user_data.php')
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) {
+            alert('Please log in to add items to cart.');
+            window.location.href = 'loginuser.html';
+            return;
+          }
+          currentCustomerID = data.CustomerID;
+        })
+        .catch(err => {
+          alert('Error fetching user data. Please log in.');
+          window.location.href = 'loginuser.html';
+        });
+
+      // Product card click
+      document.querySelectorAll('.product-card').forEach(card => {
+        card.addEventListener('click', function () {
+          if (!currentCustomerID) {
+            alert('Please log in to add items to cart.');
+            return;
+          }
+
+          const productName = this.querySelector('.product-name').textContent;
+          const productPrice = this.querySelector('.product-price').textContent;
+          const productId = this.dataset.id;
+
+          document.getElementById('popupProductName').textContent = productName;
+          document.getElementById('popupProductPrice').textContent = productPrice;
+
+          const btn = document.getElementById('confirmAddToCart');
+          btn.dataset.id = productId;
+
+          document.getElementById('cartPopup').classList.add('active');
         });
       });
-    });
 
-    let filteredProducts = [...allProducts];
+      // Add to cart
+      document.getElementById('confirmAddToCart').addEventListener('click', function () {
+        const productId = this.dataset.id;
+        const formData = new FormData();
+        formData.append('product_id', productId);
+        formData.append('customer_id', currentCustomerID);
+        formData.append('quantity', 1);
 
-    document.getElementById('searchInput').addEventListener('input', function (e) {
-      const searchTerm = e.target.value.toLowerCase();
-      filteredProducts.forEach(product => {
-        const matches = product.name.toLowerCase().includes(searchTerm) || product.priceText.toLowerCase().includes(searchTerm);
-        product.element.style.display = matches ? 'block' : 'none';
+        fetch('add_to_cart.php', { method: 'POST', body: formData })
+          .then(res => res.text())
+          .then(result => {
+            if (result.includes('successfully') || result.includes('added')) {
+              alert('Item added to cart! Redirecting to cart...');
+              document.getElementById('cartPopup').classList.remove('active');
+              window.location.href = 'shoppingcart.html';
+            } else {
+              alert('Error: ' + result);
+            }
+          })
+          .catch(err => {
+            alert('Error adding to cart.');
+            console.error(err);
+          });
       });
-    });
 
-    document.getElementById('menuToggle').addEventListener('click', e => {
-      e.stopPropagation();
-      document.getElementById('sidebar').classList.toggle('active');
-    });
+      // Close popup
+      document.getElementById('closePopup').addEventListener('click', function () {
+        document.getElementById('cartPopup').classList.remove('active');
+      });
 
-    document.addEventListener('click', e => {
-      const sidebar = document.getElementById('sidebar');
-      const toggle = document.getElementById('menuToggle');
-      if (!sidebar.contains(e.target) && !toggle.contains(e.target)) {
-        sidebar.classList.remove('active');
-      }
-    });
+      // Search functionality
+      const allProducts = [];
+      document.querySelectorAll('.product-section').forEach(section => {
+        const category = section.querySelector('.section-title').textContent;
+        section.querySelectorAll('.product-card').forEach(card => {
+          const name = card.querySelector('.product-name').textContent;
+          const priceText = card.querySelector('.product-price').textContent;
+          const price = parseInt(priceText.replace(/[₱,]/g, ''));
+          allProducts.push({
+            element: card,
+            name: name,
+            price: price,
+            priceText: priceText,
+            category: category
+          });
+        });
+      });
 
-    document.querySelectorAll('.product-card').forEach(card => {
-      card.addEventListener('click', function () {
-        const productName = this.querySelector('.product-name').textContent;
-        alert(`Viewing details for ${productName}`);
+      let filteredProducts = [...allProducts];
+
+      document.getElementById('searchInput').addEventListener('input', function (e) {
+        const searchTerm = e.target.value.toLowerCase();
+        filteredProducts.forEach(product => {
+          const matches = product.name.toLowerCase().includes(searchTerm) || product.priceText.toLowerCase().includes(searchTerm);
+          product.element.style.display = matches ? 'block' : 'none';
+        });
+      });
+
+      // Sidebar toggle
+      document.getElementById('menuToggle').addEventListener('click', e => {
+        e.stopPropagation();
+        document.getElementById('sidebar').classList.toggle('active');
+      });
+
+      document.addEventListener('click', e => {
+        const sidebar = document.getElementById('sidebar');
+        const toggle = document.getElementById('menuToggle');
+        if (!sidebar.contains(e.target) && !toggle.contains(e.target)) {
+          sidebar.classList.remove('active');
+        }
       });
     });
   </script>
