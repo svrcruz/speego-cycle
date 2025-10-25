@@ -259,6 +259,71 @@
         // Load when the page opens
         loadRecommendedProducts(1); // Replace 1 with the logged-in user's ID if available
     </script>
+
+    <script>
+        function toggleChat() {
+            const chatbox = document.getElementById('chatbox');
+            const chatLog = document.getElementById('chatLog');
+
+            // Toggle visibility
+            chatbox.classList.toggle('active');
+
+            // Show welcome message only once
+            if (chatbox.classList.contains('active') && chatLog.innerHTML.trim() === '') {
+                chatLog.innerHTML = `<p><strong>SpeegoPal:</strong> Hello! I'm SpeegoPal, your e-bike assistant. How can I help you today?</p>`;
+            }
+        }
+
+        document.getElementById('minimizeBtn').addEventListener('click', () => {
+            document.getElementById('chatbox').classList.remove('active');
+        });
+
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            // Clear input immediately
+            input.value = '';
+
+            // Show user message
+            const chatLog = document.getElementById('chatLog');
+            chatLog.innerHTML += `<p><strong>You:</strong> ${message}</p>`;
+
+            // Show typing animation
+            const typingIndicator = document.createElement('p');
+            typingIndicator.id = 'typing';
+            typingIndicator.innerHTML = `<strong>SpeegoPal:</strong> <em>Typing...</em>`;
+            chatLog.appendChild(typingIndicator);
+            chatLog.scrollTop = chatLog.scrollHeight;
+
+            // Send to Flask backend
+            const response = await fetch('http://127.0.0.1:5000/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            });
+
+            const data = await response.json();
+
+            // Remove typing animation
+            typingIndicator.remove();
+
+            // Show bot response
+            chatLog.innerHTML += `<p><strong>SpeegoPal:</strong> ${data.reply}</p>`;
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
+        // Listen for Enter key
+        document.addEventListener('DOMContentLoaded', () => {
+            const input = document.getElementById('userInput');
+            input.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

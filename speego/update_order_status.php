@@ -1,31 +1,43 @@
 <?php
-session_start();
-
-$servername = "localhost";
-$dbuser = "root";
-$dbpass = "Password1$";
-$dbname = "speegotest";
-
-$conn = new mysqli($servername, $dbuser, $dbpass, $dbname);
-if ($conn->connect_error) {
-    die(json_encode(['error' => 'Database connection failed']));
-}
-
 header('Content-Type: application/json');
 
-$data = json_decode(file_get_contents("php://input"), true);
+$servername = "localhost";
+$username = "root";
+$password = "Password1$";
+$dbname = "speegotest";
 
-if (!isset($data['orderId']) || !isset($data['status'])) {
-    echo json_encode(['error' => 'Missing orderId or status']);
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+if ($conn->connect_error) {
+    echo json_encode(['success' => false, 'error' => 'Database connection failed']);
     exit;
 }
 
-$orderId = intval($data['orderId']);
-$status = $conn->real_escape_string($data['status']);
+// Ensure it's a POST request
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Get the posted data
+    $serviceRequestID = isset($_POST['serviceRequestID']) ? intval($_POST['serviceRequestID']) : 0;
+    $status = isset($_POST['status']) ? trim($_POST['status']) : '';
 
-$sql = "UPDATE orders SET Status = '$status' WHERE OrderID = $orderId";
-if ($conn->query($sql) === TRUE) {
-    echo json_encode(['success' => true]);
+    // Validation
+    if ($serviceRequestID <= 0 || $status === '') {
+        echo json_encode(['success' => false, 'error' => 'Missing serviceRequestID or status']);
+        exit;
+    }
+
+    // Update service_request table
+    $stmt = $conn->prepare("UPDATE service_request SET status = ? WHERE serviceRequestID = ?");
+    $stmt->bind_param("si", $status, $serviceRequestID);
+
+    if ($stmt->execute()) {
+        echo json_encode(['success' => true, 'message' => 'Status updated successfully']);
+    } else {
+        echo json_encode(['success' => false, 'error' => 'Failed to execute update']);
+    }
+
+    $stmt->close();
 } else {
-    echo json_encode(['error' => $conn->error]);
+    echo json_encode(['success' => false, 'error' => 'Invalid request method']);
 }
+
+$conn->close();

@@ -180,27 +180,67 @@
                     const tableBody = document.getElementById('tableBody');
                     tableBody.innerHTML = '';
 
-                    if (data.length === 0) {
+                    if (!data || data.length === 0) {
                         tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No service requests found</td></tr>`;
                         return;
                     }
 
                     data.forEach(req => {
+                        console.log(req);
                         const row = document.createElement('tr');
                         row.innerHTML = `
-                    <td>${req.customerName}</td>
-                    <td>${req.ebikeModel}</td>
-                    <td>${req.appointmentDate}</td>
-                    <td>${req.technicianName}</td>
-                    <td>${req.serviceType}</td>
-                    <td><span class="status-badge ${req.status.toLowerCase().replace(' ', '-')}">${req.status}</span></td>
-                    <td><i class="ph ph-pencil-simple edit-icon"></i></td>
-                `;
+          <td>${req.customerName}</td>
+          <td>${req.ebikeModel}</td>
+          <td>${req.appointmentDate}</td>
+          <td>${req.technicianName}</td>
+          <td>${req.serviceType}</td>
+          <td>
+            <select class="status-dropdown" data-id="${req.serviceRequestID}">
+              <option value="Pending" ${req.status === 'Pending' ? 'selected' : ''}>Pending</option>
+              <option value="In Progress" ${req.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+              <option value="Confirmed" ${req.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+              <option value="Completed" ${req.status === 'Completed' ? 'selected' : ''}>Completed</option>
+              <option value="Cancelled" ${req.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+            </select>
+          </td>
+        `;
                         tableBody.appendChild(row);
                     });
+
+                    //When admin changes dropdown, update DB instantly
+                    document.querySelectorAll('.status-dropdown').forEach(drop => {
+                        drop.addEventListener('change', async function () {
+                            const id = this.dataset.id;
+                            const newStatus = this.value;
+
+                            console.log("Updating serviceRequestID:", id, "to status:", newStatus);
+
+                            const formData = new FormData();
+                            formData.append('serviceRequestID', id);
+                            formData.append('status', newStatus);
+
+                            try {
+                                const res = await fetch('update_service_status.php', {
+                                    method: 'POST',
+                                    body: formData
+                                });
+                                const result = await res.json();
+                                console.log('Server response:', result);
+
+                                if (result.success) {
+                                    this.style.backgroundColor = newStatus === 'Completed' ? '#c8e6c9' : '#fff';
+                                } else {
+                                    alert('Failed to update: ' + result.error);
+                                }
+                            } catch (err) {
+                                console.error('Fetch error:', err);
+                            }
+                        });
+                    });
                 })
-                .catch(err => console.error('Error fetching service requests:', err));
+                .catch(err => console.error('Error fetching admin service requests:', err));
         });
+
     </script>
 </body>
 

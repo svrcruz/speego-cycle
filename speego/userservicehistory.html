@@ -22,7 +22,7 @@
       <a href="usertrack.html" class="nav-link">Track Service Requests</a>
       <a href="index.html" class="home-icon">
         <i class="ph ph-house"></i>
-        </span></a>
+      </a>
       <span class="menu-icon" id="menuToggle">
         <i class="ph ph-list"></i>
       </span>
@@ -86,9 +86,7 @@
             <th></th>
           </tr>
         </thead>
-        <tbody id="tableBody">
-          <!-- Data will be populated by JavaScript -->
-        </tbody>
+        <tbody id="tableBody"></tbody>
       </table>
       <div id="noResults" class="no-results" style="display: none;">
         No services found matching your criteria.
@@ -97,15 +95,16 @@
   </main>
 
   <div class="sidebar" id="sidebar">
-    <div class="sidebar-item" onclick="window.location.href='shoppingcart.html'">Shopping Cart</div>
-    <div class="sidebar-item" onclick="window.location.href='orderhistory.html'">Order History</div>
-    <div class="sidebar-item" onclick="window.location.href='aboutus.html'">About Us</div>
-    <div class="sidebar-item" onclick="window.location.href='userservices.html'">Services</div>
-    <div class="sidebar-item" onclick="window.location.href='loginuser.html'">Log Out</div>
+    <div class="sidebar-item">Shopping Cart</div>
+    <div class="sidebar-item">Order History</div>
+    <div class="sidebar-item">About Us</div>
+    <div class="sidebar-item">Services</div>
+    <div class="sidebar-item">Log Out</div>
   </div>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      // ✅ Check if user is logged in
       fetch("get_user_data.php")
         .then(response => response.json())
         .then(data => {
@@ -115,13 +114,34 @@
             return;
           }
 
-          // Replace text dynamically
-          document.querySelector(".profile-name").textContent = `${data.Customer_FName} ${data.Customer_LName}`;
-          document.querySelector(".profile-username").textContent = `@${data.Customer_FName.toLowerCase()}`;
-          document.querySelectorAll(".info-value")[0].textContent = `${data.Customer_FName} ${data.Customer_LName}`;
-          document.querySelector(".info-value a").textContent = data.Customer_Email;
-          document.querySelector(".info-value a").href = `mailto:${data.Customer_Email}`;
-          document.querySelectorAll(".info-value")[2].textContent = data.Customer_Phone;
+          // ✅ Fetch user's completed service requests
+          fetch("get_user_completed_services.php")
+            .then(response => response.json())
+            .then(services => {
+              const tableBody = document.getElementById("tableBody");
+              const noResults = document.getElementById("noResults");
+
+              if (!services || services.length === 0) {
+                noResults.style.display = "block";
+                return;
+              }
+
+              noResults.style.display = "none";
+              tableBody.innerHTML = "";
+
+              services.forEach(service => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                  <td>${service.ServiceRequestID}</td>
+                  <td>${service.ServiceType}</td>
+                  <td>${service.AppointmentDate}</td>
+                  <td>${service.Status}</td>
+                  <td><a href="#" class="view-btn">View</a></td>
+                `;
+                tableBody.appendChild(row);
+              });
+            })
+            .catch(err => console.error("Error loading service history:", err));
         })
         .catch(err => {
           console.error(err);

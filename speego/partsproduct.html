@@ -75,7 +75,7 @@
     <section class="product-section">
       <h2 class="section-title">Battery</h2>
       <div class="product-grid">
-        <div class="product-card">
+        <div class="product-card" data-id="15">
           <div class="product-image">
             <img src="images/Battery.png" alt="Battery">
           </div>
@@ -84,7 +84,7 @@
             <p class="product-price">₱4,000</p>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="20">
           <div class="product-image">
             <img src="images/Motor.png" alt="Motor">
           </div>
@@ -93,7 +93,7 @@
             <p class="product-price">₱7,000</p>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="14">
           <div class="product-image">
             <img src="images/Tail Light.jpg" alt="Tail Light">
           </div>
@@ -102,7 +102,7 @@
             <p class="product-price">₱800</p>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="18">
           <div class="product-image">
             <img src="images/Charging Port.png" alt="Charging Port">
           </div>
@@ -111,7 +111,7 @@
             <p class="product-price">₱200</p>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="16">
           <div class="product-image">
             <img src="images/Controller.png" alt="Controller">
           </div>
@@ -126,16 +126,16 @@
     <section class="product-section">
       <h2 class="section-title">Wheels</h2>
       <div class="product-grid">
-        <div class="product-card">
+        <div class="product-card" data-id="3">
           <div class="product-image">
-            <img src="images/Tire.webp" alt="" Tire>
+            <img src="images/Tire.webp" alt="Tire">
           </div>
           <div class="product-info">
             <p class="product-name">Tire</p>
             <p class="product-price">₱1,000</p>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="13">
           <div class="product-image">
             <img src="images/Shock.png" alt="Shock">
           </div>
@@ -150,7 +150,7 @@
     <section class="product-section">
       <h2 class="section-title">Handlebars</h2>
       <div class="product-grid">
-        <div class="product-card">
+        <div class="product-card" data-id="19">
           <div class="product-image">
             <img src="images/Handlebar.png" alt="Handlebar">
           </div>
@@ -159,7 +159,7 @@
             <p class="product-price">₱800</p>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="17">
           <div class="product-image">
             <img src="images/Side Mirror.png" alt="Side Mirror">
           </div>
@@ -178,6 +178,17 @@
     <a href="userservices.html" class="sidebar-item">Services</a>
     <a href="loginuser.html" class="sidebar-item">Log Out</a>
   </div>
+
+  <!-- Add-to-Cart Popup -->
+  <div id="cartPopup" class="cart-popup">
+    <div class="popup-content">
+      <h3 id="popupProductName"></h3>
+      <p id="popupProductPrice"></p>
+      <button id="confirmAddToCart">Add to Cart</button>
+      <button id="closePopup">Cancel</button>
+    </div>
+  </div>
+
 
   <script>
     // Store all products with their categories and prices
@@ -271,31 +282,79 @@
       }
     });
 
-    // Product card click
-    document.querySelectorAll('.product-card').forEach(card => {
-      card.addEventListener('click', function () {
-        const productName = this.querySelector('.product-name').textContent;
-        alert(`Viewing details for ${productName}`);
-        // In a real application, this would navigate to the product details page
+    document.addEventListener('DOMContentLoaded', function () {
+      let currentCustomerID = null;
+
+      // Fetch logged-in user
+      fetch('get_user_data.php')
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) {
+            alert('Please log in to add items to cart.');
+            window.location.href = 'loginuser.html';
+            return;
+          }
+          currentCustomerID = data.CustomerID;
+        })
+        .catch(err => {
+          alert('Error fetching user data. Please log in.');
+          window.location.href = 'loginuser.html';
+        });
+
+      // Product card click
+      document.querySelectorAll('.product-card').forEach(card => {
+        card.addEventListener('click', function () {
+          if (!currentCustomerID) {
+            alert('Please log in to add items to cart.');
+            return;
+          }
+
+          const productName = this.querySelector('.product-name').textContent;
+          const productPrice = this.querySelector('.product-price').textContent;
+          const productId = this.dataset.id;
+
+          document.getElementById('popupProductName').textContent = productName;
+          document.getElementById('popupProductPrice').textContent = productPrice;
+
+          const btn = document.getElementById('confirmAddToCart');
+          btn.dataset.id = productId;
+
+          document.getElementById('cartPopup').classList.add('active');
+        });
       });
+
+      // Add to cart
+      document.getElementById('confirmAddToCart').addEventListener('click', function () {
+        const productId = this.dataset.id;
+        const formData = new FormData();
+        formData.append('product_id', productId);
+        formData.append('customer_id', currentCustomerID);
+        formData.append('quantity', 1);
+
+        fetch('add_to_cart.php', { method: 'POST', body: formData })
+          .then(res => res.text())
+          .then(result => {
+            if (result.includes('successfully') || result.includes('added')) {
+              alert('Item added to cart! Redirecting to cart...');
+              document.getElementById('cartPopup').classList.remove('active');
+              window.location.href = 'shoppingcart.html';
+            } else {
+              alert('Error: ' + result);
+            }
+          })
+          .catch(err => {
+            alert('Error adding to cart.');
+            console.error(err);
+          });
+      });
+
+      // Close popup
+      document.getElementById('closePopup').addEventListener('click', function () {
+        document.getElementById('cartPopup').classList.remove('active');
+      });
+
     });
 
-    // Sidebar toggle functionality
-    document.getElementById('menuToggle').addEventListener('click', function (e) {
-      e.stopPropagation();
-      const sidebar = document.getElementById('sidebar');
-      sidebar.classList.toggle('active');
-    });
-
-    // Close sidebar when clicking outside
-    document.addEventListener('click', function (e) {
-      const sidebar = document.getElementById('sidebar');
-      const menuToggle = document.getElementById('menuToggle');
-
-      if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-        sidebar.classList.remove('active');
-      }
-    });
   </script>
 </body>
 
