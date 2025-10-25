@@ -89,19 +89,19 @@ def check_warranty_status(product_id, purchase_date):
 
 
 def get_service_costs():
-    """Fetch service costs from database"""
+    """Fetch service costs from service_cost table"""
     conn = get_db_connection()
     if not conn:
         return {}
     try:
         cursor = conn.cursor(dictionary=True)
         cursor.execute("""
-            SELECT sr.ServiceType, sc.EstimatedCost, sc.AdditionalPartsCost, sc.TotalCost, sc.PaymentStatus
+            SELECT sr.service_type, sc.labor_cost, sc.parts_cost, sc.total_cost, sc.payment_status
             FROM service_cost sc
-            JOIN service_request sr ON sc.ServiceRequestID = sr.ServiceRequestID
+            JOIN service_request sr ON sc.service_request_id = sr.service_request_id
         """)
         costs = cursor.fetchall()
-        return {c['ServiceType']: c for c in costs}
+        return {c['service_type']: {'EstimatedCost': c['total_cost']} for c in costs}
     except Error as e:
         print(f"Error fetching service costs: {e}")
         return {}
@@ -188,7 +188,7 @@ def save_diagnosis_to_db(diagnosis_data):
         ))
         diagnosis_id = cursor.lastrowid
         update_query = """
-            UPDATE service_request SET Status = 'Diagnosed' WHERE ServiceRequestID = %s
+            UPDATE service_request SET status = 'Diagnosed' WHERE service_request_id = %s
         """
         cursor.execute(update_query, (diagnosis_data.get('service_request_id'),))
         conn.commit()
@@ -212,8 +212,8 @@ def save_service_request_to_db(request_data):
         cursor = conn.cursor()
         insert_query = """
             INSERT INTO service_request 
-            (CustomerID, AdminID, ServiceType, ProblemDescription, AppointmentDate, Status)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            (customer_id, admin_id, service_type, problem_description, appointment_date, status, product_id)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
         cursor.execute(insert_query, (
             request_data.get('customer_id', 1),
@@ -221,7 +221,8 @@ def save_service_request_to_db(request_data):
             request_data.get('service_type', 'Repair'),
             request_data.get('problem_description'),
             request_data.get('appointment_date'),
-            'Pending Diagnosis'
+            'Pending Diagnosis',
+            request_data.get('product_id', 1)
         ))
         conn.commit()
         return cursor.lastrowid
@@ -294,11 +295,11 @@ def get_recommended_for_you(customer_id=None, limit=12):
                            'Related to your service requests' as recommendation_reason
                     FROM service_request sr
                     JOIN PRODUCT p ON (
-                        p.Product_Name LIKE CONCAT('%', SUBSTRING_INDEX(sr.ProblemDescription, ' ', 1), '%')
-                        OR p.Category LIKE CONCAT('%', sr.ServiceType, '%')
+                        p.Product_Name LIKE CONCAT('%', SUBSTRING_INDEX(sr.problem_description, ' ', 1), '%')
+                        OR p.Category LIKE CONCAT('%', sr.service_type, '%')
                     )
                     JOIN INVENTORY i ON p.ProductID = i.ProductID
-                    WHERE sr.CustomerID = %s
+                    WHERE sr.customer_id = %s
                     AND p.ProductID NOT IN (
                         SELECT oi.ProductID
                         FROM ORDER_ITEM oi
@@ -419,11 +420,11 @@ def chat():
             if conn:
                 cursor = conn.cursor()
                 insert_ai = """
-                    INSERT INTO speego_pal (CustomerID, ProductID, ServiceRequestID, Response, ConfidenceScore, InteractionType)
-                    VALUES (%s, %s, %s, %s, %s, %s)
+                    INSERT INTO speego_pal (service_request_id, problem_description, ai_diagnosis, confidence_score)
+                    VALUES (%s, %s, %s, %s)
                 """
                 cursor.execute(insert_ai, (
-                    customer_id, None, None, reply, None, "chat"
+                    None, user_message, reply, None
                 ))
                 conn.commit()
         except Exception as e:
@@ -458,11 +459,25 @@ def diagnose():
         warranty_info = check_warranty_status(product_id, purchase_date)
         is_warranty_covered = warranty_info and warranty_info.get('is_active', False)
 
+    # Use hardcoded service costs if database query fails
     service_costs = get_service_costs()
+    if not service_costs:
+        service_costs = {
+            'Repair': {'EstimatedCost': 800.00},
+            'Battery Replacement': {'EstimatedCost': 500.00},
+            'Parts Installation': {'EstimatedCost': 300.00}
+        }
+    
     cost_context = "\n\nActual service costs from our database:\n"
     for stype, cost_data in service_costs.items():
         estimated = cost_data.get('EstimatedCost', 'N/A')
         cost_context += f"- {stype}: ₱{estimated}\n"
+
+    # Get relevant parts from inventory for parts cost estimation
+    parts_context = "\n\nAvailable parts and prices:\n"
+    parts_context += "- Tire: ₱1,000\n- Battery: ₱4,000\n- Shock: ₱400\n- Tail light: ₱800\n"
+    parts_context += "- Controller: ₱4,000\n- Side mirror: ₱500\n- Handlebar: ₱800\n- Motor: ₱7,000\n"
+    parts_context += "- Charging Port: ₱200\n- Charger: ₱1,250\n"
 
     warranty_context = ""
     if is_warranty_covered:
@@ -473,13 +488,13 @@ def diagnose():
 
     prompt = (
         "You are SpeegoPal, an AI e-bike service assistant for Speego Cycle. "
-        "Based on the problem description, identify the most likely service type needed "
-        "and use the ACTUAL costs from our service database."
-        f"{cost_context}{warranty_context}\n"
+        "Based on the problem description, identify the most likely service type needed, "
+        "estimate which parts might be needed, and calculate the total cost."
+        f"{cost_context}{parts_context}{warranty_context}\n"
         "Provide your response in this exact format:\n"
         "Diagnosis: <short 1-2 sentence diagnosis>\n"
         "Service Type: <matching service type from database>\n"
-        "Estimated Cost: <use actual cost from database>\n"
+        "Estimated Cost: <labor cost + parts cost = total in ₱>\n"
         "Estimated Time: <approximate repair time>\n\n"
         f"Problem description: {problem_description}\nSpeegoPal:"
     )
@@ -541,34 +556,28 @@ def create_service_request():
     try:
         cursor = conn.cursor()
 
-        # Insert service request
+        # Insert service request - using lowercase column names with underscores
         insert_sr = """
-            INSERT INTO service_request (CustomerID, AdminID, ServiceType, ProblemDescription, AppointmentDate, Status)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO service_request 
+            (customer_id, admin_id, service_type, product_id, problem_description, 
+             appointment_date, ai_diagnosis, confidence_score, status)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         cursor.execute(insert_sr, (
-            customer_id, admin_id, service_type, problem_description, appointment_date, "Pending"
+            customer_id, admin_id, service_type, product_id, problem_description, 
+            appointment_date, ai_diagnosis, confidence_score, "pending"
         ))
         conn.commit()
         service_request_id = cursor.lastrowid
 
-        # Save AI diagnosis into SPEEGO_PAL
+        # Save AI diagnosis into speego_pal
         insert_ai = """
-            INSERT INTO speego_pal (CustomerID, ProductID, ServiceRequestID, Response, ConfidenceScore, InteractionType)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """
-        cursor.execute(insert_ai, (
-            customer_id, product_id, service_request_id, ai_diagnosis, confidence_score, "service request"
-        ))
-        conn.commit()
-
-        # Create AI suggested entry in SERVICE_DIAGNOSIS
-        insert_diag = """
-            INSERT INTO service_diagnosis (ServiceRequestID, DiagnosisDetails, TechnicianName, FindingsDate)
+            INSERT INTO speego_pal 
+            (service_request_id, problem_description, ai_diagnosis, confidence_score)
             VALUES (%s, %s, %s, %s)
         """
-        cursor.execute(insert_diag, (
-            service_request_id, f"(AI Suggested) {ai_diagnosis}", "SpeegoPal AI", datetime.now()
+        cursor.execute(insert_ai, (
+            service_request_id, problem_description, ai_diagnosis, confidence_score
         ))
         conn.commit()
 

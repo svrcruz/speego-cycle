@@ -220,6 +220,24 @@
             }
         });
 
+        
+            // Add this helper function at the top of your script section
+            function convertTo24Hour(time12h) {
+                const [time, modifier] = time12h.split(' ');
+                let [hours, minutes] = time.split(':');
+
+                if (hours === '12') {
+                    hours = '00';
+                }
+
+                if (modifier === 'PM') {
+                    hours = parseInt(hours, 10) + 12;
+                }
+
+                return `${hours}:${minutes}:00`;
+            }
+
+
         // 🔹 Confirm Appointment + Save to DB
         document.getElementById('confirmBtn').addEventListener('click', async () => {
             const model = document.getElementById('model').value.trim();
@@ -231,8 +249,8 @@
             if (!model || !serial || !problem) return alert('Please fill in all required fields.');
             if (!appointmentConfirmed) return alert('Please choose an appointment schedule first.');
 
-            const appointmentDate = `${selectedDate} ${selectedTime}`;
-            const requestData = {
+            const time24h = convertTo24Hour(selectedTime);
+            const appointmentDate = `${selectedDate} ${time24h}`;            const requestData = {
                 customer_id: 1,
                 admin_id: null,
                 service_type: serviceType,

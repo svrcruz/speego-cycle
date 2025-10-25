@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Service Requests - Admin</title>
     <link rel="stylesheet" href="adminservicerequest.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
+
 <body>
     <div class="admin-container">
         <!-- Sidebar -->
@@ -84,53 +87,8 @@
                             <th></th>
                         </tr>
                     </thead>
-                    <tbody id="tableBody">
-                        <tr>
-                            <td>Sophia</td>
-                            <td>Speego Q5</td>
-                            <td>09-25-2025<br>12pm-1pm</td>
-                            <td>John</td>
-                            <td>Repair</td>
-                            <td><span class="status-badge ongoing">Ongoing</span></td>
-                            <td><i class="ph ph-pencil-simple edit-icon"></i></td>
-                        </tr>
-                        <tr>
-                            <td>Yoonchae</td>
-                            <td>Speego C7</td>
-                            <td>09-26-2025<br>1-2pm</td>
-                            <td>Josh</td>
-                            <td>Battery Replacement</td>
-                            <td><span class="status-badge pending">Pending</span></td>
-                            <td><i class="ph ph-pencil-simple edit-icon"></i></td>
-                        </tr>
-                        <tr>
-                            <td>Lara</td>
-                            <td>Speego V3</td>
-                            <td>09-25-2025<br>12pm</td>
-                            <td>Karl</td>
-                            <td>Parts Installation</td>
-                            <td><span class="status-badge pending">Pending</span></td>
-                            <td><i class="ph ph-pencil-simple edit-icon"></i></td>
-                        </tr>
-                        <tr>
-                            <td>Megan</td>
-                            <td>Speego C22</td>
-                            <td>09-20-2025<br>12pm</td>
-                            <td>John</td>
-                            <td>Accessories Installation</td>
-                            <td><span class="status-badge completed">Completed</span></td>
-                            <td><i class="ph ph-pencil-simple edit-icon"></i></td>
-                        </tr>
-                        <tr>
-                            <td>Manon</td>
-                            <td>Speego S01</td>
-                            <td>08-23-2025<br>12pm</td>
-                            <td>Paul</td>
-                            <td>Repair</td>
-                            <td><span class="status-badge completed">Completed</span></td>
-                            <td><i class="ph ph-pencil-simple edit-icon"></i></td>
-                        </tr>
-                    </tbody>
+                    <tbody id="tableBody"></tbody>
+
                 </table>
             </div>
 
@@ -165,9 +123,9 @@
         const tableBody = document.getElementById('tableBody');
         const rows = tableBody.getElementsByTagName('tr');
 
-        searchInput.addEventListener('input', function() {
+        searchInput.addEventListener('input', function () {
             const searchTerm = this.value.toLowerCase();
-            
+
             Array.from(rows).forEach(row => {
                 const text = row.textContent.toLowerCase();
                 row.style.display = text.includes(searchTerm) ? '' : 'none';
@@ -176,11 +134,11 @@
 
         // Sort functionality
         const sortSelect = document.getElementById('sortSelect');
-        
-        sortSelect.addEventListener('change', function() {
+
+        sortSelect.addEventListener('change', function () {
             const sortBy = this.value;
             const rowsArray = Array.from(rows);
-            
+
             rowsArray.sort((a, b) => {
                 if (sortBy === 'Newest' || sortBy === 'Oldest') {
                     const dateA = a.cells[2].textContent.split('\n')[0];
@@ -192,13 +150,13 @@
                     return a.cells[5].textContent.localeCompare(b.cells[5].textContent);
                 }
             });
-            
+
             rowsArray.forEach(row => tableBody.appendChild(row));
         });
 
         // Edit icons
         document.querySelectorAll('.edit-icon').forEach(icon => {
-            icon.addEventListener('click', function() {
+            icon.addEventListener('click', function () {
                 const row = this.closest('tr');
                 const customerName = row.cells[0].textContent;
                 alert(`Edit request for ${customerName}`);
@@ -207,13 +165,43 @@
 
         // Pagination
         const pageButtons = document.querySelectorAll('.page-btn:not(#prevBtn):not(#nextBtn)');
-        
+
         pageButtons.forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 pageButtons.forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
             });
         });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('get_admin_service_requests.php')
+                .then(res => res.json())
+                .then(data => {
+                    const tableBody = document.getElementById('tableBody');
+                    tableBody.innerHTML = '';
+
+                    if (data.length === 0) {
+                        tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No service requests found</td></tr>`;
+                        return;
+                    }
+
+                    data.forEach(req => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                    <td>${req.customerName}</td>
+                    <td>${req.ebikeModel}</td>
+                    <td>${req.appointmentDate}</td>
+                    <td>${req.technicianName}</td>
+                    <td>${req.serviceType}</td>
+                    <td><span class="status-badge ${req.status.toLowerCase().replace(' ', '-')}">${req.status}</span></td>
+                    <td><i class="ph ph-pencil-simple edit-icon"></i></td>
+                `;
+                        tableBody.appendChild(row);
+                    });
+                })
+                .catch(err => console.error('Error fetching service requests:', err));
+        });
     </script>
 </body>
+
 </html>
