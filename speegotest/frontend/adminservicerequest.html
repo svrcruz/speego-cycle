@@ -84,53 +84,8 @@
                             <th></th>
                         </tr>
                     </thead>
-                    <tbody id="tableBody">
-                        <tr>
-                            <td>Sophia</td>
-                            <td>Speego Q5</td>
-                            <td>09-25-2025<br>12pm-1pm</td>
-                            <td>John</td>
-                            <td>Repair</td>
-                            <td><span class="status-badge ongoing">Ongoing</span></td>
-                            <td><i class="ph ph-pencil-simple edit-icon"></i></td>
-                        </tr>
-                        <tr>
-                            <td>Yoonchae</td>
-                            <td>Speego C7</td>
-                            <td>09-26-2025<br>1-2pm</td>
-                            <td>Josh</td>
-                            <td>Battery Replacement</td>
-                            <td><span class="status-badge pending">Pending</span></td>
-                            <td><i class="ph ph-pencil-simple edit-icon"></i></td>
-                        </tr>
-                        <tr>
-                            <td>Lara</td>
-                            <td>Speego V3</td>
-                            <td>09-25-2025<br>12pm</td>
-                            <td>Karl</td>
-                            <td>Parts Installation</td>
-                            <td><span class="status-badge pending">Pending</span></td>
-                            <td><i class="ph ph-pencil-simple edit-icon"></i></td>
-                        </tr>
-                        <tr>
-                            <td>Megan</td>
-                            <td>Speego C22</td>
-                            <td>09-20-2025<br>12pm</td>
-                            <td>John</td>
-                            <td>Accessories Installation</td>
-                            <td><span class="status-badge completed">Completed</span></td>
-                            <td><i class="ph ph-pencil-simple edit-icon"></i></td>
-                        </tr>
-                        <tr>
-                            <td>Manon</td>
-                            <td>Speego S01</td>
-                            <td>08-23-2025<br>12pm</td>
-                            <td>Paul</td>
-                            <td>Repair</td>
-                            <td><span class="status-badge completed">Completed</span></td>
-                            <td><i class="ph ph-pencil-simple edit-icon"></i></td>
-                        </tr>
-                    </tbody>
+                    <tbody id="tableBody"></tbody>
+
                 </table>
             </div>
 
@@ -214,6 +169,35 @@
                 this.classList.add('active');
             });
         });
+
+        document.addEventListener('DOMContentLoaded', () => {
+    fetch('get_admin_service_requests.php')
+        .then(res => res.json())
+        .then(data => {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+
+            if (data.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No service requests found</td></tr>`;
+                return;
+            }
+
+            data.forEach(req => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${req.customerName}</td>
+                    <td>${req.ebikeModel}</td>
+                    <td>${req.appointmentDate}</td>
+                    <td>${req.technicianName}</td>
+                    <td>${req.serviceType}</td>
+                    <td><span class="status-badge ${req.status.toLowerCase().replace(' ', '-')}">${req.status}</span></td>
+                    <td><i class="ph ph-pencil-simple edit-icon"></i></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        })
+        .catch(err => console.error('Error fetching service requests:', err));
+});
     </script>
 </body>
 </html>
