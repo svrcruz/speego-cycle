@@ -541,18 +541,14 @@ def create_service_request():
 
         cursor = conn.cursor()
 
-        # 🔹 Find or create product
+        # 🔹 Only use existing products — do NOT create new ones
         cursor.execute("SELECT ProductID FROM product WHERE Product_Name = %s LIMIT 1", (product_name,))
         result = cursor.fetchone()
-        if result:
-            product_id = result[0]
-        else:
-            cursor.execute("""
-                INSERT INTO product (Product_Name, Category, Price, Stock, Reorder_Level)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (product_name, 'Unknown', 0, 0, 0))
-            product_id = cursor.lastrowid
-            conn.commit()
+
+        if not result:
+            return jsonify({'error': f'Product "{product_name}" not found in database.'}), 400
+
+        product_id = result[0]
 
         # 🔹 Customize logic based on service type
         if service_type == "Repair":
