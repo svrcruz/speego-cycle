@@ -361,3 +361,114 @@ body {
     padding: 0 15px;
   }
 }
+
+
+.cart-popup {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.cart-popup.active {
+  display: flex;
+}
+
+.popup-content {
+  background: white;
+  padding: 20px 30px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.popup-content button {
+  margin: 10px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#confirmAddToCart {
+  background-color: #28a745;
+  color: white;
+}
+
+#closePopup {
+  background-color: #ccc;
+}
+
+
+/* Make product cards clearly clickable */
+.product-card {
+  position: relative;
+  cursor: pointer;
+}
+
+/* Add a hover effect to show it's clickable */
+.product-card:hover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(220, 38, 38, 0.05);
+}
+
+/* Ensure product image doesn't block clicks */
+.product-image img {
+  pointer-events: none;
+}
+
+/* Product Card Base Style */
+.product-card {
+  background-color: white;
+  border-radius: 15px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Hover Effect */
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Selected State */
+.product-card.selected {
+  outline: 3px solid #4CAF50;
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.7);
+}
+
+/* Popup Overlay */
+#cartPopup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.6);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+/* Popup Visible */
+#cartPopup.active {
+  display: flex;
+}
+
+/* Popup Box */
+#cartPopup .popup-content {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  width: 320px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
