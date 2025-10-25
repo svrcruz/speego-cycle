@@ -32,6 +32,7 @@ $requests = [];
 if ($result && $result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
         $requests[] = [
+            'serviceRequestID' => $row['serviceRequestID'], // ✅ THIS WAS MISSING
             'customerName' => $row['customerName'],
             'ebikeModel' => $row['ebikeModel'],
             'appointmentDate' => date('M d, Y', strtotime($row['appointmentDate'])),
