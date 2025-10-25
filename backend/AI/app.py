@@ -524,82 +524,87 @@ def diagnose():
 
 @app.route('/api/service-request', methods=['POST'])
 def create_service_request():
-    data = request.json
-    customer_id = data.get('customer_id')
-    admin_id = data.get('admin_id')
-    service_type = data.get('service_type')
-    problem_description = data.get('problem_description')
-    appointment_date = data.get('appointment_date')
-    ai_diagnosis = data.get('ai_diagnosis')
-    confidence_score = data.get('confidence_score')
-    product_name = data.get('product_name')
-    product_id = None
-
-    # Try to find the product by name
-    cursor.execute("SELECT ProductID FROM product WHERE Product_Name = %s LIMIT 1", (product_name,))
-    found_product = cursor.fetchone()
-
-    if found_product:
-        product_id = found_product[0]
-    else:
-        # Optionally add a placeholder if product doesn't exist
-        cursor.execute("""
-            INSERT INTO product (Product_Name, Category, Price, Stock, Reorder_Level)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (product_name, 'Unknown', 0, 0, 0))
-        product_id = cursor.lastrowid
-        conn.commit()
-
-    conn = get_db_connection()
-    if not conn:
-        return jsonify({'error': 'Database connection failed'}), 500
-
     try:
+        data = request.get_json()
+        customer_id = data.get('customer_id')
+        admin_id = data.get('admin_id')
+        service_type = data.get('service_type')
+        product_name = data.get('product_name')
+        problem_description = data.get('problem_description')
+        appointment_date = data.get('appointment_date')
+        ai_diagnosis = data.get('ai_diagnosis')
+        confidence_score = data.get('confidence_score')
+
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+
         cursor = conn.cursor()
 
-        # Insert service request
-        insert_sr = """
-            INSERT INTO service_request (CustomerID, AdminID, ServiceType, ProblemDescription, AppointmentDate, Status)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """
-        cursor.execute(insert_sr, (
-            customer_id, admin_id, service_type, problem_description, appointment_date, "Pending"
-        ))
+        # 🔹 Find or create product
+        cursor.execute("SELECT ProductID FROM product WHERE Product_Name = %s LIMIT 1", (product_name,))
+        result = cursor.fetchone()
+        if result:
+            product_id = result[0]
+        else:
+            cursor.execute("""
+                INSERT INTO product (Product_Name, Category, Price, Stock, Reorder_Level)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (product_name, 'Unknown', 0, 0, 0))
+            product_id = cursor.lastrowid
+            conn.commit()
+
+        # 🔹 Customize logic based on service type
+        if service_type == "Repair":
+            status = "Pending Diagnosis"
+        elif service_type == "Battery Replacement":
+            status = "Awaiting Battery Check"
+        elif service_type == "Parts Installation":
+            status = "Awaiting Part Availability"
+        else:
+            status = "Pending"
+
+        # 🔹 Insert service request
+        cursor.execute("""
+            INSERT INTO service_request
+            (CustomerID, AdminID, ProductID, ServiceType, ProblemDescription, AppointmentDate, Status)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (customer_id, admin_id, product_id, service_type, problem_description, appointment_date, status))
         conn.commit()
+
         service_request_id = cursor.lastrowid
 
-        # Save AI diagnosis into SPEEGO_PAL
-        insert_ai = """
+        # 🔹 Save AI diagnosis into SPEEGO_PAL
+        cursor.execute("""
             INSERT INTO speego_pal (CustomerID, ProductID, ServiceRequestID, Response, ConfidenceScore, InteractionType)
             VALUES (%s, %s, %s, %s, %s, %s)
-        """
-        cursor.execute(insert_ai, (
-            customer_id, product_id, service_request_id, ai_diagnosis, confidence_score, "service request"
-        ))
+        """, (customer_id, product_id, service_request_id, ai_diagnosis, confidence_score, "service request"))
         conn.commit()
 
-        # Create AI suggested entry in SERVICE_DIAGNOSIS
-        insert_diag = """
+        # 🔹 Create AI suggested entry in SERVICE_DIAGNOSIS
+        cursor.execute("""
             INSERT INTO service_diagnosis (ServiceRequestID, DiagnosisDetails, TechnicianName, FindingsDate)
             VALUES (%s, %s, %s, %s)
-        """
-        cursor.execute(insert_diag, (
-            service_request_id, f"(AI Suggested) {ai_diagnosis}", "SpeegoPal AI", datetime.now()
-        ))
+        """, (service_request_id, f"(AI Suggested) {ai_diagnosis}", "SpeegoPal AI", datetime.now()))
         conn.commit()
 
         return jsonify({
             'message': 'Service request and AI diagnosis saved successfully',
-            'service_request_id': service_request_id
-        }), 200
+            'service_request_id': service_request_id,
+            'status': status
+        }), 201
+
     except Error as e:
-        conn.rollback()
-        print("Error saving service request:", e)
+        if conn:
+            conn.rollback()
+        print("Error creating service request:", e)
         return jsonify({'error': str(e)}), 500
+
     finally:
-        if conn.is_connected():
+        if conn and conn.is_connected():
             cursor.close()
             conn.close()
+
 
 if __name__ == '__main__':
     app.run(debug=True)
