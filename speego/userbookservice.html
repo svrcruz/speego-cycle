@@ -154,6 +154,16 @@
         let selectedTime = null;
         let appointmentConfirmed = false;
 
+        // 🔹 Service Button Selection
+        document.querySelectorAll('.service-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active class from all buttons
+                document.querySelectorAll('.service-btn').forEach(b => b.classList.remove('active'));
+                // Add active class to clicked button
+                btn.classList.add('active');
+            });
+        });
+
         // 🔹 Smart Diagnosis Integration
         document.getElementById('smartDiagnosisBtn').addEventListener('click', async () => {
             const problem = document.getElementById('problemDescription').value.trim();
@@ -220,24 +230,6 @@
             }
         });
 
-        
-            // Add this helper function at the top of your script section
-            function convertTo24Hour(time12h) {
-                const [time, modifier] = time12h.split(' ');
-                let [hours, minutes] = time.split(':');
-
-                if (hours === '12') {
-                    hours = '00';
-                }
-
-                if (modifier === 'PM') {
-                    hours = parseInt(hours, 10) + 12;
-                }
-
-                return `${hours}:${minutes}:00`;
-            }
-
-
         // 🔹 Confirm Appointment + Save to DB
         document.getElementById('confirmBtn').addEventListener('click', async () => {
             const model = document.getElementById('model').value.trim();
@@ -249,17 +241,19 @@
             if (!model || !serial || !problem) return alert('Please fill in all required fields.');
             if (!appointmentConfirmed) return alert('Please choose an appointment schedule first.');
 
-            const time24h = convertTo24Hour(selectedTime);
-            const appointmentDate = `${selectedDate} ${time24h}`;            const requestData = {
+            const appointmentDate = `${selectedDate} ${selectedTime}`;
+            const requestData = {
                 customer_id: 1,
                 admin_id: null,
                 service_type: serviceType,
-                product_id: 1,
+                product_name: model,
                 problem_description: problem,
                 appointment_date: appointmentDate,
                 ai_diagnosis: aiDiagnosis,
                 confidence_score: Math.floor(Math.random() * 21) + 80
             };
+
+            console.log('Submitting service request:', requestData); // Debug log
 
             try {
                 const res = await fetch('http://127.0.0.1:5000/api/service-request', {
@@ -269,7 +263,7 @@
                 });
                 const data = await res.json();
                 if (res.ok) {
-                    alert(`✅ Appointment confirmed and saved!\nService Request ID: ${data.service_request_id}`);
+                    alert(`✅ Appointment confirmed and saved!\nService Type: ${serviceType}\nService Request ID: ${data.service_request_id}`);
                 } else {
                     alert(`❌ Error saving: ${data.error}`);
                 }

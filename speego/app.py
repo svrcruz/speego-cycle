@@ -25,6 +25,27 @@ def get_db_connection():
     except Error as e:
         print(f"Database connection error: {e}")
         return None
+    
+    
+def format_appointment_date(date_string):
+    """Convert appointment date string to MySQL datetime format"""
+    if not date_string:
+        return None
+    try:
+        # Handle format: '2025-10-24 10:00 AM'
+        if 'AM' in date_string or 'PM' in date_string:
+            dt = datetime.strptime(date_string, '%Y-%m-%d %I:%M %p')
+            return dt.strftime('%Y-%m-%d %H:%M:%S')
+        # Handle format: '2025-10-24 10:00:00'
+        elif ':' in date_string:
+            return date_string
+        # Handle format: '2025-10-24'
+        else:
+            return f"{date_string} 00:00:00"
+    except Exception as e:
+        print(f"Date format error: {e}")
+        return None
+
 
 
 # ======================================================
@@ -89,19 +110,19 @@ def check_warranty_status(product_id, purchase_date):
 
 
 def get_service_costs():
-    """Fetch service costs from service_cost table"""
+    """Fetch service costs from database"""
     conn = get_db_connection()
     if not conn:
         return {}
     try:
         cursor = conn.cursor(dictionary=True)
         cursor.execute("""
-            SELECT sr.service_type, sc.labor_cost, sc.parts_cost, sc.total_cost, sc.payment_status
+            SELECT sr.ServiceType, sc.EstimatedCost, sc.AdditionalPartsCost, sc.TotalCost, sc.PaymentStatus
             FROM service_cost sc
-            JOIN service_request sr ON sc.service_request_id = sr.service_request_id
+            JOIN service_request sr ON sc.ServiceRequestID = sr.ServiceRequestID
         """)
         costs = cursor.fetchall()
-        return {c['service_type']: {'EstimatedCost': c['total_cost']} for c in costs}
+        return {c['ServiceType']: c for c in costs}
     except Error as e:
         print(f"Error fetching service costs: {e}")
         return {}
@@ -188,7 +209,7 @@ def save_diagnosis_to_db(diagnosis_data):
         ))
         diagnosis_id = cursor.lastrowid
         update_query = """
-            UPDATE service_request SET status = 'Diagnosed' WHERE service_request_id = %s
+            UPDATE service_request SET Status = 'Diagnosed' WHERE ServiceRequestID = %s
         """
         cursor.execute(update_query, (diagnosis_data.get('service_request_id'),))
         conn.commit()
@@ -212,8 +233,8 @@ def save_service_request_to_db(request_data):
         cursor = conn.cursor()
         insert_query = """
             INSERT INTO service_request 
-            (customer_id, admin_id, service_type, problem_description, appointment_date, status, product_id)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            (CustomerID, AdminID, ServiceType, ProblemDescription, AppointmentDate, Status)
+            VALUES (%s, %s, %s, %s, %s, %s)
         """
         cursor.execute(insert_query, (
             request_data.get('customer_id', 1),
@@ -221,8 +242,7 @@ def save_service_request_to_db(request_data):
             request_data.get('service_type', 'Repair'),
             request_data.get('problem_description'),
             request_data.get('appointment_date'),
-            'Pending Diagnosis',
-            request_data.get('product_id', 1)
+            'Pending Diagnosis'
         ))
         conn.commit()
         return cursor.lastrowid
@@ -295,11 +315,11 @@ def get_recommended_for_you(customer_id=None, limit=12):
                            'Related to your service requests' as recommendation_reason
                     FROM service_request sr
                     JOIN PRODUCT p ON (
-                        p.Product_Name LIKE CONCAT('%', SUBSTRING_INDEX(sr.problem_description, ' ', 1), '%')
-                        OR p.Category LIKE CONCAT('%', sr.service_type, '%')
+                        p.Product_Name LIKE CONCAT('%', SUBSTRING_INDEX(sr.ProblemDescription, ' ', 1), '%')
+                        OR p.Category LIKE CONCAT('%', sr.ServiceType, '%')
                     )
                     JOIN INVENTORY i ON p.ProductID = i.ProductID
-                    WHERE sr.customer_id = %s
+                    WHERE sr.CustomerID = %s
                     AND p.ProductID NOT IN (
                         SELECT oi.ProductID
                         FROM ORDER_ITEM oi
@@ -420,11 +440,11 @@ def chat():
             if conn:
                 cursor = conn.cursor()
                 insert_ai = """
-                    INSERT INTO speego_pal (service_request_id, problem_description, ai_diagnosis, confidence_score)
-                    VALUES (%s, %s, %s, %s)
+                    INSERT INTO speego_pal (CustomerID, ProductID, ServiceRequestID, Response, ConfidenceScore, InteractionType)
+                    VALUES (%s, %s, %s, %s, %s, %s)
                 """
                 cursor.execute(insert_ai, (
-                    None, user_message, reply, None
+                    customer_id, None, None, reply, None, "chat"
                 ))
                 conn.commit()
         except Exception as e:
@@ -459,25 +479,11 @@ def diagnose():
         warranty_info = check_warranty_status(product_id, purchase_date)
         is_warranty_covered = warranty_info and warranty_info.get('is_active', False)
 
-    # Use hardcoded service costs if database query fails
     service_costs = get_service_costs()
-    if not service_costs:
-        service_costs = {
-            'Repair': {'EstimatedCost': 800.00},
-            'Battery Replacement': {'EstimatedCost': 500.00},
-            'Parts Installation': {'EstimatedCost': 300.00}
-        }
-    
     cost_context = "\n\nActual service costs from our database:\n"
     for stype, cost_data in service_costs.items():
         estimated = cost_data.get('EstimatedCost', 'N/A')
         cost_context += f"- {stype}: ₱{estimated}\n"
-
-    # Get relevant parts from inventory for parts cost estimation
-    parts_context = "\n\nAvailable parts and prices:\n"
-    parts_context += "- Tire: ₱1,000\n- Battery: ₱4,000\n- Shock: ₱400\n- Tail light: ₱800\n"
-    parts_context += "- Controller: ₱4,000\n- Side mirror: ₱500\n- Handlebar: ₱800\n- Motor: ₱7,000\n"
-    parts_context += "- Charging Port: ₱200\n- Charger: ₱1,250\n"
 
     warranty_context = ""
     if is_warranty_covered:
@@ -488,13 +494,13 @@ def diagnose():
 
     prompt = (
         "You are SpeegoPal, an AI e-bike service assistant for Speego Cycle. "
-        "Based on the problem description, identify the most likely service type needed, "
-        "estimate which parts might be needed, and calculate the total cost."
-        f"{cost_context}{parts_context}{warranty_context}\n"
+        "Based on the problem description, identify the most likely service type needed "
+        "and use the ACTUAL costs from our service database."
+        f"{cost_context}{warranty_context}\n"
         "Provide your response in this exact format:\n"
         "Diagnosis: <short 1-2 sentence diagnosis>\n"
         "Service Type: <matching service type from database>\n"
-        "Estimated Cost: <labor cost + parts cost = total in ₱>\n"
+        "Estimated Cost: <use actual cost from database>\n"
         "Estimated Time: <approximate repair time>\n\n"
         f"Problem description: {problem_description}\nSpeegoPal:"
     )
@@ -539,60 +545,84 @@ def diagnose():
 
 @app.route('/api/service-request', methods=['POST'])
 def create_service_request():
-    data = request.json
-    customer_id = data.get('customer_id')
-    admin_id = data.get('admin_id')
-    service_type = data.get('service_type')
-    problem_description = data.get('problem_description')
-    appointment_date = data.get('appointment_date')
-    ai_diagnosis = data.get('ai_diagnosis')
-    confidence_score = data.get('confidence_score')
-    product_id = data.get('product_id')
-
-    conn = get_db_connection()
-    if not conn:
-        return jsonify({'error': 'Database connection failed'}), 500
-
     try:
+        data = request.get_json()
+        customer_id = data.get('customer_id')
+        admin_id = data.get('admin_id')
+        service_type = data.get('service_type')
+        product_name = data.get('product_name')
+        problem_description = data.get('problem_description')
+        appointment_date = format_appointment_date(data.get('appointment_date'))
+        
+        ai_diagnosis = data.get('ai_diagnosis')        
+        confidence_score = data.get('confidence_score')
+
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+
         cursor = conn.cursor()
 
-        # Insert service request - using lowercase column names with underscores
-        insert_sr = """
-            INSERT INTO service_request 
-            (customer_id, admin_id, service_type, product_id, problem_description, 
-             appointment_date, ai_diagnosis, confidence_score, status)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """
-        cursor.execute(insert_sr, (
-            customer_id, admin_id, service_type, product_id, problem_description, 
-            appointment_date, ai_diagnosis, confidence_score, "pending"
-        ))
+        # 🔹 Only use existing products — do NOT create new ones
+        cursor.execute("SELECT ProductID FROM product WHERE Product_Name = %s LIMIT 1", (product_name,))
+        result = cursor.fetchone()
+
+        if not result:
+            return jsonify({'error': f'Product "{product_name}" not found in database.'}), 400
+
+        product_id = result[0]
+
+        # 🔹 Customize logic based on service type
+        if service_type == "Repair":
+            status = "Pending Diagnosis"
+        elif service_type == "Battery Replacement":
+            status = "Awaiting Battery Check"
+        elif service_type == "Parts Installation":
+            status = "Awaiting Part Availability"
+        else:
+            status = "Pending"
+
+        # 🔹 Insert service request
+        cursor.execute("""
+            INSERT INTO service_request
+            (CustomerID, AdminID, ProductID, ServiceType, ProblemDescription, AppointmentDate, Status)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (customer_id, admin_id, product_id, service_type, problem_description, appointment_date, status))
         conn.commit()
+
         service_request_id = cursor.lastrowid
 
-        # Save AI diagnosis into speego_pal
-        insert_ai = """
-            INSERT INTO speego_pal 
-            (service_request_id, problem_description, ai_diagnosis, confidence_score)
+        # 🔹 Save AI diagnosis into SPEEGO_PAL
+        cursor.execute("""
+            INSERT INTO speego_pal (CustomerID, ProductID, ServiceRequestID, Response, ConfidenceScore, InteractionType)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (customer_id, product_id, service_request_id, ai_diagnosis, confidence_score, "service request"))
+        conn.commit()
+
+        # 🔹 Create AI suggested entry in SERVICE_DIAGNOSIS
+        cursor.execute("""
+            INSERT INTO service_diagnosis (ServiceRequestID, DiagnosisDetails, TechnicianName, FindingsDate)
             VALUES (%s, %s, %s, %s)
-        """
-        cursor.execute(insert_ai, (
-            service_request_id, problem_description, ai_diagnosis, confidence_score
-        ))
+        """, (service_request_id, f"(AI Suggested) {ai_diagnosis}", "SpeegoPal AI", datetime.now()))
         conn.commit()
 
         return jsonify({
             'message': 'Service request and AI diagnosis saved successfully',
-            'service_request_id': service_request_id
-        }), 200
+            'service_request_id': service_request_id,
+            'status': status
+        }), 201
+
     except Error as e:
-        conn.rollback()
-        print("Error saving service request:", e)
+        if conn:
+            conn.rollback()
+        print("Error creating service request:", e)
         return jsonify({'error': str(e)}), 500
+
     finally:
-        if conn.is_connected():
+        if conn and conn.is_connected():
             cursor.close()
             conn.close()
+
 
 if __name__ == '__main__':
     app.run(debug=True)
