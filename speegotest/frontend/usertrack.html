@@ -6,24 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SpeegoCycle - Track Service Requests</title>
     <link rel="stylesheet" href="usertrack.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 
 <body>
     <header class="header">
         <div class="header-left">
-            <a href="#" class="back-arrow">
+            <a href="index.html" class="back-arrow">
                 <i class="ph ph-caret-left"></i>
             </a>
         </div>
         <div class="header-right">
             <a href="userservicehistory.html" class="nav-link">Service History</a>
-            <a href="#" class="nav-link active">Track Service Requests</a>
+            <a href="usertrack.html" class="nav-link active">Track Service Requests</a>
             <a href="index.html" class="home-icon">
                 <i class="ph ph-house"></i>
-                </span></a>
+            </a>
             <span class="menu-icon" id="menuToggle">
                 <i class="ph ph-list"></i>
             </span>
@@ -88,7 +87,7 @@
                     </tr>
                 </thead>
                 <tbody id="tableBody">
-                    <!-- Data will be populated by JavaScript -->
+                    <!-- Data populated dynamically -->
                 </tbody>
             </table>
             <div id="noResults" class="no-results" style="display: none;">
@@ -102,183 +101,138 @@
         <a href="orderhistory.html" class="sidebar-item">Order History</a>
         <a href="aboutus.html" class="sidebar-item">About Us</a>
         <a href="userservices.html" class="sidebar-item">Services</a>
-        <a href="logout.html" class="sidebar-item">Log Out</a>
+        <a href="loginuser.html" class="sidebar-item">Log Out</a>
     </div>
 
     <script>
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('active');
+        let serviceData = [];      
+        let currentData = [];
+        let sortDirection = {};
+
+        // Fetch data from PHP (DB)
+        async function fetchServiceRequests() {
+            try {
+                const response = await fetch('get_service_requests.php');
+                const data = await response.json();
+
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                serviceData = data.map(service => ({
+                    serviceNo: service.serviceNo,
+                    serviceType: service.serviceType,
+                    datePlaced: service.datePlaced,
+                    status: service.status,
+                    date: new Date(service.datePlaced)
+                }));
+
+                currentData = [...serviceData];
+                renderTable(currentData);
+            } catch (err) {
+                console.error('Error fetching data:', err);
+            }
         }
 
-        document.addEventListener('click', function (e) {
-            const sidebar = document.getElementById('sidebar');
-            const menuBtn = document.querySelector('.header-right .icon-btn:last-child');
-
-            if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
-                sidebar.classList.remove('active');
-            }
-        });
-
-        // Sample data - in a real application, this would come from an API
-            const serviceData = [
-            {serviceNo: '0000000002', serviceType: 'Parts Installation', datePlaced: 'September 23, 2025', status: 'Pending', date: new Date('2025-09-23') },
-            {serviceNo: '0000000003', serviceType: 'Repair', datePlaced: 'September 28, 2025', status: 'In Progress', date: new Date('2025-09-28') },
-            {serviceNo: '0000000005', serviceType: 'Maintenance', datePlaced: 'October 05, 2025', status: 'Confirmed', date: new Date('2025-10-05') },
-            {serviceNo: '0000000007', serviceType: 'Inspection', datePlaced: 'October 10, 2025', status: 'Pending', date: new Date('2025-10-10') },
-            {serviceNo: '0000000008', serviceType: 'Parts Installation', datePlaced: 'October 11, 2025', status: 'In Progress', date: new Date('2025-10-11') }
-            ];
-
-            let currentData = [...serviceData];
-            let sortDirection = { };
-
-            // Render table
-            function renderTable(data) {
+        // Render data
+        function renderTable(data) {
             const tbody = document.getElementById('tableBody');
             const noResults = document.getElementById('noResults');
 
             if (data.length === 0) {
                 tbody.innerHTML = '';
-            noResults.style.display = 'block';
-            return;
+                noResults.style.display = 'block';
+                return;
             }
 
             noResults.style.display = 'none';
             tbody.innerHTML = data.map(service => `
-            <tr>
-                <td>${service.serviceNo}</td>
-                <td>${service.serviceType}</td>
-                <td>${service.datePlaced}</td>
-                <td><span class="status-${service.status.toLowerCase().replace(' ', '-')}">${service.status}</span></td>
-                <td><button class="view-details-btn" onclick="viewDetails('${service.serviceNo}')">View details</button></td>
-            </tr>
+                <tr>
+                    <td>${service.serviceNo}</td>
+                    <td>${service.serviceType}</td>
+                    <td>${service.datePlaced}</td>
+                    <td><span class="status-${service.status.toLowerCase().replace(' ', '-')}">${service.status}</span></td>
+                    <td><button class="view-details-btn" onclick="viewDetails('${service.serviceNo}')">View details</button></td>
+                </tr>
             `).join('');
         }
 
-            // Search functionality
-            document.getElementById('searchInput').addEventListener('input', function (e) {
+        //Filter, Search, Sorting logic (same as before)
+        document.getElementById('searchInput').addEventListener('input', function (e) {
             const searchTerm = e.target.value.toLowerCase();
             const filtered = currentData.filter(service =>
-            service.serviceNo.toLowerCase().includes(searchTerm) ||
-            service.serviceType.toLowerCase().includes(searchTerm) ||
-            service.datePlaced.toLowerCase().includes(searchTerm) ||
-            service.status.toLowerCase().includes(searchTerm)
+                service.serviceNo.toLowerCase().includes(searchTerm) ||
+                service.serviceType.toLowerCase().includes(searchTerm) ||
+                service.datePlaced.toLowerCase().includes(searchTerm) ||
+                service.status.toLowerCase().includes(searchTerm)
             );
             renderTable(filtered);
         });
 
-            // Filter panel toggle
-            document.getElementById('filterToggle').addEventListener('click', function () {
-            const panel = document.getElementById('filterPanel');
-            panel.classList.toggle('active');
-        });
-
-            // Apply filters
-            document.getElementById('applyFilter').addEventListener('click', function () {
+        document.getElementById('applyFilter').addEventListener('click', function () {
             const serviceType = document.getElementById('filterServiceType').value;
             const status = document.getElementById('filterStatus').value;
 
             currentData = serviceData.filter(service => {
-                const matchServiceType = !serviceType || service.serviceType === serviceType;
-            const matchStatus = !status || service.status === status;
-            return matchServiceType && matchStatus;
+                const matchType = !serviceType || service.serviceType === serviceType;
+                const matchStatus = !status || service.status === status;
+                return matchType && matchStatus;
             });
 
             renderTable(currentData);
             document.getElementById('filterPanel').classList.remove('active');
         });
 
-            // Clear filters
-            document.getElementById('clearFilter').addEventListener('click', function () {
-                document.getElementById('filterServiceType').value = '';
+        document.getElementById('clearFilter').addEventListener('click', function () {
+            document.getElementById('filterServiceType').value = '';
             document.getElementById('filterStatus').value = '';
+            document.getElementById('searchInput').value = '';
             currentData = [...serviceData];
             renderTable(currentData);
-            document.getElementById('searchInput').value = '';
-            document.getElementById('filterPanel').classList.remove('active');
         });
 
-        // Sorting functionality
         document.querySelectorAll('th[data-sort]').forEach(header => {
-                header.addEventListener('click', function () {
-                    const sortKey = this.getAttribute('data-sort');
+            header.addEventListener('click', function () {
+                const sortKey = this.getAttribute('data-sort');
+                sortDirection[sortKey] = sortDirection[sortKey] === 'asc' ? 'desc' : 'asc';
 
-                    // Initialize sort direction for this column if not exists
-                    if (!sortDirection[sortKey]) {
-                        sortDirection[sortKey] = 'asc';
-                    } else {
-                        sortDirection[sortKey] = sortDirection[sortKey] === 'asc' ? 'desc' : 'asc';
+                const sorted = [...currentData].sort((a, b) => {
+                    let aVal = a[sortKey];
+                    let bVal = b[sortKey];
+
+                    if (sortKey === 'datePlaced') {
+                        aVal = new Date(a.datePlaced);
+                        bVal = new Date(b.datePlaced);
                     }
 
-                    // Remove active class from all headers
-                    document.querySelectorAll('th[data-sort]').forEach(h => h.classList.remove('sorted-asc', 'sorted-desc'));
-
-                    // Add active class to current header
-                    this.classList.add(sortDirection[sortKey] === 'asc' ? 'sorted-asc' : 'sorted-desc');
-
-                    // Sort the data
-                    const sorted = [...currentData].sort((a, b) => {
-                        let aVal, bVal;
-
-                        if (sortKey === 'datePlaced') {
-                            aVal = a.date;
-                            bVal = b.date;
-                        } else {
-                            aVal = a[sortKey].toString().toLowerCase();
-                            bVal = b[sortKey].toString().toLowerCase();
-                        }
-
-                        if (aVal < bVal) return sortDirection[sortKey] === 'asc' ? -1 : 1;
-                        if (aVal > bVal) return sortDirection[sortKey] === 'asc' ? 1 : -1;
-                        return 0;
-                    });
-
-                    renderTable(sorted);
+                    if (aVal < bVal) return sortDirection[sortKey] === 'asc' ? -1 : 1;
+                    if (aVal > bVal) return sortDirection[sortKey] === 'asc' ? 1 : -1;
+                    return 0;
                 });
+
+                renderTable(sorted);
+            });
         });
 
-            // View details function
-            function viewDetails(serviceNo) {
-                alert(`Viewing details for Service No: ${serviceNo}`);
-            // In a real application, this would navigate to the service details page
+        function viewDetails(serviceNo) {
+            alert(`Viewing details for Service No: ${serviceNo}`);
         }
 
-            // Close filter panel when clicking outside
-            document.addEventListener('click', function (e) {
-            const filterPanel = document.getElementById('filterPanel');
-            const filterToggle = document.getElementById('filterToggle');
-
-            if (!filterPanel.contains(e.target) && !filterToggle.contains(e.target)) {
-                filterPanel.classList.remove('active');
-            }
+        // Sidebar toggle
+        document.getElementById('menuToggle').addEventListener('click', function (e) {
+            e.stopPropagation();
+            document.getElementById('sidebar').classList.toggle('active');
         });
 
-            // Sidebar toggle functionality
-            document.getElementById('menuToggle').addEventListener('click', function (e) {
-                e.stopPropagation();
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('active');
-        });
-
-            // Close sidebar when clicking outside
-            document.addEventListener('click', function (e) {
-            const sidebar = document.getElementById('sidebar');
-            const menuToggle = document.getElementById('menuToggle');
-
-            if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-                sidebar.classList.remove('active');
-            }
-        });
-
-            // Initial render
-            renderTable(currentData);
-
-            //previous page
-            document.querySelector('.back-arrow').addEventListener('click', function (e) {
-                e.preventDefault();
+        // Back button
+        document.querySelector('.back-arrow').addEventListener('click', function (e) {
+            e.preventDefault();
             window.history.back();
         });
+
+        // Fetch data from DB on load
+        fetchServiceRequests();
     </script>
 </body>
-
 </html>
