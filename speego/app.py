@@ -205,10 +205,12 @@ def get_recommended_for_you(customer_id=None, limit=12):
                     
                     # Get user's purchased product IDs for exclusion
                     cursor.execute("""
-                        SELECT DISTINCT oi.ProductID
+                        SELECT oi.ProductID
                         FROM order_items oi
                         JOIN orders o ON oi.OrderID = o.OrderID
                         WHERE o.CustomerID = %s
+                        ORDER BY o.OrderDate DESC
+                        LIMIT 3
                     """, (customer_id,))
                     purchased_product_ids = [p['ProductID'] for p in cursor.fetchall()]
                     
