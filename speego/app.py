@@ -139,7 +139,7 @@ def get_recommended_for_you(customer_id=None, limit=12):
             # ============================================
             if len(recommended_products) < limit:
                 cursor.execute("""
-                    SELECT DISTINCT p.Category, p.Product_Name, o.OrderDate
+                    SELECT p.Category, p.Product_Name, o.OrderDate
                     FROM orders o
                     JOIN order_items oi ON o.OrderID = oi.OrderID
                     JOIN product p ON oi.ProductID = p.ProductID
