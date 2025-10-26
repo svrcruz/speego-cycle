@@ -139,11 +139,14 @@
                 <p>Hello! How can I help you today? 🚴‍♀️</p>
             </div>
             <div class="chat-footer">
-                <input type="text" placeholder="Type a message..." />
-                <button class="send-btn"><i class="ph ph-arrow-up"></i></button>
+                <input type="text" placeholder="Type your message..." id="chat-input">
+                <button class="send-btn" id="send-btn">➤</button>
             </div>
         </div>
     </div>
+    
+    
+
 
     <script>
         function toggleSidebar() {
@@ -261,68 +264,59 @@
     </script>
 
     <script>
-        function toggleChat() {
-            const chatbox = document.getElementById('chatbox');
-            const chatLog = document.getElementById('chatLog');
+        const sendBtn = document.getElementById('send-btn');
+        const chatInput = document.getElementById('chat-input');
+        const chatBody = document.querySelector('.chat-body');
 
-            // Toggle visibility
-            chatbox.classList.toggle('active');
+        // Send message on button click
+        sendBtn.addEventListener('click', sendMessage);
 
-            // Show welcome message only once
-            if (chatbox.classList.contains('active') && chatLog.innerHTML.trim() === '') {
-                chatLog.innerHTML = `<p><strong>SpeegoPal:</strong> Hello! I'm SpeegoPal, your e-bike assistant. How can I help you today?</p>`;
-            }
-        }
-
-        document.getElementById('minimizeBtn').addEventListener('click', () => {
-            document.getElementById('chatbox').classList.remove('active');
+        // Send message on Enter key press
+        chatInput.addEventListener('keypress', e => {
+        if (e.key === 'Enter') sendMessage();
         });
 
         async function sendMessage() {
-            const input = document.getElementById('userInput');
-            const message = input.value.trim();
-            if (!message) return;
+        const message = chatInput.value.trim();
+        if (!message) return;
 
-            // Clear input immediately
-            input.value = '';
+        // Display user message
+        const userMsg = document.createElement('p');
+        userMsg.classList.add('user-msg');
+        userMsg.textContent = message;
+        chatBody.appendChild(userMsg);
+        chatInput.value = '';
+        chatBody.scrollTop = chatBody.scrollHeight;
 
-            // Show user message
-            const chatLog = document.getElementById('chatLog');
-            chatLog.innerHTML += `<p><strong>You:</strong> ${message}</p>`;
+        // Typing animation
+        const typing = document.createElement('p');
+        typing.innerHTML = `<strong>SpeegoPal:</strong> <em>Typing...</em>`;
+        chatBody.appendChild(typing);
+        chatBody.scrollTop = chatBody.scrollHeight;
 
-            // Show typing animation
-            const typingIndicator = document.createElement('p');
-            typingIndicator.id = 'typing';
-            typingIndicator.innerHTML = `<strong>SpeegoPal:</strong> <em>Typing...</em>`;
-            chatLog.appendChild(typingIndicator);
-            chatLog.scrollTop = chatLog.scrollHeight;
-
-            // Send to Flask backend
+        try {
             const response = await fetch('http://127.0.0.1:5000/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message })
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message })
             });
 
             const data = await response.json();
+            typing.remove();
 
-            // Remove typing animation
-            typingIndicator.remove();
+            const botMsg = document.createElement('p');
+            botMsg.innerHTML = `<strong>SpeegoPal:</strong> ${data.reply}`;
+            chatBody.appendChild(botMsg);
+            chatBody.scrollTop = chatBody.scrollHeight;
 
-            // Show bot response
-            chatLog.innerHTML += `<p><strong>SpeegoPal:</strong> ${data.reply}</p>`;
-            chatLog.scrollTop = chatLog.scrollHeight;
+        } catch (error) {
+            typing.remove();
+            const errMsg = document.createElement('p');
+            errMsg.innerHTML = `<strong>SpeegoPal:</strong> Sorry, I couldn’t reach the server.`;
+            chatBody.appendChild(errMsg);
+            chatBody.scrollTop = chatBody.scrollHeight;
         }
-
-        // Listen for Enter key
-        document.addEventListener('DOMContentLoaded', () => {
-            const input = document.getElementById('userInput');
-            input.addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') {
-                    sendMessage();
-                }
-            });
-        });
+        }
     </script>
 </body>
 
