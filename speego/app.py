@@ -188,38 +188,76 @@ def get_recommended_for_you(customer_id=None, limit=12):
             # PRIORITY 3: Frequently Bought Together
             # ============================================
             if len(recommended_products) < limit:
+                # First, get user's recent product IDs
                 cursor.execute("""
-                    SELECT DISTINCT p.ProductID, p.Product_Name, p.Category, p.Price,
-                           p.Stock, i.Stock_Level, i.Availability,
-                           'Customers also bought' as recommendation_reason
-                    FROM order_items oi1
-                    JOIN order_items oi2 ON oi1.OrderID = oi2.OrderID AND oi1.ProductID != oi2.ProductID
-                    JOIN product p ON oi2.ProductID = p.ProductID
-                    JOIN inventory i ON p.ProductID = i.ProductID
-                    WHERE oi1.ProductID IN (
-                        SELECT ProductID FROM order_items oi
+                    SELECT DISTINCT oi.ProductID
+                    FROM order_items oi
+                    JOIN orders o ON oi.OrderID = o.OrderID
+                    WHERE o.CustomerID = %s
+                    ORDER BY o.OrderDate DESC
+                    LIMIT 3
+                """, (customer_id,))
+                user_products = cursor.fetchall()
+                
+                if user_products:
+                    user_product_ids = [p['ProductID'] for p in user_products]
+                    product_placeholders = ','.join(['%s'] * len(user_product_ids))
+                    
+                    # Get user's purchased product IDs for exclusion
+                    cursor.execute("""
+                        SELECT DISTINCT oi.ProductID
+                        FROM order_items oi
                         JOIN orders o ON oi.OrderID = o.OrderID
                         WHERE o.CustomerID = %s
-                        ORDER BY o.OrderDate DESC
-                        LIMIT 3
-                    )
-                    AND oi2.ProductID NOT IN (
-                        SELECT ProductID FROM order_items oi
-                        JOIN orders o ON oi.OrderID = o.OrderID
-                        WHERE o.CustomerID = %s
-                    )
-                    AND i.Stock_Level > CAST(i.Low_level AS UNSIGNED)
-                    AND i.Availability = 'In Stock'
-                    GROUP BY p.ProductID
-                    ORDER BY COUNT(*) DESC
-                    LIMIT %s
-                """, (customer_id, customer_id, limit - len(recommended_products)))
-                fbt_products = cursor.fetchall()
-                for prod in fbt_products:
-                    if prod['ProductID'] not in product_ids_seen:
-                        product_ids_seen.add(prod['ProductID'])
-                        recommended_products.append(prod)
-                print(f"   ✓ Added {len(fbt_products)} frequently-bought-together products")
+                    """, (customer_id,))
+                    purchased_product_ids = [p['ProductID'] for p in cursor.fetchall()]
+                    
+                    if purchased_product_ids:
+                        purchased_placeholders = ','.join(['%s'] * len(purchased_product_ids))
+                        
+                        cursor.execute(f"""
+                            SELECT DISTINCT p.ProductID, p.Product_Name, p.Category, p.Price,
+                                p.Stock,
+                                COALESCE(i.Stock_Level, p.Stock) as Stock_Level,
+                                COALESCE(i.Availability, 'Available') as Availability,
+                                'Customers also bought' as recommendation_reason,
+                                COUNT(*) as frequency
+                            FROM order_items oi1
+                            JOIN order_items oi2 ON oi1.OrderID = oi2.OrderID AND oi1.ProductID != oi2.ProductID
+                            JOIN product p ON oi2.ProductID = p.ProductID
+                            LEFT JOIN inventory i ON p.ProductID = i.ProductID
+                            WHERE oi1.ProductID IN ({product_placeholders})
+                            AND oi2.ProductID NOT IN ({purchased_placeholders})
+                            AND p.Stock > 0
+                            GROUP BY p.ProductID, p.Product_Name, p.Category, p.Price, p.Stock
+                            ORDER BY frequency DESC
+                            LIMIT %s
+                        """, (*user_product_ids, *purchased_product_ids, limit - len(recommended_products)))
+                    else:
+                        cursor.execute(f"""
+                            SELECT DISTINCT p.ProductID, p.Product_Name, p.Category, p.Price,
+                                p.Stock,
+                                COALESCE(i.Stock_Level, p.Stock) as Stock_Level,
+                                COALESCE(i.Availability, 'Available') as Availability,
+                                'Customers also bought' as recommendation_reason,
+                                COUNT(*) as frequency
+                            FROM order_items oi1
+                            JOIN order_items oi2 ON oi1.OrderID = oi2.OrderID AND oi1.ProductID != oi2.ProductID
+                            JOIN product p ON oi2.ProductID = p.ProductID
+                            LEFT JOIN inventory i ON p.ProductID = i.ProductID
+                            WHERE oi1.ProductID IN ({product_placeholders})
+                            AND p.Stock > 0
+                            GROUP BY p.ProductID, p.Product_Name, p.Category, p.Price, p.Stock
+                            ORDER BY frequency DESC
+                            LIMIT %s
+                        """, (*user_product_ids, limit - len(recommended_products)))
+                    
+                    fbt_products = cursor.fetchall()
+                    for prod in fbt_products:
+                        if prod['ProductID'] not in product_ids_seen:
+                            product_ids_seen.add(prod['ProductID'])
+                            recommended_products.append(prod)
+                    print(f"   ✓ Added {len(fbt_products)} frequently-bought-together products")
             
             # ============================================
             # PRIORITY 4: Service History Related
