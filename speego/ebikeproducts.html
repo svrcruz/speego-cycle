@@ -200,6 +200,21 @@
   </div>
 
   <script>
+    // Load user name
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("get_user_data.php")
+        .then(res => res.json())
+        .then(data => {
+          if (!data.error) {
+            const nameEl = document.querySelector(".greeting-text p");
+            nameEl.textContent = `${data.Customer_FName} ${data.Customer_LName}`;
+          }
+        })
+        .catch(err => console.error("User fetch error:", err));
+    });
+  </script>
+
+  <script>
     document.addEventListener('DOMContentLoaded', function () {
       let currentCustomerID = null;
 

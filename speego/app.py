@@ -1,13 +1,15 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, session
 from flask_cors import CORS
 import requests
 import json
 import mysql.connector
 from mysql.connector import Error
 from datetime import datetime, timedelta
+import secrets
 
 app = Flask(__name__)
-CORS(app)
+app.secret_key = secrets.token_hex(16)  # Generate secure secret key
+CORS(app, supports_credentials=True)  # Enable credentials for session support
 
 # Database configuration
 DB_CONFIG = {
@@ -25,27 +27,176 @@ def get_db_connection():
     except Error as e:
         print(f"Database connection error: {e}")
         return None
-    
-    
-def format_appointment_date(date_string):
-    """Convert appointment date string to MySQL datetime format"""
-    if not date_string:
-        return None
-    try:
-        # Handle format: '2025-10-24 10:00 AM'
-        if 'AM' in date_string or 'PM' in date_string:
-            dt = datetime.strptime(date_string, '%Y-%m-%d %I:%M %p')
-            return dt.strftime('%Y-%m-%d %H:%M:%S')
-        # Handle format: '2025-10-24 10:00:00'
-        elif ':' in date_string:
-            return date_string
-        # Handle format: '2025-10-24'
-        else:
-            return f"{date_string} 00:00:00"
-    except Exception as e:
-        print(f"Date format error: {e}")
-        return None
 
+
+# ======================================================
+# SESSION & AUTH ENDPOINTS
+# ======================================================
+
+@app.route('/api/get_session', methods=['GET'])
+def get_session():
+    """Get current logged-in user info from session"""
+    # For now, return a mock user - replace with actual session logic
+    # This should match your PHP session management
+    customer_id = request.args.get('customer_id', type=int)
+    
+    if customer_id:
+        conn = get_db_connection()
+        if conn:
+            try:
+                cursor = conn.cursor(dictionary=True)
+                cursor.execute("""
+                    SELECT CustomerID, Customer_FName, Customer_LName, Customer_Email
+                    FROM customer WHERE CustomerID = %s
+                """, (customer_id,))
+                user = cursor.fetchone()
+                
+                if user:
+                    return jsonify({
+                        'logged_in': True,
+                        'customer_id': user['CustomerID'],
+                        'first_name': user['Customer_FName'],
+                        'last_name': user['Customer_LName'],
+                        'email': user['Customer_Email'],
+                        'full_name': f"{user['Customer_FName']} {user['Customer_LName']}"
+                    })
+            except Error as e:
+                print(f"Error fetching user: {e}")
+            finally:
+                if conn.is_connected():
+                    cursor.close()
+                    conn.close()
+    
+    return jsonify({'logged_in': False, 'error': 'No active session'})
+
+
+# ======================================================
+# SMART RECOMMENDATIONS (NO DEFAULT CUSTOMER_ID)
+# ======================================================
+
+def get_recommended_for_you(customer_id=None, limit=12):
+    """
+    Get personalized product recommendations for a customer
+    Based on:
+    1. Purchase history (similar categories) - if customer_id provided
+    2. Service request history (related products) - if customer_id provided
+    3. Popular products (fallback or when no customer_id)
+    """
+    conn = get_db_connection()
+    if not conn:
+        return []
+    
+    try:
+        cursor = conn.cursor(dictionary=True)
+        recommended_products = []
+        
+        if customer_id:
+            # Get customer's purchase history categories
+            cursor.execute("""
+                SELECT DISTINCT p.Category
+                FROM product p
+                JOIN order_items oi ON p.ProductID = oi.ProductID
+                JOIN orders o ON oi.OrderID = o.OrderID
+                WHERE o.CustomerID = %s
+                LIMIT 3
+            """, (customer_id,))
+            purchased_categories = [row['Category'] for row in cursor.fetchall()]
+            
+            # Get products from same categories (excluding already purchased)
+            if purchased_categories:
+                category_placeholders = ','.join(['%s'] * len(purchased_categories))
+                cursor.execute(f"""
+                    SELECT DISTINCT p.ProductID, p.Product_Name, p.Category, p.Price, 
+                           p.Stock, i.Stock_Level, i.Availability,
+                           'Based on your purchases' as recommendation_reason
+                    FROM product p
+                    JOIN inventory i ON p.ProductID = i.ProductID
+                    WHERE p.Category IN ({category_placeholders})
+                    AND p.ProductID NOT IN (
+                        SELECT oi.ProductID 
+                        FROM order_items oi 
+                        JOIN orders o ON oi.OrderID = o.OrderID 
+                        WHERE o.CustomerID = %s
+                    )
+                    AND i.Stock_Level > CAST(i.Low_level AS UNSIGNED)
+                    AND i.Availability = 'In Stock'
+                    ORDER BY p.Price DESC
+                    LIMIT %s
+                """, (*purchased_categories, customer_id, limit))
+                recommended_products.extend(cursor.fetchall())
+            
+            # Get products related to service requests
+            if len(recommended_products) < limit:
+                try:
+                    cursor.execute("""
+                        SELECT DISTINCT p.ProductID, p.Product_Name, p.Category, p.Price,
+                               p.Stock, i.Stock_Level, i.Availability,
+                               'Related to your service requests' as recommendation_reason
+                        FROM service_request sr
+                        JOIN product p ON p.Category = 'Parts'
+                        JOIN inventory i ON p.ProductID = i.ProductID
+                        WHERE sr.CustomerID = %s
+                        AND p.ProductID NOT IN (
+                            SELECT oi.ProductID
+                            FROM order_items oi
+                            JOIN orders o ON oi.OrderID = o.OrderID
+                            WHERE o.CustomerID = %s
+                        )
+                        AND i.Stock_Level > CAST(i.Low_level AS UNSIGNED)
+                        AND i.Availability = 'In Stock'
+                        LIMIT %s
+                    """, (customer_id, customer_id, limit - len(recommended_products)))
+                    recommended_products.extend(cursor.fetchall())
+                except Error as e:
+                    print(f"Service request query error: {e}")
+        
+        # Fill remaining slots with popular/featured products
+        if len(recommended_products) < limit:
+            cursor.execute("""
+                SELECT p.ProductID, p.Product_Name, p.Category, p.Price,
+                       p.Stock, i.Stock_Level, i.Availability,
+                       'Popular choice' as recommendation_reason
+                FROM product p
+                JOIN inventory i ON p.ProductID = i.ProductID
+                WHERE i.Stock_Level > CAST(i.Low_level AS UNSIGNED)
+                AND i.Availability = 'In Stock'
+                ORDER BY p.Price DESC, i.Stock_Level DESC
+                LIMIT %s
+            """, (limit - len(recommended_products),))
+            recommended_products.extend(cursor.fetchall())
+        
+        # Remove duplicates while preserving order
+        seen = set()
+        unique_products = []
+        for product in recommended_products:
+            if product['ProductID'] not in seen:
+                seen.add(product['ProductID'])
+                unique_products.append(product)
+        
+        return unique_products[:limit]
+        
+    except Error as e:
+        print(f"Error getting recommendations: {e}")
+        return []
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
+
+@app.route('/recommended_products', methods=['GET'])
+def recommended_products():
+    """API endpoint for recommended products - NO DEFAULT customer_id"""
+    customer_id = request.args.get('customer_id', type=int)
+    limit = request.args.get('limit', default=12, type=int)
+    
+    if customer_id:
+        print(f"[API] Loading personalized recommendations for customer {customer_id}")
+    else:
+        print(f"[API] Loading generic popular products (no customer_id provided)")
+    
+    products = get_recommended_for_you(customer_id, limit)
+    return jsonify(products)
 
 
 # ======================================================
@@ -141,10 +292,10 @@ def get_available_products(category=None):
         cursor = conn.cursor(dictionary=True)
         query = """
             SELECT p.ProductID, p.Product_Name, p.Category, p.Price, p.Stock,
-                   i.Stock_Level, i.Low_Stock, i.Availability
-            FROM PRODUCT p
-            JOIN INVENTORY i ON p.ProductID = i.ProductID
-            WHERE i.Stock_Level > i.Low_Stock AND i.Availability = 'Available'
+                   i.Stock_Level, i.Availability
+            FROM product p
+            JOIN inventory i ON p.ProductID = i.ProductID
+            WHERE i.Stock_Level > 0 AND i.Availability = 'In Stock'
         """
         params = []
         if category:
@@ -173,10 +324,10 @@ def get_product_recommendations(keywords):
         cursor.execute("""
             SELECT p.ProductID, p.Product_Name, p.Category, p.Price, p.Stock,
                    i.Stock_Level, i.Availability
-            FROM PRODUCT p
-            JOIN INVENTORY i ON p.ProductID = i.ProductID
+            FROM product p
+            JOIN inventory i ON p.ProductID = i.ProductID
             WHERE (p.Product_Name LIKE %s OR p.Category LIKE %s)
-            AND i.Stock_Level > 0 AND i.Availability = 'Available'
+            AND i.Stock_Level > 0 AND i.Availability = 'In Stock'
             LIMIT 5
         """, (keyword_pattern, keyword_pattern))
         return cursor.fetchall()
@@ -237,7 +388,7 @@ def save_service_request_to_db(request_data):
             VALUES (%s, %s, %s, %s, %s, %s)
         """
         cursor.execute(insert_query, (
-            request_data.get('customer_id', 1),
+            request_data.get('customer_id'),
             request_data.get('admin_id', None),
             request_data.get('service_type', 'Repair'),
             request_data.get('problem_description'),
@@ -255,131 +406,11 @@ def save_service_request_to_db(request_data):
             cursor.close()
             conn.close()
 
-# ======================================================
-# NEW FUNCTION: RECOMMENDED FOR YOU
-# ======================================================
-
-def get_recommended_for_you(customer_id=None, limit=12):
-    """
-    Get personalized product recommendations for a customer
-    Based on:
-    1. Purchase history (similar categories)
-    2. Service request history (related products)
-    3. Popular products (fallback)
-    """
-    conn = get_db_connection()
-    if not conn:
-        return []
-    
-    try:
-        cursor = conn.cursor(dictionary=True)
-        recommended_products = []
-        
-        if customer_id:
-            # Get customer's purchase history categories
-            cursor.execute("""
-                SELECT DISTINCT p.Category
-                FROM PRODUCT p
-                JOIN ORDER_ITEM oi ON p.ProductID = oi.ProductID
-                JOIN ORDERS o ON oi.OrderID = o.OrderID
-                WHERE o.CustomerID = %s
-                LIMIT 3
-            """, (customer_id,))
-            purchased_categories = [row['Category'] for row in cursor.fetchall()]
-            
-            # Get products from same categories (excluding already purchased)
-            if purchased_categories:
-                category_placeholders = ','.join(['%s'] * len(purchased_categories))
-                cursor.execute(f"""
-                    SELECT DISTINCT p.ProductID, p.Product_Name, p.Category, p.Price, 
-                           p.Stock, i.Stock_Level, i.Availability,
-                           'Based on your purchases' as recommendation_reason
-                    FROM PRODUCT p
-                    JOIN INVENTORY i ON p.ProductID = i.ProductID
-                    WHERE p.Category IN ({category_placeholders})
-                    AND p.ProductID NOT IN (
-                        SELECT oi.ProductID FROM ORDER_ITEM oi JOIN ORDERS o ON oi.OrderID = o.OrderID WHERE o.CustomerID = %s
-                    )
-                    AND i.Stock_Level > i.Low_level 
-                    AND i.Availability = 'Available'
-                    ORDER BY p.Price DESC
-                    LIMIT %s
-                """, (*purchased_categories, customer_id, limit))
-                recommended_products.extend(cursor.fetchall())
-            
-            # Get products related to service requests
-            if len(recommended_products) < limit:
-                cursor.execute("""
-                    SELECT DISTINCT p.ProductID, p.Product_Name, p.Category, p.Price,
-                           p.Stock, i.Stock_Level, i.Availability,
-                           'Related to your service requests' as recommendation_reason
-                    FROM service_request sr
-                    JOIN PRODUCT p ON (
-                        p.Product_Name LIKE CONCAT('%', SUBSTRING_INDEX(sr.ProblemDescription, ' ', 1), '%')
-                        OR p.Category LIKE CONCAT('%', sr.ServiceType, '%')
-                    )
-                    JOIN INVENTORY i ON p.ProductID = i.ProductID
-                    WHERE sr.CustomerID = %s
-                    AND p.ProductID NOT IN (
-                        SELECT oi.ProductID
-                        FROM ORDER_ITEM oi
-                        JOIN ORDERS o ON oi.OrderID = o.OrderID
-                        WHERE o.CustomerID = %s
-                    )
-                    AND i.Stock_Level > i.Low_Stock 
-                    AND i.Availability = 'Available'
-                    LIMIT %s
-                """, (customer_id, customer_id, limit - len(recommended_products)))
-                recommended_products.extend(cursor.fetchall())
-        
-        # Fill remaining slots with popular/featured products
-        if len(recommended_products) < limit:
-            cursor.execute("""
-                SELECT p.ProductID, p.Product_Name, p.Category, p.Price,
-                       p.Stock, i.Stock_Level, i.Availability,
-                       'Popular choice' as recommendation_reason
-                FROM PRODUCT p
-                JOIN INVENTORY i ON p.ProductID = i.ProductID
-                WHERE i.Stock_Level > i.Low_Stock 
-                AND i.Availability = 'Available'
-                ORDER BY p.Price DESC, i.Stock_Level DESC
-                LIMIT %s
-            """, (limit - len(recommended_products),))
-            recommended_products.extend(cursor.fetchall())
-        
-        # Remove duplicates while preserving order
-        seen = set()
-        unique_products = []
-        for product in recommended_products:
-            if product['ProductID'] not in seen:
-                seen.add(product['ProductID'])
-                unique_products.append(product)
-        
-        return unique_products[:limit]
-        
-    except Error as e:
-        print(f"Error getting recommendations: {e}")
-        return []
-    finally:
-        if conn.is_connected():
-            cursor.close()
-            conn.close()
-
-
-# ======================================================
-# AI & ROUTES 
-# ======================================================
-
-@app.route('/recommended_products', methods=['GET'])
-def recommended_products():
-    customer_id = request.args.get('customer_id', default=None, type=int)
-    products = get_recommended_for_you(customer_id)
-    return jsonify(products)
 
 @app.route('/chat', methods=['POST'])
 def chat():
     user_message = request.json['message']
-    customer_id = request.json.get('customer_id', 1)  # optional, defaults to 1 for testing
+    customer_id = request.json.get('customer_id')  # NO DEFAULT - must be provided
 
     rec_keywords = ['recommend', 'suggestion', 'need', 'buy', 'looking for', 'want']
     is_recommendation = any(keyword in user_message.lower() for keyword in rec_keywords)
@@ -402,7 +433,6 @@ def chat():
     )
 
     try:
-        # === Send request to Llama3 model ===
         response = requests.post(
             'http://localhost:11434/api/generate',
             json={
@@ -419,7 +449,6 @@ def chat():
         )
         reply = response.json().get('response', '').strip()
 
-        # === Handle product recommendations ===
         recommendations = []
         if is_recommendation:
             words = user_message.lower().split()
@@ -434,25 +463,25 @@ def chat():
                     unique.append(rec)
             recommendations = unique[:5]
 
-        # === Save chatbot message to speego_pal table ===
-        try:
-            conn = get_db_connection()
-            if conn:
-                cursor = conn.cursor()
-                insert_ai = """
-                    INSERT INTO speego_pal (CustomerID, ProductID, ServiceRequestID, Response, ConfidenceScore, InteractionType)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                """
-                cursor.execute(insert_ai, (
-                    customer_id, None, None, reply, None, "chat"
-                ))
-                conn.commit()
-        except Exception as e:
-            print("Error saving chat to speego_pal:", e)
-        finally:
-            if conn and conn.is_connected():
-                cursor.close()
-                conn.close()
+        if customer_id:
+            try:
+                conn = get_db_connection()
+                if conn:
+                    cursor = conn.cursor()
+                    insert_ai = """
+                        INSERT INTO speego_pal (CustomerID, ProductID, ServiceRequestID, Response, ConfidenceScore, InteractionType)
+                        VALUES (%s, %s, %s, %s, %s, %s)
+                    """
+                    cursor.execute(insert_ai, (
+                        customer_id, None, None, reply, None, "chat"
+                    ))
+                    conn.commit()
+            except Exception as e:
+                print("Error saving chat to speego_pal:", e)
+            finally:
+                if conn and conn.is_connected():
+                    cursor.close()
+                    conn.close()
 
         return jsonify({'reply': reply, 'recommendations': recommendations})
 
@@ -460,11 +489,6 @@ def chat():
         print("Error in /chat:", e)
         return jsonify({'reply': 'Sorry, there was an error connecting to the AI model.'}), 500
 
-
-
-# ======================================================
-# DIAGNOSIS - AI does all reasoning here
-# ======================================================
 
 @app.route('/diagnose', methods=['POST'])
 def diagnose():
@@ -521,11 +545,8 @@ def diagnose():
             elif low.startswith("estimated time:"): time = line.split(":", 1)[1].strip()
 
         related_products = get_product_recommendations(problem_description)
-        # Normalize cost symbol to PHP
         if cost:
-            cost = cost.replace("$", "₱").replace("USD", "₱").replace("US$", "₱")
-            # remove duplicates (₱₱)
-            cost = cost.replace("₱₱", "₱").strip()
+            cost = cost.replace("$", "₱").replace("USD", "₱").replace("US$", "₱").replace("₱₱", "₱").strip()
 
         return jsonify({
             'diagnosis': diagnosis or ai_response,
@@ -539,10 +560,6 @@ def diagnose():
         return jsonify({'diagnosis': 'Error generating diagnosis'}), 500
 
 
-# ======================================================
-# Save confirmed service request + AI diagnosis
-# ======================================================
-
 @app.route('/api/service-request', methods=['POST'])
 def create_service_request():
     try:
@@ -552,9 +569,8 @@ def create_service_request():
         service_type = data.get('service_type')
         product_name = data.get('product_name')
         problem_description = data.get('problem_description')
-        appointment_date = format_appointment_date(data.get('appointment_date'))
-        
-        ai_diagnosis = data.get('ai_diagnosis')        
+        appointment_date = data.get('appointment_date')
+        ai_diagnosis = data.get('ai_diagnosis')
         confidence_score = data.get('confidence_score')
 
         conn = get_db_connection()
@@ -563,7 +579,6 @@ def create_service_request():
 
         cursor = conn.cursor()
 
-        # 🔹 Only use existing products — do NOT create new ones
         cursor.execute("SELECT ProductID FROM product WHERE Product_Name = %s LIMIT 1", (product_name,))
         result = cursor.fetchone()
 
@@ -572,7 +587,6 @@ def create_service_request():
 
         product_id = result[0]
 
-        # 🔹 Customize logic based on service type
         if service_type == "Repair":
             status = "Pending Diagnosis"
         elif service_type == "Battery Replacement":
@@ -582,7 +596,6 @@ def create_service_request():
         else:
             status = "Pending"
 
-        # 🔹 Insert service request
         cursor.execute("""
             INSERT INTO service_request
             (CustomerID, AdminID, ProductID, ServiceType, ProblemDescription, AppointmentDate, Status)
@@ -592,14 +605,12 @@ def create_service_request():
 
         service_request_id = cursor.lastrowid
 
-        # 🔹 Save AI diagnosis into SPEEGO_PAL
         cursor.execute("""
             INSERT INTO speego_pal (CustomerID, ProductID, ServiceRequestID, Response, ConfidenceScore, InteractionType)
             VALUES (%s, %s, %s, %s, %s, %s)
         """, (customer_id, product_id, service_request_id, ai_diagnosis, confidence_score, "service request"))
         conn.commit()
 
-        # 🔹 Create AI suggested entry in SERVICE_DIAGNOSIS
         cursor.execute("""
             INSERT INTO service_diagnosis (ServiceRequestID, DiagnosisDetails, TechnicianName, FindingsDate)
             VALUES (%s, %s, %s, %s)
@@ -625,4 +636,11 @@ def create_service_request():
 
 
 if __name__ == '__main__':
+    print("\n" + "="*60)
+    print("🚀 SPEEGO CYCLE - PRODUCTION SERVER")
+    print("="*60)
+    print("📍 Server: http://127.0.0.1:5000")
+    print("🎯 Recommendations: /recommended_products?customer_id=X")
+    print("⚠️  Customer ID is now REQUIRED (no defaults)")
+    print("="*60 + "\n")
     app.run(debug=True)

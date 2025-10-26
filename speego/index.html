@@ -213,53 +213,153 @@
                 chatOverlay.classList.remove('active');
             }
         });
+    </script>
 
-        //recommended for you
-        const RECOMMENDED_API = "http://127.0.0.1:5000/recommended_products"; // backend endpoint
+    <!-- ============================================================ -->
+    <!-- DYNAMIC RECOMMENDATIONS SCRIPT -->
+    <!-- ============================================================ -->
+    <script>
+        const RECOMMENDED_API = "http://127.0.0.1:5000/recommended_products";
+        const SESSION_API = "get_user_data.php";
         const recommendedTrack = document.getElementById("recommended");
 
-        async function loadRecommendedProducts(customerId = 1) {
+        // Store current user info
+        let currentUser = null;
+
+        /**
+         * Get logged-in user from PHP session
+         */
+        async function getCurrentUser() {
             try {
-                const res = await fetch(`${RECOMMENDED_API}?customer_id=${customerId}`);
-                const data = await res.json();
-                renderRecommended(data);
-            } catch (err) {
-                console.error("Failed to load recommendations:", err);
-                recommendedTrack.innerHTML = "<p style='padding:1rem;'>Unable to load recommendations.</p>";
+                const response = await fetch(SESSION_API);
+                const data = await response.json();
+
+                if (!data.error && data.CustomerID) {
+                    currentUser = {
+                        customer_id: data.CustomerID,
+                        first_name: data.Customer_FName,
+                        last_name: data.Customer_LName,
+                        full_name: `${data.Customer_FName} ${data.Customer_LName}`
+                    };
+
+                    console.log('✅ User logged in:', currentUser.full_name, '(ID:', currentUser.customer_id + ')');
+
+                    // Update greeting in header
+                    const nameElement = document.querySelector(".greeting-text p");
+                    if (nameElement) {
+                        nameElement.textContent = currentUser.full_name;
+                    }
+
+                    return currentUser;
+                } else {
+                    console.warn('⚠️ No user logged in');
+                    return null;
+                }
+            } catch (error) {
+                console.error('❌ Error fetching session:', error);
+                return null;
             }
         }
 
-        function renderRecommended(products) {
-            recommendedTrack.innerHTML = ""; // clear placeholder cards
+        /**
+         * Load recommended products (personalized or generic)
+         */
+        async function loadRecommendedProducts() {
+            try {
+                // Get current user first
+                const user = await getCurrentUser();
+
+                // Build API URL
+                let apiUrl = RECOMMENDED_API;
+                if (user && user.customer_id) {
+                    apiUrl += `?customer_id=${user.customer_id}&limit=6`;
+                    console.log('📦 Loading personalized recommendations for customer', user.customer_id);
+                } else {
+                    apiUrl += `?limit=6`;
+                    console.log('📦 Loading generic popular products (no user logged in)');
+                }
+
+                // Fetch recommendations
+                const response = await fetch(apiUrl);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const products = await response.json();
+                console.log(`✅ Loaded ${products.length} recommendations`);
+
+                // Render to carousel
+                renderRecommendedCarousel(products);
+
+            } catch (error) {
+                console.error('❌ Failed to load recommendations:', error);
+                // Show placeholder on error
+                recommendedTrack.innerHTML = `
+                    <div class="card" style="display: flex; align-items: center; justify-content: center; color: #999;">
+                        <p>Unable to load recommendations</p>
+                    </div>
+                `;
+            }
+        }
+
+        /**
+         * Render recommendations in carousel
+         */
+        function renderRecommendedCarousel(products) {
+            recommendedTrack.innerHTML = ""; // Clear placeholder cards
+
             if (!products || products.length === 0) {
-                recommendedTrack.innerHTML = "<p style='padding:1rem;'>No recommended products available.</p>";
+                recommendedTrack.innerHTML = `
+                    <div class="card" style="display: flex; align-items: center; justify-content: center; color: #999;">
+                        <p>No recommendations available</p>
+                    </div>
+                `;
                 return;
             }
 
-            // Limit to 6 products (like your original layout)
+            // Limit to 6 products for carousel
             const limitedProducts = products.slice(0, 6);
 
             limitedProducts.forEach(p => {
                 const card = document.createElement("div");
                 card.classList.add("card");
+
+                // Try to load product image, fallback to placeholder
+                const imageName = p.Product_Name.replace(/ /g, '%20');
+
                 card.innerHTML = `
-                    <img src="images/${p.Product_Image || 'default.png'}" alt="${p.Product_Name}">
+                    <img src="images/${imageName}.png" 
+                         alt="${p.Product_Name}"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div style="display: none; height: 150px; background: #f0f0f0; align-items: center; justify-content: center; color: #999;">
+                        <i class="ph ph-image" style="font-size: 3rem;"></i>
+                    </div>
                     <div class="card-info">
                         <p class="name">${p.Product_Name}</p>
                         <p class="price">₱${Number(p.Price).toLocaleString()}</p>
+                        ${p.recommendation_reason ? `<p style="font-size: 0.7rem; color: #666; margin-top: 0.25rem;">${p.recommendation_reason}</p>` : ''}
                     </div>
                 `;
+
+                // Click handler - navigate to product details
                 card.addEventListener("click", () => {
-                    window.location.href = "productdetails.html?id=" + p.ProductID;
+                    window.location.href = `productdetails.html?id=${p.ProductID}`;
                 });
+
                 recommendedTrack.appendChild(card);
             });
         }
 
-        // Load when the page opens
-        loadRecommendedProducts(1); // Replace 1 with the logged-in user's ID if available
+        // Initialize recommendations when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRecommendedProducts();
+        });
     </script>
 
+    <!-- ============================================================ -->
+    <!-- CHAT FUNCTIONALITY -->
+    <!-- ============================================================ -->
     <script>
         function toggleChat() {
             const chatbox = document.getElementById('chatbox');
@@ -273,10 +373,6 @@
                 chatLog.innerHTML = `<p><strong>SpeegoPal:</strong> Hello! I'm SpeegoPal, your e-bike assistant. How can I help you today?</p>`;
             }
         }
-
-        document.getElementById('minimizeBtn').addEventListener('click', () => {
-            document.getElementById('chatbox').classList.remove('active');
-        });
 
         async function sendMessage() {
             const input = document.getElementById('userInput');
@@ -297,11 +393,17 @@
             chatLog.appendChild(typingIndicator);
             chatLog.scrollTop = chatLog.scrollHeight;
 
+            // Get customer_id if available
+            const customer_id = currentUser ? currentUser.customer_id : null;
+
             // Send to Flask backend
             const response = await fetch('http://127.0.0.1:5000/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message })
+                body: JSON.stringify({
+                    message: message,
+                    customer_id: customer_id
+                })
             });
 
             const data = await response.json();
@@ -317,11 +419,13 @@
         // Listen for Enter key
         document.addEventListener('DOMContentLoaded', () => {
             const input = document.getElementById('userInput');
-            input.addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') {
-                    sendMessage();
-                }
-            });
+            if (input) {
+                input.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') {
+                        sendMessage();
+                    }
+                });
+            }
         });
     </script>
 </body>
