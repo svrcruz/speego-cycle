@@ -263,13 +263,14 @@ def get_recommended_for_you(customer_id=None, limit=12):
             print(f"   📊 Filling remaining with popular products")
             cursor.execute("""
                 SELECT p.ProductID, p.Product_Name, p.Category, p.Price,
-                       p.Stock, i.Stock_Level, i.Availability,
-                       'Popular choice' as recommendation_reason
+                    p.Stock, 
+                    COALESCE(i.Stock_Level, p.Stock) as Stock_Level,
+                    COALESCE(i.Availability, 'Available') as Availability,
+                    'Popular choice' as recommendation_reason
                 FROM product p
-                JOIN inventory i ON p.ProductID = i.ProductID
-                WHERE i.Stock_Level > CAST(i.Low_level AS UNSIGNED)
-                AND i.Availability = 'In Stock'
-                ORDER BY p.Price DESC, i.Stock_Level DESC
+                LEFT JOIN inventory i ON p.ProductID = i.ProductID
+                WHERE p.Stock > 0
+                ORDER BY p.Price DESC
                 LIMIT %s
             """, (limit - len(recommended_products),))
             popular = cursor.fetchall()
@@ -278,17 +279,17 @@ def get_recommended_for_you(customer_id=None, limit=12):
                     product_ids_seen.add(prod['ProductID'])
                     recommended_products.append(prod)
             print(f"   ✓ Added {len(popular)} popular products")
-        
+
         print(f"   ✅ Total recommendations: {len(recommended_products)}\n")
         return recommended_products[:limit]
-        
+
     except Error as e:
-        print(f"❌ Error getting recommendations: {e}")
-        return []
+            print(f"❌ Error getting recommendations: {e}")
+            return []
     finally:
-        if conn.is_connected():
-            cursor.close()
-            conn.close()
+            if conn.is_connected():
+                cursor.close()
+                conn.close()
 
 
 @app.route('/recommended_products', methods=['GET'])
