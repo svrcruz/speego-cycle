@@ -8,8 +8,8 @@ from datetime import datetime, timedelta
 import secrets
 
 app = Flask(__name__)
-app.secret_key = secrets.token_hex(16)  # Generate secure secret key
-CORS(app, supports_credentials=True)  # Enable credentials for session support
+app.secret_key = secrets.token_hex(16)
+CORS(app, supports_credentials=True)
 
 # Database configuration
 DB_CONFIG = {
@@ -36,8 +36,6 @@ def get_db_connection():
 @app.route('/api/get_session', methods=['GET'])
 def get_session():
     """Get current logged-in user info from session"""
-    # For now, return a mock user - replace with actual session logic
-    # This should match your PHP session management
     customer_id = request.args.get('customer_id', type=int)
     
     if customer_id:
@@ -71,16 +69,18 @@ def get_session():
 
 
 # ======================================================
-# SMART RECOMMENDATIONS (NO DEFAULT CUSTOMER_ID)
+# ENHANCED SMART RECOMMENDATIONS
 # ======================================================
 
 def get_recommended_for_you(customer_id=None, limit=12):
     """
-    Get personalized product recommendations for a customer
-    Based on:
-    1. Purchase history (similar categories) - if customer_id provided
-    2. Service request history (related products) - if customer_id provided
-    3. Popular products (fallback or when no customer_id)
+    Get HIGHLY PERSONALIZED product recommendations
+    Priority Order:
+    1. Related to items in cart (complementary products)
+    2. Similar to recently purchased items (same category/brand)
+    3. Frequently bought together with user's purchases
+    4. Based on service history (relevant parts/accessories)
+    5. Trending products (fallback for new users)
     """
     conn = get_db_connection()
     if not conn:
@@ -89,56 +89,157 @@ def get_recommended_for_you(customer_id=None, limit=12):
     try:
         cursor = conn.cursor(dictionary=True)
         recommended_products = []
+        product_ids_seen = set()
         
         if customer_id:
-            # Get customer's purchase history categories
-            cursor.execute("""
-                SELECT DISTINCT p.Category
-                FROM product p
-                JOIN order_items oi ON p.ProductID = oi.ProductID
-                JOIN orders o ON oi.OrderID = o.OrderID
-                WHERE o.CustomerID = %s
-                LIMIT 3
-            """, (customer_id,))
-            purchased_categories = [row['Category'] for row in cursor.fetchall()]
+            print(f"\n🎯 Building personalized recommendations for Customer {customer_id}")
             
-            # Get products from same categories (excluding already purchased)
-            if purchased_categories:
-                category_placeholders = ','.join(['%s'] * len(purchased_categories))
-                cursor.execute(f"""
-                    SELECT DISTINCT p.ProductID, p.Product_Name, p.Category, p.Price, 
+            # ============================================
+            # PRIORITY 1: Cart-Based Recommendations
+            # ============================================
+            cursor.execute("""
+                SELECT DISTINCT p.Category, p.Product_Name
+                FROM cart c
+                JOIN product p ON c.ProductID = p.ProductID
+                WHERE c.CustomerID = %s
+            """, (customer_id,))
+            cart_items = cursor.fetchall()
+            
+            if cart_items:
+                print(f"   📦 Found {len(cart_items)} items in cart")
+                cart_categories = list(set([item['Category'] for item in cart_items]))
+                
+                # Get complementary products (different categories but related)
+                if cart_categories:
+                    category_placeholders = ','.join(['%s'] * len(cart_categories))
+                    cursor.execute(f"""
+                        SELECT DISTINCT p.ProductID, p.Product_Name, p.Category, p.Price, 
+                               p.Stock, i.Stock_Level, i.Availability,
+                               'Pairs well with items in your cart' as recommendation_reason
+                        FROM product p
+                        JOIN inventory i ON p.ProductID = i.ProductID
+                        WHERE p.Category NOT IN ({category_placeholders})
+                        AND p.ProductID NOT IN (
+                            SELECT ProductID FROM cart WHERE CustomerID = %s
+                        )
+                        AND i.Stock_Level > CAST(i.Low_level AS UNSIGNED)
+                        AND i.Availability = 'In Stock'
+                        ORDER BY RAND()
+                        LIMIT 4
+                    """, (*cart_categories, customer_id))
+                    cart_related = cursor.fetchall()
+                    for prod in cart_related:
+                        if prod['ProductID'] not in product_ids_seen:
+                            product_ids_seen.add(prod['ProductID'])
+                            recommended_products.append(prod)
+                    print(f"   ✓ Added {len(cart_related)} cart-related products")
+            
+            # ============================================
+            # PRIORITY 2: Purchase History (Recent Orders)
+            # ============================================
+            if len(recommended_products) < limit:
+                cursor.execute("""
+                    SELECT DISTINCT p.Category, p.Product_Name, o.OrderDate
+                    FROM orders o
+                    JOIN order_items oi ON o.OrderID = oi.OrderID
+                    JOIN product p ON oi.ProductID = p.ProductID
+                    WHERE o.CustomerID = %s
+                    ORDER BY o.OrderDate DESC
+                    LIMIT 5
+                """, (customer_id,))
+                recent_purchases = cursor.fetchall()
+                
+                if recent_purchases:
+                    print(f"   🛍️ Found {len(recent_purchases)} recent purchases")
+                    purchased_categories = list(set([item['Category'] for item in recent_purchases]))
+                    
+                    # Get similar products (same category, not purchased)
+                    if purchased_categories:
+                        category_placeholders = ','.join(['%s'] * len(purchased_categories))
+                        cursor.execute(f"""
+                            SELECT DISTINCT p.ProductID, p.Product_Name, p.Category, p.Price, 
+                                   p.Stock, i.Stock_Level, i.Availability,
+                                   'Based on your recent purchases' as recommendation_reason
+                            FROM product p
+                            JOIN inventory i ON p.ProductID = i.ProductID
+                            WHERE p.Category IN ({category_placeholders})
+                            AND p.ProductID NOT IN (
+                                SELECT oi.ProductID 
+                                FROM order_items oi 
+                                JOIN orders o ON oi.OrderID = o.OrderID 
+                                WHERE o.CustomerID = %s
+                            )
+                            AND p.ProductID NOT IN (
+                                SELECT ProductID FROM cart WHERE CustomerID = %s
+                            )
+                            AND i.Stock_Level > CAST(i.Low_level AS UNSIGNED)
+                            AND i.Availability = 'In Stock'
+                            ORDER BY p.Price DESC
+                            LIMIT %s
+                        """, (*purchased_categories, customer_id, customer_id, limit - len(recommended_products)))
+                        purchase_related = cursor.fetchall()
+                        for prod in purchase_related:
+                            if prod['ProductID'] not in product_ids_seen:
+                                product_ids_seen.add(prod['ProductID'])
+                                recommended_products.append(prod)
+                        print(f"   ✓ Added {len(purchase_related)} purchase-based products")
+            
+            # ============================================
+            # PRIORITY 3: Frequently Bought Together
+            # ============================================
+            if len(recommended_products) < limit:
+                cursor.execute("""
+                    SELECT DISTINCT p.ProductID, p.Product_Name, p.Category, p.Price,
                            p.Stock, i.Stock_Level, i.Availability,
-                           'Based on your purchases' as recommendation_reason
-                    FROM product p
+                           'Customers also bought' as recommendation_reason
+                    FROM order_items oi1
+                    JOIN order_items oi2 ON oi1.OrderID = oi2.OrderID AND oi1.ProductID != oi2.ProductID
+                    JOIN product p ON oi2.ProductID = p.ProductID
                     JOIN inventory i ON p.ProductID = i.ProductID
-                    WHERE p.Category IN ({category_placeholders})
-                    AND p.ProductID NOT IN (
-                        SELECT oi.ProductID 
-                        FROM order_items oi 
-                        JOIN orders o ON oi.OrderID = o.OrderID 
+                    WHERE oi1.ProductID IN (
+                        SELECT ProductID FROM order_items oi
+                        JOIN orders o ON oi.OrderID = o.OrderID
+                        WHERE o.CustomerID = %s
+                        ORDER BY o.OrderDate DESC
+                        LIMIT 3
+                    )
+                    AND oi2.ProductID NOT IN (
+                        SELECT ProductID FROM order_items oi
+                        JOIN orders o ON oi.OrderID = o.OrderID
                         WHERE o.CustomerID = %s
                     )
                     AND i.Stock_Level > CAST(i.Low_level AS UNSIGNED)
                     AND i.Availability = 'In Stock'
-                    ORDER BY p.Price DESC
+                    GROUP BY p.ProductID
+                    ORDER BY COUNT(*) DESC
                     LIMIT %s
-                """, (*purchased_categories, customer_id, limit))
-                recommended_products.extend(cursor.fetchall())
+                """, (customer_id, customer_id, limit - len(recommended_products)))
+                fbt_products = cursor.fetchall()
+                for prod in fbt_products:
+                    if prod['ProductID'] not in product_ids_seen:
+                        product_ids_seen.add(prod['ProductID'])
+                        recommended_products.append(prod)
+                print(f"   ✓ Added {len(fbt_products)} frequently-bought-together products")
             
-            # Get products related to service requests
+            # ============================================
+            # PRIORITY 4: Service History Related
+            # ============================================
             if len(recommended_products) < limit:
                 try:
                     cursor.execute("""
                         SELECT DISTINCT p.ProductID, p.Product_Name, p.Category, p.Price,
                                p.Stock, i.Stock_Level, i.Availability,
-                               'Related to your service requests' as recommendation_reason
+                               'Recommended for your e-bike service' as recommendation_reason
                         FROM service_request sr
-                        JOIN product p ON p.Category = 'Parts'
+                        JOIN product p ON (
+                            p.Category = 'Parts' OR 
+                            p.Category = 'Accessories' OR
+                            p.Product_Name LIKE CONCAT('%', SUBSTRING_INDEX(sr.ProblemDescription, ' ', 2), '%')
+                        )
                         JOIN inventory i ON p.ProductID = i.ProductID
                         WHERE sr.CustomerID = %s
                         AND p.ProductID NOT IN (
-                            SELECT oi.ProductID
-                            FROM order_items oi
+                            SELECT ProductID FROM order_items oi
                             JOIN orders o ON oi.OrderID = o.OrderID
                             WHERE o.CustomerID = %s
                         )
@@ -146,12 +247,20 @@ def get_recommended_for_you(customer_id=None, limit=12):
                         AND i.Availability = 'In Stock'
                         LIMIT %s
                     """, (customer_id, customer_id, limit - len(recommended_products)))
-                    recommended_products.extend(cursor.fetchall())
+                    service_related = cursor.fetchall()
+                    for prod in service_related:
+                        if prod['ProductID'] not in product_ids_seen:
+                            product_ids_seen.add(prod['ProductID'])
+                            recommended_products.append(prod)
+                    print(f"   ✓ Added {len(service_related)} service-related products")
                 except Error as e:
-                    print(f"Service request query error: {e}")
+                    print(f"   ⚠️ Service request query error: {e}")
         
-        # Fill remaining slots with popular/featured products
+        # ============================================
+        # PRIORITY 5: Trending/Popular (Fallback)
+        # ============================================
         if len(recommended_products) < limit:
+            print(f"   📊 Filling remaining with popular products")
             cursor.execute("""
                 SELECT p.ProductID, p.Product_Name, p.Category, p.Price,
                        p.Stock, i.Stock_Level, i.Availability,
@@ -163,20 +272,18 @@ def get_recommended_for_you(customer_id=None, limit=12):
                 ORDER BY p.Price DESC, i.Stock_Level DESC
                 LIMIT %s
             """, (limit - len(recommended_products),))
-            recommended_products.extend(cursor.fetchall())
+            popular = cursor.fetchall()
+            for prod in popular:
+                if prod['ProductID'] not in product_ids_seen:
+                    product_ids_seen.add(prod['ProductID'])
+                    recommended_products.append(prod)
+            print(f"   ✓ Added {len(popular)} popular products")
         
-        # Remove duplicates while preserving order
-        seen = set()
-        unique_products = []
-        for product in recommended_products:
-            if product['ProductID'] not in seen:
-                seen.add(product['ProductID'])
-                unique_products.append(product)
-        
-        return unique_products[:limit]
+        print(f"   ✅ Total recommendations: {len(recommended_products)}\n")
+        return recommended_products[:limit]
         
     except Error as e:
-        print(f"Error getting recommendations: {e}")
+        print(f"❌ Error getting recommendations: {e}")
         return []
     finally:
         if conn.is_connected():
@@ -186,21 +293,19 @@ def get_recommended_for_you(customer_id=None, limit=12):
 
 @app.route('/recommended_products', methods=['GET'])
 def recommended_products():
-    """API endpoint for recommended products - NO DEFAULT customer_id"""
+    """API endpoint for recommended products"""
     customer_id = request.args.get('customer_id', type=int)
     limit = request.args.get('limit', default=12, type=int)
     
-    if customer_id:
-        print(f"[API] Loading personalized recommendations for customer {customer_id}")
-    else:
-        print(f"[API] Loading generic popular products (no customer_id provided)")
+    if not customer_id:
+        return jsonify({'error': 'customer_id is required'}), 400
     
     products = get_recommended_for_you(customer_id, limit)
     return jsonify(products)
 
 
 # ======================================================
-# EXISTING CORE FUNCTIONS 
+# EXISTING CORE FUNCTIONS (unchanged)
 # ======================================================
 
 def check_warranty_status(product_id, purchase_date):
@@ -410,7 +515,7 @@ def save_service_request_to_db(request_data):
 @app.route('/chat', methods=['POST'])
 def chat():
     user_message = request.json['message']
-    customer_id = request.json.get('customer_id')  # NO DEFAULT - must be provided
+    customer_id = request.json.get('customer_id')
 
     rec_keywords = ['recommend', 'suggestion', 'need', 'buy', 'looking for', 'want']
     is_recommendation = any(keyword in user_message.lower() for keyword in rec_keywords)
@@ -637,10 +742,15 @@ def create_service_request():
 
 if __name__ == '__main__':
     print("\n" + "="*60)
-    print("🚀 SPEEGO CYCLE - PRODUCTION SERVER")
+    print("🚀 SPEEGO CYCLE - ENHANCED RECOMMENDATION ENGINE")
     print("="*60)
     print("📍 Server: http://127.0.0.1:5000")
-    print("🎯 Recommendations: /recommended_products?customer_id=X")
-    print("⚠️  Customer ID is now REQUIRED (no defaults)")
+    print("🎯 Personalized Recs: /recommended_products?customer_id=X")
+    print("📊 Algorithm Priority:")
+    print("   1️⃣ Cart-based (complementary items)")
+    print("   2️⃣ Purchase history (similar products)")
+    print("   3️⃣ Frequently bought together")
+    print("   4️⃣ Service history related")
+    print("   5️⃣ Trending/Popular (fallback)")
     print("="*60 + "\n")
     app.run(debug=True)

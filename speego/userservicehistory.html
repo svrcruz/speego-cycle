@@ -1,3 +1,5 @@
+Can't create, edit, or upload … If your storage is full for 2+ years, your files may be deleted from Drive and Photos.
+Get 30 GB of storage for ₱49 ₱10/month for 3 months.
 <!DOCTYPE html>
 <html lang="en">
 
@@ -115,7 +117,7 @@
           }
 
           // ✅ Fetch user's completed service requests
-          fetch("get_user_completed_services.php")
+          fetch("get_user_service_history.php")
             .then(response => response.json())
             .then(services => {
               const tableBody = document.getElementById("tableBody");
@@ -132,12 +134,13 @@
               services.forEach(service => {
                 const row = document.createElement("tr");
                 row.innerHTML = `
-                  <td>${service.ServiceRequestID}</td>
-                  <td>${service.ServiceType}</td>
-                  <td>${service.AppointmentDate}</td>
-                  <td>${service.Status}</td>
-                  <td><a href="#" class="view-btn">View</a></td>
+                    <td>${service.serviceRequestID}</td>
+                    <td>${service.serviceType}</td>
+                    <td>${service.appointmentDate}</td>
+                    <td>${service.status}</td>
+                    <td><a href="#" class="view-btn">View</a></td>
                 `;
+
                 tableBody.appendChild(row);
               });
             })

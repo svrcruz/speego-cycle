@@ -154,6 +154,20 @@
         let selectedTime = null;
         let appointmentConfirmed = false;
 
+        // 🔹 Helper Function: Convert 12-hour to 24-hour format
+        function convertTo24Hour(time12h) {
+            const [time, modifier] = time12h.split(' ');
+            let [hours, minutes] = time.split(':');
+
+            if (hours === '12') {
+                hours = modifier === 'AM' ? '00' : '12';
+            } else {
+                hours = modifier === 'PM' ? String(parseInt(hours, 10) + 12) : hours.padStart(2, '0');
+            }
+
+            return `${hours}:${minutes}:00`;
+        }
+
         // 🔹 Service Button Selection
         document.querySelectorAll('.service-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -241,7 +255,10 @@
             if (!model || !serial || !problem) return alert('Please fill in all required fields.');
             if (!appointmentConfirmed) return alert('Please choose an appointment schedule first.');
 
-            const appointmentDate = `${selectedDate} ${selectedTime}`;
+            // ✅ Convert to MySQL DATETIME format (YYYY-MM-DD HH:MM:SS)
+            const time24 = convertTo24Hour(selectedTime);
+            const appointmentDate = `${selectedDate} ${time24}`;
+
             const requestData = {
                 customer_id: 1,
                 admin_id: null,

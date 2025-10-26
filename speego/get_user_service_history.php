@@ -1,3 +1,4 @@
+Can't create, edit, or upload … If your storage is full for 2+ years, your files may be deleted from Drive and Photos. Get 30 GB of storage for ₱49 ₱10/month for 3 months.
 <?php
 session_start();
 
@@ -8,46 +9,42 @@ $dbname = "speegotest";
 
 $conn = new mysqli($servername, $dbuser, $dbpass, $dbname);
 if ($conn->connect_error) {
-    echo json_encode(['error' => 'Database connection failed: ' . $conn->connect_error]);
+    echo json_encode(['error' => 'Database connection failed']);
     exit;
 }
 
-// Check if user is logged in
 if (!isset($_SESSION['CustomerID'])) {
-    echo json_encode(['error' => 'User not logged in.']);
+    echo json_encode(['error' => 'User not logged in']);
     exit;
 }
 
 $customerID = $_SESSION['CustomerID'];
 
-// Fetch service requests for this customer
 $sql = "SELECT 
-            serviceRequestID AS serviceNo,
-            serviceType,
-            appointmentDate,
-            status
-        FROM service_request
-        WHERE customerID = ?
-        ORDER BY appointmentDate DESC";
+    sr.serviceRequestID,
+    sr.serviceType,
+    sr.problemDescription,
+    sr.appointmentDate,
+    sr.status,
+    p.Product_Name AS ebikeModel
+FROM service_request sr
+LEFT JOIN product p ON sr.productID = p.productID
+WHERE sr.customerID = ? 
+AND LOWER(sr.status) = 'completed'
+ORDER BY sr.appointmentDate DESC";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $customerID);
 $stmt->execute();
 $result = $stmt->get_result();
 
-$serviceRequests = [];
-
+$services = [];
 while ($row = $result->fetch_assoc()) {
-    $serviceRequests[] = [
-        'serviceNo' => $row['serviceNo'],
-        'serviceType' => $row['serviceType'],
-        'datePlaced' => date('F d, Y', strtotime($row['appointmentDate'])),
-        'status' => $row['status'],
-        'date' => $row['appointmentDate']
-    ];
+    $services[] = $row;
 }
 
-echo json_encode($serviceRequests);
+echo json_encode($services);
 
 $stmt->close();
 $conn->close();
+?>

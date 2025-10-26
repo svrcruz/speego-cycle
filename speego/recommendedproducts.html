@@ -4,11 +4,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recommended Products</title>
+    <title>Recommended Products - SpeegoCycle</title>
     <link rel="stylesheet" href="recommendedproducts.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        /* Loading indicator */
+        .loading-indicator {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .loading-indicator i {
+            font-size: 3rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Recommendation reason badge */
+        .recommend-reason {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            color: #666;
+            background: #fef3c7;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            margin-top: 0.5rem;
+        }
+
+        .recommend-reason i {
+            color: #f59e0b;
+        }
+
+        /* Add to cart button */
+        .add-to-cart-btn {
+            margin-top: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .add-to-cart-btn:hover {
+            background: #b91c1c;
+            transform: translateY(-2px);
+        }
+
+        /* User info badge */
+        .user-info-badge {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info-badge i {
+            font-size: 2rem;
+            color: #0284c7;
+        }
+
+        .user-info-text h3 {
+            margin: 0;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .user-info-text p {
+            margin: 0.25rem 0 0;
+            font-size: 0.85rem;
+            color: #666;
+        }
+    </style>
 </head>
 
 <body>
@@ -17,7 +107,7 @@
             <i class="ph ph-user-circle"></i>
             <div>
                 <span class="greeting">Hello there,</span>
-                <span class="username">Juan Dela Cruz</span>
+                <span class="username" id="userName">Loading...</span>
             </div>
         </div>
         <div class="header-right">
@@ -44,13 +134,23 @@
         <div class="filter-panel" id="filterPanel">
             <h3>Filter Options</h3>
             <div class="filter-group">
+                <label>Category:</label>
+                <select id="filterCategory">
+                    <option value="">All Categories</option>
+                    <option value="E-bikes">E-bikes</option>
+                    <option value="Parts">Parts</option>
+                    <option value="Accessories">Accessories</option>
+                </select>
+            </div>
+            <div class="filter-group">
                 <label>Price Range:</label>
                 <select id="filterPrice">
                     <option value="">All</option>
                     <option value="0-10000">₱0 - ₱10,000</option>
                     <option value="10000-20000">₱10,000 - ₱20,000</option>
                     <option value="20000-30000">₱20,000 - ₱30,000</option>
-                    <option value="30000-50000">₱30,000+</option>
+                    <option value="30000-50000">₱30,000 - ₱50,000</option>
+                    <option value="50000-999999">₱50,000+</option>
                 </select>
             </div>
             <div class="filter-actions">
@@ -62,6 +162,21 @@
 
     <main class="main-content">
         <h1 class="page-title">RECOMMENDED FOR YOU</h1>
+
+        <!-- User Info Badge -->
+        <div class="user-info-badge" id="userInfoBadge" style="display: none;">
+            <i class="ph ph-sparkle"></i>
+            <div class="user-info-text">
+                <h3 id="personalizedTitle">Personalized recommendations loading...</h3>
+                <p id="personalizedDesc">Based on your shopping history and preferences</p>
+            </div>
+        </div>
+
+        <div class="loading-indicator" id="loadingIndicator">
+            <i class="ph ph-spinner"></i>
+            <p>Loading personalized recommendations...</p>
+        </div>
+
         <section class="product-section">
             <div class="product-grid" id="productGrid">
                 <!-- Products dynamically loaded here -->
@@ -70,34 +185,358 @@
     </main>
 
     <div class="sidebar" id="sidebar">
-        <div class="sidebar-item">Shopping Cart</div>
-        <div class="sidebar-item">Order History</div>
-        <div class="sidebar-item">About Us</div>
-        <div class="sidebar-item">Services</div>
-        <div class="sidebar-item">Log Out</div>
+        <div class="sidebar-item" onclick="window.location.href='shoppingcart.html'">Shopping Cart</div>
+        <div class="sidebar-item" onclick="window.location.href='orderhistory.html'">Order History</div>
+        <div class="sidebar-item" onclick="window.location.href='aboutus.html'">About Us</div>
+        <div class="sidebar-item" onclick="window.location.href='userservices.html'">Services</div>
+        <div class="sidebar-item" onclick="logout()">Log Out</div>
     </div>
 
     <script>
-        const API_URL = "http://127.0.0.1:5000/recommended_products"; // Change if backend hosted elsewhere
+        const API_URL = "http://127.0.0.1:5000/recommended_products";
+        const SESSION_API = "get_user_data.php";
         const productGrid = document.getElementById("productGrid");
+        const loadingIndicator = document.getElementById("loadingIndicator");
 
-        // Fetch recommended products from backend
-        async function fetchRecommendedProducts(customerId = 1) {
+        let USER_SESSION = null;
+        let allProducts = []; // Store all products for filtering
+
+        // ✅ DEBUGGING: Log everything
+        console.log('🚀 Page loaded');
+        console.log('📡 API_URL:', API_URL);
+        console.log('📡 SESSION_API:', SESSION_API);
+        console.log('🌐 Current URL:', window.location.href);
+
+        /**
+         * ✅ IMPROVED: Try multiple ways to get user session
+         */
+        async function checkSession() {
+            console.log('🔍 Attempting to get user session...');
+
+            // Method 1: Try get_user_data.php
             try {
-                const res = await fetch(`${API_URL}?customer_id=${customerId}`);
-                const data = await res.json();
-                renderProducts(data);
+                console.log('🔍 Method 1: Trying get_user_data.php...');
+                const response = await fetch('get_user_data.php', {
+                    method: 'GET',
+                    credentials: 'include', // Important for session cookies
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                console.log('📥 Response status:', response.status);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('📦 Session data received:', data);
+
+                if (data.CustomerID && !data.error) {
+                    USER_SESSION = data;
+                    console.log('✅ Method 1 SUCCESS: User found', USER_SESSION);
+                    updateUI();
+                    return true;
+                }
+
+                console.warn('⚠️ Method 1: No valid session:', data);
             } catch (error) {
-                console.error("Failed to fetch recommended products:", error);
-                productGrid.innerHTML = "<p>Failed to load recommendations. Please try again later.</p>";
+                console.error('❌ Method 1 failed:', error);
+            }
+
+            // Method 2: Try get_user_direct.php (if you created it)
+            try {
+                console.log('🔍 Method 2: Trying get_user_direct.php...');
+                const response = await fetch('get_user_direct.php', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('📦 Direct session data:', data);
+
+                    if (data.CustomerID && !data.error) {
+                        USER_SESSION = data;
+                        console.log('✅ Method 2 SUCCESS: User found', USER_SESSION);
+                        updateUI();
+                        return true;
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Method 2 failed:', error);
+            }
+
+            // Method 3: Check if customer_id in URL (for testing)
+            const urlParams = new URLSearchParams(window.location.search);
+            const customerIdParam = urlParams.get('customer_id');
+
+            if (customerIdParam) {
+                console.log('🔍 Method 3: Found customer_id in URL:', customerIdParam);
+                // Try to get user info from Flask API
+                try {
+                    const response = await fetch(`http://127.0.0.1:5000/api/get_session?customer_id=${customerIdParam}`);
+                    const data = await response.json();
+
+                    if (data.logged_in) {
+                        USER_SESSION = {
+                            CustomerID: data.customer_id,
+                            Customer_FName: data.first_name,
+                            Customer_LName: data.last_name,
+                            Customer_Email: data.email
+                        };
+                        console.log('✅ Method 3 SUCCESS: User found via Flask API', USER_SESSION);
+                        updateUI();
+                        return true;
+                    }
+                } catch (error) {
+                    console.error('❌ Method 3 failed:', error);
+                }
+            }
+
+            // All methods failed
+            console.error('❌ ALL METHODS FAILED - No valid session found');
+            showSessionError();
+            return false;
+        }
+
+        function updateUI() {
+            // Update username display
+            const userName = document.getElementById('userName');
+            if (userName && USER_SESSION.Customer_FName) {
+                userName.textContent = `${USER_SESSION.Customer_FName} ${USER_SESSION.Customer_LName}`;
+            }
+
+            // Show user info badge
+            const userBadge = document.getElementById('userInfoBadge');
+            const personalizedTitle = document.getElementById('personalizedTitle');
+            const personalizedDesc = document.getElementById('personalizedDesc');
+
+            if (userBadge && USER_SESSION.CustomerID) {
+                userBadge.style.display = 'flex';
+                personalizedTitle.textContent = `Hey ${USER_SESSION.Customer_FName}! Here's what we picked for you`;
+                personalizedDesc.textContent = `Based on your cart, purchase history, and browsing preferences`;
             }
         }
 
-        // Render products dynamically
+        function showSessionError() {
+            loadingIndicator.style.display = 'none';
+            productGrid.innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; padding: 3rem;">
+                    <i class="ph ph-warning-circle" style="font-size: 4rem; color: #f44336; display: block; margin-bottom: 1rem;"></i>
+                    <h3 style="color: #333;">Session Not Found</h3>
+                    <p style="color: #666; margin: 1rem 0;">Please log in to see personalized recommendations.</p>
+                    
+                    <details style="margin: 2rem auto; max-width: 600px; text-align: left; background: #f9f9f9; padding: 1rem; border-radius: 8px;">
+                        <summary style="cursor: pointer; font-weight: 600; color: #333;">🔧 Troubleshooting</summary>
+                        <ul style="margin-top: 1rem; color: #666; line-height: 1.8;">
+                            <li>Make sure you're logged in</li>
+                            <li>Check if cookies are enabled</li>
+                            <li>Try logging out and back in</li>
+                            <li>Clear browser cache and cookies</li>
+                        </ul>
+                        <p style="margin-top: 1rem; font-size: 0.9rem; color: #999;">
+                            <strong>For Testing:</strong> Add ?customer_id=1 to the URL
+                        </p>
+                    </details>
+                    
+                    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                        <button onclick="window.location.href='loginuser.html'" 
+                                style="padding: 0.75rem 1.5rem; background: #dc2626; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem;">
+                            Go to Login
+                        </button>
+                        <button onclick="window.location.href='index.html'" 
+                                style="padding: 0.75rem 1.5rem; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem;">
+                            Go to Home
+                        </button>
+                        <button onclick="testWithCustomer(1)" 
+                                style="padding: 0.75rem 1.5rem; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem;">
+                            Test with Customer 1
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function testWithCustomer(customerId) {
+            window.location.href = `recommendedproducts.html?customer_id=${customerId}`;
+        }
+
+        /**
+         * ✅ Fetch PERSONALIZED recommendations from backend
+         */
+        async function fetchRecommendedProducts() {
+            if (!USER_SESSION || !USER_SESSION.CustomerID) {
+                console.error('❌ No user session found');
+                productGrid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #f44336;">
+                        <i class="ph ph-warning-circle" style="font-size: 4rem; display: block; margin-bottom: 1rem;"></i>
+                        <h3>Session Error</h3>
+                        <p>Unable to load user session. Please login again.</p>
+                        <button onclick="window.location.href='loginuser.html'" style="margin-top: 1rem; padding: 0.75rem 1.5rem; background: #dc2626; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Go to Login
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            loadingIndicator.style.display = 'block';
+            productGrid.innerHTML = '';
+
+            try {
+                const customerId = USER_SESSION.CustomerID;
+                const apiUrl = `${API_URL}?customer_id=${customerId}&limit=24`;
+
+                console.log('🎯 Fetching PERSONALIZED recommendations for Customer ID:', customerId);
+                console.log('📡 API URL:', apiUrl);
+                console.log('⏰ Request time:', new Date().toISOString());
+
+                const response = await fetch(apiUrl);
+
+                console.log('📥 Response status:', response.status);
+                console.log('📥 Response ok:', response.ok);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('❌ Response error:', errorText);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                console.log('📦 Raw response data:', data);
+                console.log('📊 Data type:', Array.isArray(data) ? 'Array' : typeof data);
+                console.log('📊 Data length:', data.length);
+
+                if (data.error) {
+                    console.error('❌ API returned error:', data.error);
+                    throw new Error(data.error);
+                }
+
+                if (!Array.isArray(data)) {
+                    console.error('❌ API did not return an array:', data);
+                    throw new Error('Invalid response format from API');
+                }
+
+                console.log('✅ Received recommendations:', data.length);
+                console.log('📊 First 3 recommendations:', data.slice(0, 3));
+
+                if (data.length === 0) {
+                    console.warn('⚠️ No recommendations returned for this user');
+                    console.warn('⚠️ User may need to:');
+                    console.warn('   - Add items to cart');
+                    console.warn('   - Make purchases');
+                    console.warn('   - Have order history');
+
+                    productGrid.innerHTML = `
+                        <div style="grid-column: 1/-1; text-align: center; padding: 3rem;">
+                            <i class="ph ph-package" style="font-size: 4rem; color: #999; display: block; margin-bottom: 1rem;"></i>
+                            <h3 style="color: #666;">No recommendations yet for ${USER_SESSION.Customer_FName}</h3>
+                            <p style="color: #999; font-size: 0.9rem; margin: 1rem 0;">Start building your profile:</p>
+                            <div style="text-align: left; max-width: 400px; margin: 1rem auto;">
+                                <p style="margin: 0.5rem 0;">✓ Add items to your cart</p>
+                                <p style="margin: 0.5rem 0;">✓ Make a purchase</p>
+                                <p style="margin: 0.5rem 0;">✓ Browse products</p>
+                            </div>
+                            <button onclick="window.location.href='index.html'" style="margin-top: 1.5rem; padding: 0.75rem 1.5rem; background: #dc2626; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                Browse Products
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                allProducts = data;
+                renderProducts(data);
+
+            } catch (error) {
+                console.error("❌ Failed to fetch recommended products:", error);
+                console.error("❌ Error stack:", error.stack);
+                productGrid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #f44336;">
+                        <i class="ph ph-warning-circle" style="font-size: 4rem; display: block; margin-bottom: 1rem;"></i>
+                        <h3>Failed to load recommendations</h3>
+                        <p style="margin: 1rem 0;">${error.message}</p>
+                        <details style="margin: 1rem auto; max-width: 600px; text-align: left; background: #fee; padding: 1rem; border-radius: 8px;">
+                            <summary style="cursor: pointer; font-weight: 600;">Debug Information</summary>
+                            <pre style="margin-top: 0.5rem; font-size: 0.85rem; overflow: auto;">${JSON.stringify({
+                    customerID: USER_SESSION?.CustomerID,
+                    apiUrl: API_URL,
+                    error: error.message,
+                    timestamp: new Date().toISOString()
+                }, null, 2)}</pre>
+                        </details>
+                        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1rem;">
+                            <button onclick="fetchRecommendedProducts()" style="padding: 0.75rem 1.5rem; background: #dc2626; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                Try Again
+                            </button>
+                            <button onclick="window.location.href='index.html'" style="padding: 0.75rem 1.5rem; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                Go Home
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+        }
+
+        /**
+         * ✅ Add product to cart
+         */
+        async function addToCart(productId, productName) {
+            if (!USER_SESSION || !USER_SESSION.CustomerID) {
+                alert('Please login first');
+                window.location.href = 'loginuser.html';
+                return;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('product_id', productId);
+                formData.append('quantity', 1);
+
+                const response = await fetch('add_to_cart.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(`✅ ${productName} added to cart!`);
+                    // Refresh recommendations after adding to cart
+                    fetchRecommendedProducts();
+                } else {
+                    alert(`❌ ${data.message || 'Failed to add to cart'}`);
+                }
+            } catch (error) {
+                console.error('Cart error:', error);
+                alert('❌ Failed to add to cart');
+            }
+        }
+
+        /**
+         * ✅ Render products dynamically with recommendation reasons
+         */
         function renderProducts(products) {
             productGrid.innerHTML = "";
+
             if (!products || products.length === 0) {
-                productGrid.innerHTML = "<p>No recommended products available.</p>";
+                productGrid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 3rem;">
+                        <i class="ph ph-package" style="font-size: 4rem; color: #999; display: block; margin-bottom: 1rem;"></i>
+                        <h3 style="color: #666;">No recommendations available</h3>
+                        <p style="color: #999; font-size: 0.9rem;">Start shopping to get personalized recommendations!</p>
+                        <button onclick="window.location.href='index.html'" style="margin-top: 1rem; padding: 0.75rem 1.5rem; background: #dc2626; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Browse Products
+                        </button>
+                    </div>
+                `;
                 return;
             }
 
@@ -105,63 +544,103 @@
                 const card = document.createElement("div");
                 card.classList.add("product-card");
                 card.setAttribute("data-id", p.ProductID);
+                card.setAttribute("data-price", p.Price);
+                card.setAttribute("data-category", p.Category);
+                card.setAttribute("data-name", p.Product_Name.toLowerCase());
+
+                // Try to load image
+                const imageName = p.Product_Name.replace(/ /g, '%20');
+                const reason = p.recommendation_reason || 'Recommended for you';
 
                 card.innerHTML = `
-                    <div class="product-image"></div>
+                    <div class="product-image" style="background-color: #f0f0f0; height: 200px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                        <img src="images/${imageName}.png" 
+                             alt="${p.Product_Name}"
+                             style="max-width: 100%; max-height: 100%; object-fit: contain;"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div style="display: none; flex-direction: column; align-items: center; color: #999;">
+                            <i class="ph ph-image" style="font-size: 3rem;"></i>
+                            <p style="font-size: 0.8rem; margin-top: 0.5rem;">No image</p>
+                        </div>
+                    </div>
                     <div class="product-info">
                         <p class="product-name">${p.Product_Name}</p>
+                        <p style="font-size: 0.75rem; color: #999; margin: 0.25rem 0;">${p.Category}</p>
                         <p class="product-price">₱${Number(p.Price).toLocaleString()}</p>
-                        <p class="recommend-reason">${p.recommendation_reason}</p>
+                        <span class="recommend-reason">
+                            <i class="ph ph-sparkle"></i> ${reason}
+                        </span>
+                        <button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart(${p.ProductID}, '${p.Product_Name.replace(/'/g, "\\'")}')">
+                            <i class="ph ph-shopping-cart"></i> Add to Cart
+                        </button>
                     </div>
                 `;
 
+                // Click handler for product details
                 card.addEventListener("click", () => {
-                    alert(`Viewing details for ${p.Product_Name}`);
+                    const productDetails = `
+Product: ${p.Product_Name}
+Category: ${p.Category}
+Price: ₱${Number(p.Price).toLocaleString()}
+Stock: ${p.Stock_Level || p.Stock} available
+Reason: ${reason}`;
+                    alert(productDetails);
                 });
 
                 productGrid.appendChild(card);
             });
         }
 
-        // --- Search Functionality ---
+        /**
+         * ✅ Search functionality
+         */
         document.getElementById("searchInput").addEventListener("input", function (e) {
             const searchTerm = e.target.value.toLowerCase();
             document.querySelectorAll(".product-card").forEach(card => {
-                const name = card.querySelector(".product-name").textContent.toLowerCase();
-                const price = card.querySelector(".product-price").textContent.toLowerCase();
-                card.style.display = (name.includes(searchTerm) || price.includes(searchTerm)) ? "block" : "none";
+                const name = card.getAttribute("data-name");
+                const visible = name.includes(searchTerm);
+                card.style.display = visible ? "block" : "none";
             });
         });
 
-        // --- Filter Panel Toggle ---
+        /**
+         * ✅ Filter functionality
+         */
         document.getElementById("filterToggle").addEventListener("click", () => {
             document.getElementById("filterPanel").classList.toggle("active");
         });
 
-        // --- Apply Filters ---
         document.getElementById("applyFilter").addEventListener("click", () => {
             const priceRange = document.getElementById("filterPrice").value;
+            const category = document.getElementById("filterCategory").value;
+
             const [min, max] = priceRange ? priceRange.split("-").map(Number) : [0, Infinity];
 
             document.querySelectorAll(".product-card").forEach(card => {
-                const priceText = card.querySelector(".product-price").textContent.replace(/[₱,]/g, "");
-                const price = parseFloat(priceText);
-                const visible = price >= (min || 0) && price <= (max || Infinity);
+                const price = parseFloat(card.getAttribute("data-price"));
+                const cardCategory = card.getAttribute("data-category");
+
+                const priceMatch = price >= (min || 0) && price <= (max || Infinity);
+                const categoryMatch = !category || cardCategory === category;
+
+                const visible = priceMatch && categoryMatch;
                 card.style.display = visible ? "block" : "none";
             });
 
             document.getElementById("filterPanel").classList.remove("active");
         });
 
-        // --- Clear Filters ---
         document.getElementById("clearFilter").addEventListener("click", () => {
             document.getElementById("filterPrice").value = "";
+            document.getElementById("filterCategory").value = "";
             document.getElementById("searchInput").value = "";
             document.querySelectorAll(".product-card").forEach(card => card.style.display = "block");
             document.getElementById("filterPanel").classList.remove("active");
         });
 
-        // --- Sidebar Toggle ---
+        /**
+         * ✅ Sidebar toggle
+         */
         document.getElementById("menuToggle").addEventListener("click", function (e) {
             e.stopPropagation();
             const sidebar = document.getElementById("sidebar");
@@ -171,13 +650,62 @@
         document.addEventListener("click", function (e) {
             const sidebar = document.getElementById("sidebar");
             const menuToggle = document.getElementById("menuToggle");
+            const filterPanel = document.getElementById("filterPanel");
+            const filterToggle = document.getElementById("filterToggle");
+
             if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
                 sidebar.classList.remove("active");
             }
+
+            if (!filterPanel.contains(e.target) && !filterToggle.contains(e.target)) {
+                filterPanel.classList.remove("active");
+            }
         });
 
-        // --- Initialize Page ---
-        fetchRecommendedProducts(1); // Replace 1 with the logged-in user's CustomerID
+        /**
+         * ✅ Logout function
+         */
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = 'logout.php';
+            }
+        }
+
+        /**
+         * ✅ Initialize page - Try to load session and recommendations
+         */
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🚀 Initializing Recommended Products Page...');
+            console.log('🌐 Page URL:', window.location.href);
+            console.log('🍪 Cookies:', document.cookie);
+
+            // Check for URL parameter first (for testing)
+            const urlParams = new URLSearchParams(window.location.search);
+            const customerIdParam = urlParams.get('customer_id');
+
+            if (customerIdParam) {
+                console.log('⚡ Quick load: customer_id found in URL:', customerIdParam);
+                // Set USER_SESSION directly for testing
+                USER_SESSION = {
+                    CustomerID: parseInt(customerIdParam),
+                    Customer_FName: 'Test User',
+                    Customer_LName: customerIdParam,
+                    testing: true
+                };
+                updateUI();
+                await fetchRecommendedProducts();
+                return;
+            }
+
+            // Normal flow: check session
+            const sessionValid = await checkSession();
+            if (sessionValid && USER_SESSION && USER_SESSION.CustomerID) {
+                console.log('✅ Session valid, loading recommendations...');
+                await fetchRecommendedProducts();
+            } else {
+                console.error('❌ Session validation failed');
+            }
+        });
     </script>
 </body>
 

@@ -1,6 +1,5 @@
+Can't create, edit, or upload … If your storage is full for 2+ years, your files may be deleted from Drive and Photos. Get 30 GB of storage for ₱49 ₱10/month for 3 months.
 <?php
-session_start();
-
 $servername = "localhost";
 $dbuser = "root";
 $dbpass = "Password1$";
@@ -8,41 +7,43 @@ $dbname = "speegotest";
 
 $conn = new mysqli($servername, $dbuser, $dbpass, $dbname);
 if ($conn->connect_error) {
-    die(json_encode(['error' => 'Database connection failed']));
+    echo json_encode(['error' => 'Database connection failed: ' . $conn->connect_error]);
+    exit;
 }
 
-header('Content-Type: application/json');
-
-$query = "
-    SELECT 
-        o.OrderID,
-        c.Customer_FName AS FirstName,
-        c.Customer_LName AS LastName,
-        GROUP_CONCAT(p.Product_Name SEPARATOR ', ') AS Items,
-        SUM(oi.Quantity) AS TotalQuantity,
-        o.TotalAmount
-    FROM orders o
-    JOIN customer c ON o.CustomerID = c.CustomerID
-    JOIN order_items oi ON o.OrderID = oi.OrderID
-    JOIN product p ON oi.ProductID = p.ProductID
-    GROUP BY o.OrderID
-    ORDER BY o.OrderDate DESC
+$sql = "
+SELECT 
+    sr.serviceRequestID,
+    CONCAT(c.Customer_FName, ' ', c.Customer_LName) AS customerName,
+    p.Product_Name AS ebikeModel,
+    sr.appointmentDate,
+    sd.technicianName,
+    sr.serviceType,
+    sr.status
+FROM service_request sr
+LEFT JOIN customer c ON sr.customerID = c.customerID
+LEFT JOIN product p ON sr.productID = p.productID
+LEFT JOIN service_diagnosis sd ON sr.serviceRequestID = sd.serviceRequestID
+ORDER BY sr.appointmentDate DESC
 ";
 
-$result = $conn->query($query);
-$orders = [];
+$result = $conn->query($sql);
+$requests = [];
 
-if ($result) {
+if ($result && $result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
-        $orders[] = [
-            'OrderID' => $row['OrderID'],
-            'Customer' => $row['FirstName'] . ' ' . $row['LastName'],
-            'Items' => $row['Items'],
-            'Quantity' => (int)$row['TotalQuantity'],
-            'TotalAmount' => $row['TotalAmount']
+        $requests[] = [
+            'serviceRequestID' => $row['serviceRequestID'], // ✅ THIS WAS MISSING
+            'customerName' => $row['customerName'],
+            'ebikeModel' => $row['ebikeModel'],
+            'appointmentDate' => date('M d, Y', strtotime($row['appointmentDate'])),
+            'technicianName' => $row['technicianName'] ?: '—',
+            'serviceType' => $row['serviceType'],
+            'status' => $row['status']
         ];
     }
 }
 
-echo json_encode(['orders' => $orders]);
+echo json_encode($requests);
 $conn->close();
+?>

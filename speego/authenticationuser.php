@@ -41,16 +41,23 @@ if (isset($_POST['resend'])) {
     $_SESSION['otp'] = $otp;
     $_SESSION['email'] = $email;
 
+    // Use json_encode and encodeURIComponent for safe JavaScript embedding
     echo "<!DOCTYPE html>
-    <html><head>
+    <html>
+    <head>
         <meta charset='UTF-8'>
         <script>
-            alert('Your new test OTP code is: $otp');
-            window.location.href='authenticationuser.html?email=$email';
+            const otp = " . json_encode($otp) . ";
+            const email = " . json_encode($email) . ";
+            alert('Your test OTP code is: ' + otp);
+            window.location.href = 'authenticationuser.html?email=' + encodeURIComponent(email);
         </script>
-    </head></html>";
+    </head>
+    <body></body>
+    </html>";
     exit();
 }
+
 
 //  When user submits OTP verification
 if (isset($_POST['verify'])) {

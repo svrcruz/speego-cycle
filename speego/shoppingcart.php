@@ -8,9 +8,10 @@ if ($conn->connect_error) {
     exit;
 }
 
-// For testing, assume customer 1
+// User logged in ID
 if (!isset($_SESSION['CustomerID'])) {
-    $_SESSION['CustomerID'] = 1;
+    echo json_encode(['error' => 'Not logged in']);
+    exit;
 }
 $customer_id = $_SESSION['CustomerID'];
 

@@ -1,3 +1,4 @@
+Can't create, edit, or upload … If your storage is full for 2+ years, your files may be deleted from Drive and Photos. Get 30 GB of storage for ₱49 ₱10/month for 3 months.
 <?php
 session_start();
 
@@ -27,8 +28,10 @@ $sql = "SELECT
             appointmentDate,
             status
         FROM service_request
-        WHERE customerID = ?
+        WHERE customerID = ? AND status != 'Completed'
         ORDER BY appointmentDate DESC";
+
+
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $customerID);
@@ -51,3 +54,4 @@ echo json_encode($serviceRequests);
 
 $stmt->close();
 $conn->close();
+?>

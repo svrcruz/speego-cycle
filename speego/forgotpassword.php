@@ -32,5 +32,3 @@ if (isset($_POST['get_otp'])) {
         exit();
     }
 }
-?>
-
