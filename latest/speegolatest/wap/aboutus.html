@@ -81,6 +81,19 @@
     </div>
 
     <script>
+
+        document.addEventListener("DOMContentLoaded", () => {
+        fetch("get_user_data.php")
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) return; // Not logged in or user not found
+                const nameDisplay = document.querySelector(".greeting-text p");
+                if (nameDisplay) {
+                    nameDisplay.textContent = `${data.Customer_FName} ${data.Customer_LName}`;
+                }
+            })
+            .catch(err => console.error("User fetch error:", err));
+    });
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('active');
@@ -114,18 +127,8 @@
             }
         });
 
-        // Load user name
-        document.addEventListener("DOMContentLoaded", () => {
-            fetch("get_user_data.php")
-                .then(res => res.json())
-                .then(data => {
-                    if (!data.error) {
-                        const nameEl = document.querySelector(".greeting-text p");
-                        nameEl.textContent = `${data.Customer_FName} ${data.Customer_LName}`;
-                    }
-                })
-                .catch(err => console.error("User fetch error:", err));
-        });
+
+
     </script>
 </body>
 
