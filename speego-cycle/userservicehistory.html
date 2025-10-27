@@ -1,3 +1,4 @@
+<<<<<<< HEAD:speego-cycle/userservicehistory.html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -168,3 +169,175 @@
 
 </body>
 </html>
+=======
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpeegoCycle - Service History</title>
+  <link rel="stylesheet" href="userservicehistory.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+
+<body>
+  <header class="header">
+    <div class="header-left">
+      <a href="userservices.html" class="back-arrow">
+        <i class="ph ph-caret-left"></i>
+      </a>
+    </div>
+    <div class="header-right">
+      <a href="#" class="nav-link active">Service History</a>
+      <a href="usertrack.html" class="nav-link">Track Service Requests</a>
+      <a href="index.html" class="home-icon">
+        <i class="ph ph-house"></i>
+      </a>
+      <span class="menu-icon" id="menuToggle">
+        <i class="ph ph-list"></i>
+      </span>
+    </div>
+  </header>
+
+  <div class="search-container">
+    <div class="search-box">
+      <span class="search-icon">
+        <i class="ph ph-magnifying-glass"></i>
+      </span>
+      <input type="text" class="search-input" id="searchInput" placeholder="Search">
+      <span class="filter-icon" id="filterToggle">
+        <i class="ph ph-funnel-simple"></i>
+      </span>
+    </div>
+
+    <div class="filter-panel" id="filterPanel">
+      <h3>Filter Options</h3>
+      <div class="filter-group">
+        <label>Service Type:</label>
+        <select id="filterServiceType">
+          <option value="">All</option>
+          <option value="Repair">Repair</option>
+          <option value="Maintenance">Maintenance</option>
+          <option value="Installation">Installation</option>
+          <option value="Inspection">Inspection</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Status:</label>
+        <select id="filterStatus">
+          <option value="">All</option>
+          <option value="Completed">Completed</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Pending">Pending</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
+      <div class="filter-actions">
+        <button id="applyFilter" class="btn-apply">Apply Filters</button>
+        <button id="clearFilter" class="btn-clear">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="main-content">
+    <h1 class="page-title">Service History</h1>
+    <div class="breadcrumb">
+      Home <span>›</span> Services <span>›</span> Service History
+    </div>
+
+    <div class="table-container">
+      <table id="serviceTable">
+        <thead>
+          <tr>
+            <th data-sort="serviceNo">Service No. <span class="sort-arrow">⇅</span></th>
+            <th>Service Type</th>
+            <th data-sort="datePlaced">Date Placed <span class="sort-arrow">⇅</span></th>
+            <th data-sort="status">Status <span class="sort-arrow">⇅</span></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div id="noResults" class="no-results" style="display: none;">
+        No services found matching your criteria.
+      </div>
+    </div>
+  </main>
+
+  <div class="sidebar" id="sidebar">
+  <a class="sidebar-item" href="shoppingcart.html">Shopping Cart</a>
+  <a class="sidebar-item" href="orderhistory.html">Order History</a>
+  <a class="sidebar-item" href="aboutus.html">About Us</a>
+  <a class="sidebar-item" href="userservices.html">Services</a>
+  <a class="sidebar-item" href="loginuser.html">Log Out</a>
+</div>
+
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      //  Check if user is logged in
+      fetch("get_user_data.php")
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            alert("Please log in first.");
+            window.location = "loginuser.html";
+            return;
+          }
+
+          //  Fetch user's completed service requests
+          fetch("get_user_service_history.php")
+            .then(response => response.json())
+            .then(services => {
+              const tableBody = document.getElementById("tableBody");
+              const noResults = document.getElementById("noResults");
+
+              if (!services || services.length === 0) {
+                noResults.style.display = "block";
+                return;
+              }
+
+              noResults.style.display = "none";
+              tableBody.innerHTML = "";
+
+              services.forEach(service => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${service.serviceRequestID}</td>
+                    <td>${service.serviceType}</td>
+                    <td>${service.appointmentDate}</td>
+                    <td>${service.status}</td>
+                    <td><a href="#" class="view-btn">View</a></td>
+                `;
+
+                tableBody.appendChild(row);
+              });
+            })
+            .catch(err => console.error("Error loading service history:", err));
+        })
+        .catch(err => {
+          console.error(err);
+          alert("Error loading user info.");
+        });
+    });
+
+    // Sidebar toggle
+    document.getElementById('menuToggle').addEventListener('click', function(e) {
+      e.stopPropagation();
+      document.getElementById('sidebar').classList.toggle('active');
+    });
+
+    document.addEventListener('click', function(e) {
+      const sidebar = document.getElementById('sidebar');
+      const menuToggle = document.getElementById('menuToggle');
+      if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+        sidebar.classList.remove('active');
+      }
+    });
+  </script>
+
+</body>
+</html>
+>>>>>>> e748052c4982d99710196d93e6575486a1fd0f08:latest/speegolatest/wap/userservicehistory.html
