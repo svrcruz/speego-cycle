@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventory - Admin</title>
+
+  <link rel="stylesheet" href="admininventory.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+  <div class="admin-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <button class="toggle-btn" id="toggleBtn">
+          <i class="ph ph-caret-left"></i>
+        </button>
+        <div class="admin-info">
+          <h2>Hello there,</h2>
+          <h1>ADMIN</h1>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="admindashboard.html" class="nav-item">
+          <i class="ph ph-house"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="adminreports.html" class="nav-item">
+          <i class="ph ph-chart-line"></i>
+          <span>Reports</span>
+        </a>
+        <a href="adminservicerequest.html" class="nav-item">
+          <i class="ph ph-wrench"></i>
+          <span>Service Requests</span>
+        </a>
+        <a href="inventoryadmin.html" class="nav-item active">
+          <i class="ph ph-stack"></i>
+          <span>Inventory</span>
+        </a>
+        <a href="adminorders.html" class="nav-item">
+          <i class="ph ph-truck"></i>
+          <span>Orders</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="inventory-card">
+        <div class="card-header">
+          <h1 class="page-title">Products</h1>
+          <div class="header-actions">
+            <div class="search-box">
+              <i class="ph ph-magnifying-glass"></i>
+              <input type="text" id="searchInput" placeholder="Search...">
+            </div>
+            <button class="btn btn-edit">Edit</button>
+            <button class="btn btn-delete">Delete</button>
+            <button class="btn btn-add" id="addProductBtn">Add Product</button>
+            <button class="btn btn-filters">
+              <i class="ph ph-faders"></i> Filters
+            </button>
+            <button class="btn btn-download">Download all</button>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+          <table class="inventory-table">
+            <thead>
+              <tr>
+                <th>Product ID</th>
+                <th>Products</th>
+                <th>Listed Price</th>
+                <th>Quantity</th>
+                <th>Reorder Level</th>
+                <th>Availability</th>
+              </tr>
+            </thead>
+            <tbody id="productTableBody">
+              <tr><td colspan="6">Loading products...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Sliding Add Product Panel -->
+  <div class="modal active" id="addProductPanel" style="display:none;">
+    <div class="modal-content" style="max-width:600px;">
+      <h2 class="modal-title">New Product</h2>
+      <form id="addProductForm" action="add_product.php" method="POST">
+        <div class="form-grid">
+          <div class="image-upload">
+            <div class="upload-box" id="uploadBox">
+              <input type="file" id="imageInput" accept="image/*" hidden>
+              <i class="ph ph-image"></i>
+            </div>
+            <p class="upload-text">Drag image here<br>or<br><a href="#" id="browseBtn" class="browse-link">Browse image</a></p>
+          </div>
+
+          <div class="form-fields">
+            <div class="form-group">
+              <label>Product Name</label>
+              <input type="text" name="product_name" class="form-input" placeholder="Enter product name" required>
+            </div>
+
+            <div class="form-group">
+              <label>Category</label>
+              <select name="category" class="form-input" required>
+                <option value="">Select category</option>
+                <option value="E-bikes">E-bikes</option>
+                <option value="Parts">Parts</option>
+                <option value="Accessories">Accessories</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Listing Price</label>
+              <input type="number" name="price" class="form-input" placeholder="Enter price" step="0.01" required>
+            </div>
+
+            <div class="form-group">
+              <label>Quantity</label>
+              <input type="number" name="stock" class="form-input" placeholder="Enter quantity" required>
+            </div>
+
+            <div class="form-group">
+              <label>Reorder Value</label>
+              <input type="number" name="reorder_level" class="form-input" placeholder="Enter reorder level" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-modal btn-discard" id="discardBtn">Discard</button>
+          <button type="submit" class="btn-modal btn-submit">Add Product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+ <script>
+  // Sidebar toggle
+  const sidebar = document.getElementById('sidebar');
+  const toggleBtn = document.getElementById('toggleBtn');
+  toggleBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
+
+  // Show/hide Add Product modal
+  const addBtn = document.getElementById('addProductBtn');
+  const discardBtn = document.getElementById('discardBtn');
+  const panel = document.getElementById('addProductPanel');
+
+  addBtn.addEventListener('click', () => {
+    document.getElementById('addProductForm').reset();
+    panel.style.display = 'flex';
+    panel.setAttribute('data-mode', 'add');
+  });
+  discardBtn.addEventListener('click', () => panel.style.display = 'none');
+
+  // Image upload preview
+  const uploadBox = document.getElementById('uploadBox');
+  const imageInput = document.getElementById('imageInput');
+  const browseBtn = document.getElementById('browseBtn');
+  browseBtn.addEventListener('click', e => { e.preventDefault(); imageInput.click(); });
+  uploadBox.addEventListener('click', () => imageInput.click());
+  imageInput.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = ev => {
+        uploadBox.style.backgroundImage = `url(${ev.target.result})`;
+        uploadBox.style.backgroundSize = 'cover';
+        uploadBox.style.backgroundPosition = 'center';
+        uploadBox.innerHTML = '';
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // Table + selection
+  const tableBody = document.getElementById('productTableBody');
+  let selectedRow = null;
+  let selectedProduct = null;
+
+  function loadProducts() {
+    fetch('get_product.php')
+      .then(res => res.json())
+      .then(data => {
+        tableBody.innerHTML = '';
+        if (data.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="6">No products yet.</td></tr>';
+          return;
+        }
+        data.forEach(p => {
+          const stock = parseInt(p.Stock);
+          const reorder = parseInt(p.Reorder_Level);
+          let badge = '';
+          if (stock === 0) badge = '<span class="status-badge out-of-stock">Out of stock</span>';
+          else if (stock <= reorder) badge = '<span class="status-badge low-stock">Low stock</span>';
+          else badge = '<span class="status-badge in-stock">In-stock</span>';
+
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${p.ProductID}</td>
+            <td>${p.Product_Name}</td>
+            <td>₱${parseFloat(p.Price).toLocaleString()}</td>
+            <td>${p.Stock}</td>
+            <td>${p.Reorder_Level}</td>
+            <td>${badge}</td>
+          `;
+          row.addEventListener('click', () => {
+            if (selectedRow) selectedRow.classList.remove('selected-row');
+            row.classList.add('selected-row');
+            selectedRow = row;
+            selectedProduct = p;
+          });
+          tableBody.appendChild(row);
+        });
+      })
+      .catch(err => {
+        console.error(err);
+        tableBody.innerHTML = '<tr><td colspan="6">Error loading products.</td></tr>';
+      });
+  }
+  loadProducts();
+  setInterval(loadProducts, 3000);
+
+  // Search filter
+  const searchInput = document.getElementById('searchInput');
+  searchInput.addEventListener('input', () => {
+    const term = searchInput.value.toLowerCase();
+    const rows = tableBody.getElementsByTagName('tr');
+    Array.from(rows).forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(term) ? '' : 'none';
+    });
+  });
+
+  // Edit button
+  const editBtn = document.querySelector('.btn-edit');
+  editBtn.addEventListener('click', () => {
+    if (!selectedProduct) {
+      alert('Please select a product to edit.');
+      return;
+    }
+    panel.style.display = 'flex';
+    panel.setAttribute('data-mode', 'edit');
+
+    const form = document.getElementById('addProductForm');
+    form.product_name.value = selectedProduct.Product_Name;
+    form.category.value = selectedProduct.Category || '';
+    form.price.value = selectedProduct.Price;
+    form.stock.value = selectedProduct.Stock;
+    form.reorder_level.value = selectedProduct.Reorder_Level;
+  });
+
+  // Delete button
+  const deleteBtn = document.querySelector('.btn-delete');
+  deleteBtn.addEventListener('click', () => {
+    if (!selectedProduct) {
+      alert('Please select a product to delete.');
+      return;
+    }
+    if (!confirm(`Delete product "${selectedProduct.Product_Name}"?`)) return;
+
+    fetch('delete_product.php?id=' + selectedProduct.ProductID)
+      .then(res => res.text())
+      .then(msg => {
+        alert(msg);
+        loadProducts();
+      })
+      .catch(err => alert('Error deleting product.'));
+  });
+</script>
+
+</body>
+</html>
