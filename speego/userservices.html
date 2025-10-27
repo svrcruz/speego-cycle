@@ -1,5 +1,3 @@
-Can't create, edit, or upload … If your storage is full for 2+ years, your files may be deleted from Drive and Photos.
-Get 30 GB of storage for ₱49 ₱10/month for 3 months.
 <!DOCTYPE html>
 <html lang="en">
 
@@ -21,7 +19,7 @@ Get 30 GB of storage for ₱49 ₱10/month for 3 months.
         </div>
         <div class="user-info">
           <p>Hello there,</p>
-          <h3 id="userName">Juan Dela Cruz</h3>
+          <h3>Juan Dela Cruz</h3>
         </div>
       </div>
     </div>
@@ -54,21 +52,32 @@ Get 30 GB of storage for ₱49 ₱10/month for 3 months.
 
     <div class="services-grid">
       <div class="service-card">
-        <div class="service-image"></div>
+        <div class="service-image">
+          <img src="images/Repair.png" alt="Repair Service" />
+        </div>
         <h3 class="service-name">Repair</h3>
       </div>
+
       <div class="service-card">
-        <div class="service-image"></div>
+        <div class="service-image">
+          <img src="images/Battery.png" alt="Battery Replacement" />
+        </div>
         <h3 class="service-name">Battery Replacement</h3>
       </div>
+
       <div class="service-card">
-        <div class="service-image"></div>
+        <div class="service-image">
+          <img src="images/Installation.png" alt="Parts Installation" />
+        </div>
         <h3 class="service-name">Parts Installation</h3>
       </div>
-      <div class="service-card">
-        <div class="service-image"></div>
+
+      <a href="speegopal.html" class="service-card">
+        <div class="service-image">
+          <img src="images/SpeegoPal.png" alt="SpeegoPal ChatBot" />
+        </div>
         <h3 class="service-name">SpeegoPal ChatBot</h3>
-      </div>
+      </a>
     </div>
 
     <div class="book-service-container">
@@ -81,7 +90,7 @@ Get 30 GB of storage for ₱49 ₱10/month for 3 months.
     <a href="orderhistory.html" class="sidebar-item">Order History</a>
     <a href="aboutus.html" class="sidebar-item">About Us</a>
     <a href="userservices.html" class="sidebar-item">Services</a>
-    <a href="logout.html" class="sidebar-item">Log Out</a>
+    <a href="loginuser.html" class="sidebar-item">Log Out</a>
   </div>
 
   <script>
@@ -107,29 +116,7 @@ Get 30 GB of storage for ₱49 ₱10/month for 3 months.
     document.getElementById('sidebar').addEventListener('click', function (e) {
       e.stopPropagation();
     });
-
-    // Fetch user data to update greeting dynamically
-    document.addEventListener("DOMContentLoaded", () => {
-      fetch("get_user_data.php")
-        .then(response => response.json())
-        .then(data => {
-          if (data.error) {
-            console.error("Error fetching user:", data.error);
-            document.getElementById("userName").textContent = "Guest User";
-            return;
-          }
-
-          // Update the displayed name dynamically
-          const userName = `${data.Customer_FName} ${data.Customer_LName}`;
-          document.getElementById("userName").textContent = userName;
-        })
-        .catch(err => {
-          console.error("User fetch error:", err);
-          document.getElementById("userName").textContent = "Guest User";
-        });
-    });
   </script>
-
 </body>
 
 </html>
