@@ -153,15 +153,17 @@
    margin: 0 5px;
  }
 
- .services-grid {
+
+.services-grid {
    display: flex;
    justify-content: center;
    gap: 30px;
    max-width: 1200px;
    margin: 0 auto 50px;
-   flex-wrap: nowrap;
+   flex-wrap: wrap; 
    padding: 0 20px;
- }
+}
+
 
  .service-card {
    display: flex;
@@ -178,13 +180,24 @@
    transform: translateY(-5px);
  }
 
- .service-image {
+.service-image {
    width: 100%;
    aspect-ratio: 1 / 1;
    background-color: #d1d1d1;
    border-radius: 20px;
    margin-bottom: 15px;
- }
+   overflow: hidden; 
+   display: flex;
+   justify-content: center;
+   align-items: center;
+}
+
+.service-image img {
+   width: 100%;
+   height: 100%;
+   object-fit: cover;
+   border-radius: 20px;
+}
 
  .service-name {
    font-size: 16px;
