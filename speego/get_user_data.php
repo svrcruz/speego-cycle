@@ -2,6 +2,8 @@
 session_start();
 header("Content-Type: application/json");
 
+error_reporting(0);
+
 // Check if user is logged in
 if (!isset($_SESSION['CustomerID'])) {
     echo json_encode(["error" => "Please log in first."]);

@@ -57,14 +57,10 @@
     <div class="section">
         <div class="section-header">
             <h2>RECOMMENDED FOR YOU</h2>
-            <a href="recommendedproducts.html" class="see-all">See All</a>
         </div>
         <div class="carousel-container">
             <div class="carousel-track" id="recommended">
                 <!-- Loading placeholders -->
-                <div class="card skeleton"></div>
-                <div class="card skeleton"></div>
-                <div class="card skeleton"></div>
                 <div class="card skeleton"></div>
                 <div class="card skeleton"></div>
                 <div class="card skeleton"></div>
@@ -276,10 +272,10 @@
                 // Build API URL with customer_id
                 let apiUrl = RECOMMENDED_API;
                 if (user && user.customer_id) {
-                    apiUrl += `?customer_id=${user.customer_id}&limit=6`;
+                    apiUrl += `?customer_id=${user.customer_id}&limit=3`;
                     console.log('🎯 Loading PERSONALIZED recommendations for Customer ID:', user.customer_id);
                 } else {
-                    apiUrl += `?limit=6`;
+                    apiUrl += `?limit=3`;
                     console.log('📦 Loading generic popular products (no user logged in)');
                 }
 
