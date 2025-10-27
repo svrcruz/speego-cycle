@@ -2,7 +2,7 @@
 session_start();
 
 // Database connection
-$conn = new mysqli("localhost", "root", "admin123", "speegotest");
+$conn = new mysqli("localhost", "root", "Password1$", "speegotest");
 if ($conn->connect_error) {
     die(json_encode(["error" => "Database connection failed."]));
 }
@@ -42,7 +42,7 @@ while ($row = $result->fetch_assoc()) {
 
     // Try to find an image that matches the product name
     foreach (glob($imageDir . "*") as $filePath) {
-        $fileName = basename($filePath); 
+        $fileName = basename($filePath);
         // remove extension and non-alphanumeric characters for comparison
         $fileBase = preg_replace("/[^a-zA-Z0-9]/", "", pathinfo($fileName, PATHINFO_FILENAME));
         $productBase = preg_replace("/[^a-zA-Z0-9]/", "", $productName);
@@ -69,4 +69,3 @@ $conn->close();
 
 header("Content-Type: application/json");
 echo json_encode(["cart" => $cartItems], JSON_PRETTY_PRINT);
-?>

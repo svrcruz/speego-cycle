@@ -1,8 +1,8 @@
 <?php
 // Database connection
 $servername = "localhost";
-$dbuser = "root";     
-$dbpass = "admin123";         
+$dbuser = "root";
+$dbpass = "Password1$";
 $dbname = "speegotest";
 
 // Connect to the database
@@ -48,4 +48,3 @@ if ($conn->query($sql1) === TRUE) {
 }
 
 $conn->close();
-?>

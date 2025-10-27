@@ -3,7 +3,7 @@ session_start();
 header('Content-Type: application/json');
 error_reporting(E_ALL & ~E_NOTICE);
 
-$conn = new mysqli("localhost", "root", "admin123", "speegotest");
+$conn = new mysqli("localhost", "root", "Password1$", "speegotest");
 if ($conn->connect_error) {
     echo json_encode(['success' => false, 'message' => 'Database connection failed']);
     exit;
@@ -108,4 +108,3 @@ $orderStmt->close();
 $itemStmt->close();
 $deleteStmt->close();
 $conn->close();
-?>

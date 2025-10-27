@@ -2,7 +2,7 @@
 // Database connection
 $servername = "localhost";
 $dbuser = "root";     
-$dbpass = "admin123";         
+$dbpass = "Password1$";         
 $dbname = "speegotest";
 
 // Connect to the database

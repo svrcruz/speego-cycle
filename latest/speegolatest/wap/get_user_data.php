@@ -11,7 +11,7 @@ if (!isset($_SESSION['CustomerID'])) {
 // Database connection
 $servername = "localhost";
 $dbuser = "root";
-$dbpass = "admin123";
+$dbpass = "Password1$";
 $dbname = "speegotest";
 
 $conn = new mysqli($servername, $dbuser, $dbpass, $dbname);
@@ -43,4 +43,3 @@ if ($result->num_rows > 0) {
 
 $stmt->close();
 $conn->close();
-?>

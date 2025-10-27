@@ -3,7 +3,7 @@ header('Content-Type: application/json');
 
 $servername = "localhost";
 $username = "root";
-$password = "admin123";
+$password = "Password1$";
 $dbname = "speegotest";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -49,4 +49,3 @@ while ($row = $result->fetch_assoc()) {
 echo json_encode($popular, JSON_PRETTY_PRINT);
 
 $conn->close();
-?>

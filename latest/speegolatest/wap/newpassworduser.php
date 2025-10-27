@@ -2,7 +2,7 @@
 session_start();
 $servername = "localhost";
 $dbuser = "root";
-$dbpass = "admin123";
+$dbpass = "Password1$";
 $dbname = "speegotest";
 $conn = new mysqli($servername, $dbuser, $dbpass, $dbname);
 
@@ -32,4 +32,3 @@ if (isset($_POST['save'])) {
     $stmt->close();
 }
 $conn->close();
-?>

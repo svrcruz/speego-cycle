@@ -1,7 +1,7 @@
 <?php
 $servername = "localhost";
 $dbuser = "root";
-$dbpass = "admin123";
+$dbpass = "Password1$";
 $dbname = "speegotest";
 
 $conn = new mysqli($servername, $dbuser, $dbpass, $dbname);
@@ -47,4 +47,3 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 }
 
 $conn->close();
-?>

@@ -3,7 +3,7 @@ session_start();
 
 $servername = "localhost";
 $dbuser = "root";
-$dbpass = "admin123";
+$dbpass = "Password1$";
 $dbname = "speegotest";
 
 header('Content-Type: application/json');

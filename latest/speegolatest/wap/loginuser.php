@@ -8,15 +8,15 @@ header("Location: index.html");
 
 // Database connection
 $servername = "localhost";
-$dbuser = "root";     
-$dbpass = "admin123";         
+$dbuser = "root";
+$dbpass = "Password1$";
 $dbname = "speegotest";
 
 // Connect to the database
 $conn = new mysqli($servername, $dbuser, $dbpass, $dbname);
 
 if ($conn->connect_error) {
-    die(json_encode(["error" => "Database connection failed: " . $conn->connect_error]));
+  die(json_encode(["error" => "Database connection failed: " . $conn->connect_error]));
 }
 
 $email = $_POST['Customer_Email'];
@@ -45,4 +45,3 @@ if ($result->num_rows > 0) {
 
 $stmt->close();
 $conn->close();
-?>

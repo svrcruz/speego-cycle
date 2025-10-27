@@ -1,8 +1,8 @@
 <?php
 session_start();
 $servername = "localhost";
-$dbuser = "root";     
-$dbpass = "admin123";         
+$dbuser = "root";
+$dbpass = "Password1$";
 $dbname = "speegotest";
 
 // Connect to the database
@@ -32,10 +32,9 @@ if ($result->num_rows > 0) {
     $_SESSION['admin_logged_in'] = true;
     $_SESSION['admin_user'] = $user;
 
-    
+
     header('Location: admindashboard.html');
     exit;
-
 } else {
     echo "<script>
             alert('Invalid username or password');
@@ -43,4 +42,3 @@ if ($result->num_rows > 0) {
           </script>";
     exit;
 }
-?>

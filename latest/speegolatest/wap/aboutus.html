@@ -39,7 +39,7 @@
         <a href="orderhistory.html" class="sidebar-item">Order History</a>
         <a href="aboutus.html" class="sidebar-item">About Us</a>
         <a href="userservices.html" class="sidebar-item">Services</a>
-        <a href="logout.html" class="sidebar-item">Log Out</a>
+        <a href="loginuser.html" class="sidebar-item">Log Out</a>
     </div>
 
     <!-- About Section -->
@@ -112,6 +112,19 @@
             if (chatOverlay.classList.contains('active') && !chatOverlay.querySelector('.chat-box').contains(e.target) && e.target !== openChatBtn) {
                 chatOverlay.classList.remove('active');
             }
+        });
+
+        // Load user name
+        document.addEventListener("DOMContentLoaded", () => {
+            fetch("get_user_data.php")
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.error) {
+                        const nameEl = document.querySelector(".greeting-text p");
+                        nameEl.textContent = `${data.Customer_FName} ${data.Customer_LName}`;
+                    }
+                })
+                .catch(err => console.error("User fetch error:", err));
         });
     </script>
 </body>

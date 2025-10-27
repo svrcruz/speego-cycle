@@ -2,7 +2,7 @@
 session_start();
 header('Content-Type: application/json');
 
-$conn = new mysqli("localhost", "root", "admin123", "speegotest");
+$conn = new mysqli("localhost", "root", "Password1$", "speegotest");
 if ($conn->connect_error) {
     echo json_encode(['error' => 'Database connection failed']);
     exit;
@@ -31,4 +31,3 @@ if ($update->execute()) {
 }
 
 $conn->close();
-?>

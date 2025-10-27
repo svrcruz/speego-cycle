@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-$conn = new mysqli("localhost", "root", "admin123", "speegotest");
+$conn = new mysqli("localhost", "root", "Password1$", "speegotest");
 
 if ($conn->connect_error) {
     die("Database connection failed: " . $conn->connect_error);
